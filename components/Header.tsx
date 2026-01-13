@@ -1,21 +1,23 @@
 import React from 'react';
-import { Wrench, LogOut, User as UserIcon, Store, Moon, Sun } from 'lucide-react';
+import { Wrench, LogOut, User as UserIcon, Store, Moon, Sun, Crown } from 'lucide-react';
 import { User } from '../types';
 
 interface HeaderProps {
   user?: User | null;
   onLogout?: () => void;
   onProfileClick?: () => void;
+  onPlanClick?: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ user, onLogout, onProfileClick, isDarkMode, toggleTheme }) => {
+export const Header: React.FC<HeaderProps> = ({ user, onLogout, onProfileClick, onPlanClick, isDarkMode, toggleTheme }) => {
+  const isPremium = user?.plan === 'PRO' || user?.plan === 'PRIME';
+
   return (
-    // Adicionado pt-[env(safe-area-inset-top)] para respeitar o notch do iPhone
     <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-50 transition-colors duration-300 pt-[env(safe-area-inset-top)]">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.reload()}>
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = "/"}>
           <div className="bg-indigo-600 p-2 rounded-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
             <Wrench size={24} />
           </div>
@@ -38,6 +40,20 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout, onProfileClick, 
 
           {user ? (
             <div className="flex items-center gap-3">
+              {/* Botão de Plano */}
+              <button 
+                id="plan-badge"
+                onClick={onPlanClick}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${
+                  isPremium 
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:shadow-amber-500/30' 
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+              >
+                {isPremium ? <Crown size={12} fill="currentColor" /> : <Crown size={12} />}
+                {isPremium ? (user.role === 'MECHANIC' ? 'PRO' : 'PRIME') : 'Assinar'}
+              </button>
+
               <button 
                 onClick={onProfileClick}
                 className="hidden sm:flex flex-col items-end mr-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg transition-colors text-right"

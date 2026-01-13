@@ -4,15 +4,17 @@ import { AuthScreen } from './components/AuthScreen';
 import { ClientDashboard } from './components/ClientDashboard';
 import { MechanicDashboard } from './components/MechanicDashboard';
 import { UserProfile } from './components/UserProfile';
+import { SubscriptionScreen } from './components/SubscriptionScreen';
 import { SplashScreen } from './components/SplashScreen';
 import { User } from './types';
 
-type ViewState = 'dashboard' | 'profile';
+type ViewState = 'dashboard' | 'profile' | 'subscription';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
+  const [showConfetti, setShowConfetti] = useState(false);
   
   // Theme State
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -26,23 +28,42 @@ const App: React.FC = () => {
     return false;
   });
 
-  // Apply theme class to html element
+  // Listen for system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only update automatically if user hasn't set a preference manually (no localStorage key)
+      if (!localStorage.getItem('theme')) {
+        setIsDarkMode(e.matches);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Apply theme class to html element without persisting automatically
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    setIsDarkMode(prev => {
+      const newValue = !prev;
+      // When toggled manually, save preference
+      localStorage.setItem('theme', newValue ? 'dark' : 'light');
+      return newValue;
+    });
   };
 
   const handleLogin = (newUser: User) => {
-    setUser(newUser);
+    // Garantir que o user tenha o campo plan se vier do mock antigo
+    const userWithPlan = { ...newUser, plan: newUser.plan || 'FREE' };
+    setUser(userWithPlan);
     setCurrentView('dashboard');
   };
 
@@ -55,6 +76,17 @@ const App: React.FC = () => {
     setUser(updatedUser);
   };
 
+  const handleSubscribe = () => {
+    if (user) {
+      const newPlan = user.role === 'MECHANIC' ? 'PRO' : 'PRIME';
+      setUser({ ...user, plan: newPlan });
+      setCurrentView('dashboard');
+      // Trigger success animation visually
+      const button = document.getElementById('plan-badge');
+      if (button) button.classList.add('animate-bounce');
+    }
+  };
+
   if (loading) {
     return <SplashScreen onFinish={() => setLoading(false)} />;
   }
@@ -65,6 +97,7 @@ const App: React.FC = () => {
         user={user} 
         onLogout={handleLogout} 
         onProfileClick={() => setCurrentView('profile')}
+        onPlanClick={() => setCurrentView('subscription')}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
       />
@@ -75,11 +108,6 @@ const App: React.FC = () => {
             <AuthScreen onLogin={handleLogin} />
           </div>
         ) : (
-          /* 
-             A prop 'key' aqui é fundamental. Quando 'currentView' muda, 
-             o React desmonta o componente antigo e monta o novo, 
-             disparando a animação CSS 'animate-page-enter' definida no index.html.
-          */
           <div key={currentView} className="animate-page-enter">
             {currentView === 'profile' ? (
               <UserProfile 
@@ -87,12 +115,18 @@ const App: React.FC = () => {
                 onSave={handleUpdateUser} 
                 onBack={() => setCurrentView('dashboard')} 
               />
+            ) : currentView === 'subscription' ? (
+              <SubscriptionScreen 
+                user={user}
+                onSubscribe={handleSubscribe}
+                onBack={() => setCurrentView('dashboard')}
+              />
             ) : (
               <>
                 {user.role === 'CLIENT' ? (
-                  <ClientDashboard user={user} />
+                  <ClientDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
                 ) : (
-                  <MechanicDashboard user={user} />
+                  <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
                 )}
               </>
             )}
@@ -102,7 +136,7 @@ const App: React.FC = () => {
       
       {/* Footer com ajuste para Safe Area do iPhone (pb-safe ou padding-bottom via env) */}
       <footer className="mt-auto py-8 text-center text-zinc-400 dark:text-zinc-600 text-sm border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
-        <div className="pb-4"> {/* Container interno para garantir espaçamento antes da safe area */}
+        <div className="pb-4">
           <p className="font-medium">© 2024 FIX.</p>
           <p className="mt-1 text-xs">
             {user ? 'Conectando motoristas e mecânicos.' : 'Plataforma para Motoristas e Oficinas.'}

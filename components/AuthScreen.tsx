@@ -23,6 +23,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       name: name || (selectedRole === 'CLIENT' ? 'Cliente Exemplo' : 'Mecânico Exemplo'),
       email: email || 'user@example.com',
       role: selectedRole,
+      plan: 'FREE', // Padrão Grátis
       shopName: selectedRole === 'MECHANIC' ? (shopName || 'Oficina Mecânica Top') : undefined,
       rating: 4.8
     };

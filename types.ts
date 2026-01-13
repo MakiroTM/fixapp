@@ -14,11 +14,21 @@ export enum ServiceType {
 
 export type UserRole = 'CLIENT' | 'MECHANIC';
 
+export type UserPlan = 'FREE' | 'PRO' | 'PRIME';
+
+export interface ChatMessage {
+  id: string;
+  text: string;
+  sender: 'me' | 'them';
+  timestamp: Date;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  plan: UserPlan; // Novo campo
   phone?: string;
   address?: string;
   city?: string;
