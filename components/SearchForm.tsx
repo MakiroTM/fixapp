@@ -62,7 +62,13 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
        setQuery(text);
     } else {
        // For services, we set the problem category
-       setProblemCategory(text === problemCategory ? '' : text);
+       const isDeselecting = text === problemCategory;
+       setProblemCategory(isDeselecting ? '' : text);
+       
+       // Se estiver selecionando e o campo de texto estiver vazio, preenchemos ele também
+       if (!isDeselecting && !query) {
+         setQuery(text);
+       }
     }
   };
 
@@ -136,22 +142,42 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
         {/* Campos Específicos por Aba */}
         <div className="space-y-4">
           {activeTab === 'services' ? (
-            <div>
-              <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Tipo de Serviço</label>
-              <div className="relative">
-                <select 
-                  value={service}
-                  onChange={(e) => setService(e.target.value as ServiceType)}
-                  className="w-full p-3 pl-4 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none text-zinc-700 dark:text-zinc-200 font-medium"
-                >
-                  {Object.values(ServiceType)
-                    .filter(s => s !== ServiceType.PARTS)
-                    .map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Tipo de Serviço</label>
+                <div className="relative">
+                  <select 
+                    value={service}
+                    onChange={(e) => setService(e.target.value as ServiceType)}
+                    className="w-full p-3 pl-4 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none text-zinc-700 dark:text-zinc-200 font-medium"
+                  >
+                    {Object.values(ServiceType)
+                      .filter(s => s !== ServiceType.PARTS)
+                      .map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Problema Comum</label>
+                <div className="relative">
+                  <select 
+                    value={problemCategory}
+                    onChange={(e) => handleChipSelect(e.target.value)}
+                    className="w-full p-3 pl-4 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none text-zinc-700 dark:text-zinc-200 font-medium"
+                  >
+                    <option value="">Selecione um problema...</option>
+                    {COMMON_PROBLEMS.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
                 </div>
               </div>
             </div>

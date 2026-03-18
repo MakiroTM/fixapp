@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { User, ChatMessage } from '../types';
-import { Wrench, Star, Clock, MapPin, DollarSign, Settings, Bell, ChevronRight, Lock, Crown, MessageCircle, CheckCircle } from 'lucide-react';
+import { Wrench, Star, Clock, MapPin, DollarSign, Settings, Bell, ChevronRight, Lock, Crown, MessageCircle, CheckCircle, Map as MapIcon } from 'lucide-react';
 import { ChatInterface } from './ChatInterface';
+import { MapComponent } from './MapComponent';
 
 interface MechanicDashboardProps {
   user: User;
@@ -13,22 +14,33 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
   
   // States to simulate job acceptance and chat
   const [activeJob, setActiveJob] = useState<string | null>(null);
+  const [isAccepting, setIsAccepting] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [chatRecipient, setChatRecipient] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
+  // Coordenadas simuladas para o exemplo
+  const activeJobCoords = { lat: -23.5505, lng: -46.6333 };
+
   const handleAcceptJob = (clientName: string, carInfo: string) => {
-    setActiveJob(clientName);
-    setChatRecipient(clientName);
-    setChatMessages([
-      {
-        id: '1',
-        text: `Olá ${clientName}, aceitei seu chamado para o ${carInfo}. Estou analisando a localização e já saio.`,
-        sender: 'me',
-        timestamp: new Date()
-      }
-    ]);
-    setIsChatOpen(true);
+    setIsAccepting(true);
+    
+    // Simular delay de rede para aceitação
+    setTimeout(() => {
+      setActiveJob(clientName);
+      setChatRecipient(clientName);
+      setChatMessages([
+        {
+          id: '1',
+          text: `Olá ${clientName}, aceitei seu chamado para o ${carInfo}. Estou analisando a localização e já saio.`,
+          sender: 'me',
+          timestamp: new Date()
+        }
+      ]);
+      setIsChatOpen(true);
+      setIsAccepting(false);
+    }, 1500);
   };
 
   return (
@@ -115,7 +127,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                 <h4 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-1">{activeJob}</h4>
                 <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-6">Honda Civic - Pneu Furado</p>
                 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                    <button 
                      onClick={() => {
                         setChatRecipient(activeJob);
@@ -127,12 +139,29 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                      Abrir Chat
                    </button>
                    <button 
+                     onClick={() => setShowMap(!showMap)}
+                     className="flex-1 bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 py-3 rounded-xl font-bold border border-indigo-100 dark:border-indigo-800 flex items-center justify-center gap-2 hover:bg-indigo-50 dark:hover:bg-zinc-700 transition-colors"
+                   >
+                     <MapIcon size={20} />
+                     {showMap ? 'Ocultar Mapa' : 'Ver Mapa'}
+                   </button>
+                   <button 
                      onClick={() => setActiveJob(null)}
                      className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 py-3 px-6 rounded-xl font-bold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
                    >
                      Finalizar
                    </button>
                 </div>
+
+                {showMap && (
+                  <div className="mt-6 h-[300px] animate-fade-in">
+                    <MapComponent 
+                      latitude={activeJobCoords.lat} 
+                      longitude={activeJobCoords.lng} 
+                      title={`Localização de ${activeJob}`}
+                    />
+                  </div>
+                )}
              </div>
           ) : (
             <>
@@ -155,11 +184,22 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                 <div className="flex items-center gap-4 border-t border-zinc-100 dark:border-zinc-700 pt-4 mt-2">
                     <button 
                       onClick={() => handleAcceptJob('João da Silva', 'Honda Civic')}
-                      className="flex-1 bg-zinc-900 dark:bg-zinc-700 text-white py-2 rounded-lg font-medium text-sm hover:bg-zinc-800 dark:hover:bg-zinc-600 transition-colors"
+                      disabled={isAccepting}
+                      className="flex-1 bg-zinc-900 dark:bg-zinc-700 text-white py-2 rounded-lg font-medium text-sm hover:bg-zinc-800 dark:hover:bg-zinc-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
                     >
-                      Aceitar Chamado
+                      {isAccepting ? (
+                        <>
+                          <Clock size={16} className="animate-spin" />
+                          Aceitando...
+                        </>
+                      ) : (
+                        'Aceitar Chamado'
+                      )}
                     </button>
-                    <button className="px-4 py-2 text-zinc-500 dark:text-zinc-400 font-medium text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-lg">
+                    <button 
+                      disabled={isAccepting}
+                      className="px-4 py-2 text-zinc-500 dark:text-zinc-400 font-medium text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-lg disabled:opacity-50"
+                    >
                       Ignorar
                     </button>
                 </div>

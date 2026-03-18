@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, X, Phone, MoreVertical, Paperclip } from 'lucide-react';
+import { Send, X, Phone, MoreVertical, Paperclip, MapPin, Map as MapIcon } from 'lucide-react';
+import Markdown from 'react-markdown';
 import { ChatMessage } from '../types';
+import { MapComponent } from './MapComponent';
 
 interface ChatInterfaceProps {
   recipientName: string;
@@ -19,6 +21,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [newMessage, setNewMessage] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -33,19 +37,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setMessages(initialMessages);
   }, [initialMessages]);
 
-  const handleSend = (e?: React.FormEvent) => {
+  const handleSend = (e?: React.FormEvent, textOverride?: string) => {
     e?.preventDefault();
-    if (!newMessage.trim()) return;
+    const textToSend = textOverride || newMessage;
+    if (!textToSend.trim()) return;
 
     const msg: ChatMessage = {
       id: Date.now().toString(),
-      text: newMessage,
+      text: textToSend,
       sender: 'me',
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, msg]);
-    setNewMessage('');
+    if (!textOverride) setNewMessage('');
 
     // Simular resposta automática após 2 segundos
     setTimeout(() => {
@@ -63,6 +68,39 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       };
       setMessages(prev => [...prev, reply]);
     }, 2000);
+  };
+
+  const shareLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocalização não é suportada pelo seu navegador.");
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        // Adicionamos metadados de localização na mensagem para facilitar a detecção
+        const locationMessage = `📍 **Minha localização atual**\n\n[Ver no Google Maps](${mapsUrl})\n\n<!-- location:${latitude},${longitude} -->`;
+        handleSend(undefined, locationMessage);
+        setIsLocating(false);
+      },
+      (error) => {
+        console.error("Erro ao obter localização:", error);
+        alert("Não foi possível obter sua localização. Verifique as permissões do navegador.");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const extractCoords = (text: string) => {
+    const match = text.match(/<!-- location:(-?\d+\.\d+),(-?\d+\.\d+) -->/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    return null;
   };
 
   if (!isOpen) return null;
@@ -94,34 +132,83 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-900/50 scrollbar-thin">
-          {messages.map((msg) => (
-            <div 
-              key={msg.id} 
-              className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-            >
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-900/50 scrollbar-thin relative">
+          {messages.map((msg) => {
+            const coords = extractCoords(msg.text);
+            return (
               <div 
-                className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                  msg.sender === 'me' 
-                    ? 'bg-indigo-600 text-white rounded-br-none' 
-                    : 'bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-none border border-zinc-100 dark:border-zinc-700'
-                }`}
+                key={msg.id} 
+                className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
               >
-                {msg.text}
-                <div className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-indigo-200' : 'text-zinc-400'}`}>
-                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <div 
+                  className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                    msg.sender === 'me' 
+                      ? 'bg-indigo-600 text-white rounded-br-none' 
+                      : 'bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-none border border-zinc-100 dark:border-zinc-700'
+                  }`}
+                >
+                  <div className={`max-w-none break-words ${
+                    msg.sender === 'me' 
+                      ? '[&_a]:text-white [&_a]:underline [&_a]:font-medium' 
+                      : '[&_a]:text-indigo-600 dark:[&_a]:text-indigo-400 [&_a]:underline'
+                  }`}>
+                    <Markdown>{msg.text.replace(/<!-- location:.* -->/, '')}</Markdown>
+                  </div>
+                  
+                  {coords && (
+                    <button 
+                      onClick={() => setSelectedLocation(coords)}
+                      className={`mt-3 w-full py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                        msg.sender === 'me'
+                          ? 'bg-white/20 hover:bg-white/30 text-white'
+                          : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100'
+                      }`}
+                    >
+                      <MapIcon size={16} />
+                      Ver no Mapa Interno
+                    </button>
+                  )}
+
+                  <div className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-indigo-200' : 'text-zinc-400'}`}>
+                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div ref={messagesEndRef} />
+
+          {/* Map Overlay inside Chat */}
+          {selectedLocation && (
+            <div className="absolute inset-0 z-20 p-2 animate-fade-in">
+              <MapComponent 
+                latitude={selectedLocation.lat} 
+                longitude={selectedLocation.lng} 
+                title="Localização do Cliente"
+                onClose={() => setSelectedLocation(null)}
+              />
+            </div>
+          )}
         </div>
 
         {/* Input Area */}
         <form onSubmit={handleSend} className="p-3 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
-          <button type="button" className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors">
-            <Paperclip size={20} />
-          </button>
+          <div className="flex items-center">
+            <button type="button" className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors" title="Anexar arquivo">
+              <Paperclip size={20} />
+            </button>
+            {userRole === 'CLIENT' && (
+              <button 
+                type="button" 
+                onClick={shareLocation}
+                disabled={isLocating}
+                className={`p-2 transition-colors ${isLocating ? 'text-indigo-400 animate-pulse' : 'text-zinc-400 hover:text-indigo-600'}`}
+                title="Compartilhar localização"
+              >
+                <MapPin size={20} />
+              </button>
+            )}
+          </div>
           <input 
             type="text" 
             value={newMessage}
