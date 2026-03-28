@@ -6,7 +6,7 @@ import { MechanicDashboard } from './components/MechanicDashboard';
 import { UserProfile } from './components/UserProfile';
 import { SubscriptionScreen } from './components/SubscriptionScreen';
 import { SplashScreen } from './components/SplashScreen';
-import { User } from './types';
+import { User, Coordinates } from './types';
 
 type ViewState = 'dashboard' | 'profile' | 'subscription';
 
@@ -15,6 +15,11 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
   const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Geolocation State
+  const [location, setLocation] = useState<Coordinates | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   
   // Theme State
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -50,6 +55,36 @@ const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Geolocation Logic
+  useEffect(() => {
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      setIsDetectingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          setLocation(coords);
+          setLocationError(null);
+          setIsDetectingLocation(false);
+        },
+        (err: any) => {
+          console.error("Geolocation error:", err);
+          let msg = "Erro de localização.";
+          if (err.code === 1) msg = "Permissão negada.";
+          else if (err.code === 2) msg = "Sinal indisponível.";
+          else if (err.code === 3) msg = "Tempo esgotado.";
+          setLocationError(msg);
+          setIsDetectingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      setLocationError("Não suportado.");
+    }
+  }, []);
 
   const toggleTheme = () => {
     setIsDarkMode(prev => {
@@ -124,7 +159,13 @@ const App: React.FC = () => {
             ) : (
               <>
                 {user.role === 'CLIENT' ? (
-                  <ClientDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
+                  <ClientDashboard 
+                    user={user} 
+                    onUpgrade={() => setCurrentView('subscription')} 
+                    location={location}
+                    locationError={locationError}
+                    isDetectingLocation={isDetectingLocation}
+                  />
                 ) : (
                   <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
                 )}
@@ -134,13 +175,43 @@ const App: React.FC = () => {
         )}
       </main>
       
-      {/* Footer com ajuste para Safe Area do iPhone (pb-safe ou padding-bottom via env) */}
-      <footer className="mt-auto py-8 text-center text-zinc-400 dark:text-zinc-600 text-sm border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
-        <div className="pb-4">
-          <p className="font-medium">© 2024 FIX.</p>
-          <p className="mt-1 text-xs">
-            {user ? 'Conectando motoristas e mecânicos.' : 'Plataforma para Motoristas e Oficinas.'}
-          </p>
+      {/* Footer com ajuste para Safe Area do iPhone */}
+      <footer className="mt-auto py-6 sm:py-8 text-center text-zinc-400 dark:text-zinc-600 text-sm border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
+          <div className="text-center md:text-left">
+            <p className="font-bold text-zinc-800 dark:text-zinc-200">© 2026 FIX App</p>
+            <p className="text-xs">Conectando motoristas e mecânicos com inteligência.</p>
+          </div>
+
+          {/* Location Status in Footer */}
+          <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-1.5 rounded-full border border-zinc-100 dark:border-zinc-800">
+            {isDetectingLocation ? (
+              <div className="flex items-center gap-1.5 text-blue-500 animate-pulse text-[10px] sm:text-xs font-medium">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>
+                Detectando GPS...
+              </div>
+            ) : locationError ? (
+              <div className="flex items-center gap-1.5 text-amber-500 text-[10px] sm:text-xs font-medium">
+                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                GPS: {locationError}
+              </div>
+            ) : location ? (
+              <div className="flex items-center gap-1.5 text-emerald-500 text-[10px] sm:text-xs font-medium">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                GPS Ativo
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] sm:text-xs font-medium">
+                <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full"></div>
+                GPS Desativado
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-6 md:gap-4 text-xs font-medium">
+            <a href="#" className="hover:text-indigo-500 transition-colors">Privacidade</a>
+            <a href="#" className="hover:text-indigo-500 transition-colors">Termos</a>
+          </div>
         </div>
       </footer>
     </div>

@@ -54,17 +54,17 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         {/* Container do Texto FIX */}
         <div className="flex items-center justify-center gap-1 overflow-visible">
           {/* F - Vem da Esquerda Inferior */}
-          <h1 className="text-8xl font-black text-white tracking-tighter animate-fly-in-left drop-shadow-lg">
+          <h1 className="text-6xl sm:text-8xl font-black text-white tracking-tighter animate-fly-in-left drop-shadow-lg">
             F
           </h1>
           
           {/* I - Vem de Cima */}
-          <h1 className="text-8xl font-black text-white tracking-tighter animate-fly-in-top drop-shadow-lg">
+          <h1 className="text-6xl sm:text-8xl font-black text-white tracking-tighter animate-fly-in-top drop-shadow-lg">
             I
           </h1>
           
           {/* X - Vem da Direita Superior */}
-          <h1 className="text-8xl font-black text-white tracking-tighter animate-fly-in-right drop-shadow-lg">
+          <h1 className="text-6xl sm:text-8xl font-black text-white tracking-tighter animate-fly-in-right drop-shadow-lg">
             X
           </h1>
         </div>
