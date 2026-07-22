@@ -5,10 +5,11 @@ import { ClientDashboard } from './components/ClientDashboard';
 import { MechanicDashboard } from './components/MechanicDashboard';
 import { UserProfile } from './components/UserProfile';
 import { SubscriptionScreen } from './components/SubscriptionScreen';
+import { SosEmergencyScreen } from './components/SosEmergencyScreen';
 import { SplashScreen } from './components/SplashScreen';
 import { User, Coordinates } from './types';
 
-type ViewState = 'dashboard' | 'profile' | 'subscription';
+type ViewState = 'dashboard' | 'profile' | 'subscription' | 'sos';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -133,6 +134,8 @@ const App: React.FC = () => {
         onLogout={handleLogout} 
         onProfileClick={() => setCurrentView('profile')}
         onPlanClick={() => setCurrentView('subscription')}
+        onHomeClick={() => setCurrentView('dashboard')}
+        onSosClick={() => setCurrentView('sos')}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
       />
@@ -156,12 +159,21 @@ const App: React.FC = () => {
                 onSubscribe={handleSubscribe}
                 onBack={() => setCurrentView('dashboard')}
               />
+            ) : currentView === 'sos' ? (
+              <SosEmergencyScreen
+                user={user}
+                location={location}
+                locationError={locationError}
+                isDetectingLocation={isDetectingLocation}
+                onBack={() => setCurrentView('dashboard')}
+              />
             ) : (
               <>
                 {user.role === 'CLIENT' ? (
                   <ClientDashboard 
                     user={user} 
                     onUpgrade={() => setCurrentView('subscription')} 
+                    onSosClick={() => setCurrentView('sos')}
                     location={location}
                     locationError={locationError}
                     isDetectingLocation={isDetectingLocation}

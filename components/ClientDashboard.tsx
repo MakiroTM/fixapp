@@ -11,6 +11,7 @@ import { AlertCircle, Compass, MapPin } from 'lucide-react';
 interface ClientDashboardProps {
   user: User;
   onUpgrade: () => void;
+  onSosClick?: () => void;
   location: Coordinates | null;
   locationError: string | null;
   isDetectingLocation: boolean;
@@ -19,6 +20,7 @@ interface ClientDashboardProps {
 export const ClientDashboard: React.FC<ClientDashboardProps> = ({ 
   user, 
   onUpgrade,
+  onSosClick,
   location,
   locationError,
   isDetectingLocation
@@ -84,6 +86,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   };
 
   const handleEmergencyClick = () => {
+    if (onSosClick) {
+      onSosClick();
+      return;
+    }
     setInitialService(ServiceType.EMERGENCY);
     const formElement = document.querySelector('form');
     if (formElement) {
@@ -110,42 +116,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       
       <main className="w-full max-w-5xl mx-auto px-4 relative z-10 pb-20 -mt-8 sm:-mt-14">
         
-        {/* Emergency SOS Button */}
-        <div className="flex justify-center mb-6 relative z-30">
-          <button
-            onClick={async () => {
-              if (location) {
-                setIsLoading(true);
-                try {
-                  const result = await findMechanics(
-                    "Socorro, preciso de um mecânico de emergência imediatamente!",
-                    VehicleType.CAR,
-                    ServiceType.EMERGENCY,
-                    location
-                  );
-                  if (result && result.groundingChunks && result.groundingChunks.length > 0) {
-                    const nearestMechanic = result.groundingChunks[0].maps?.title || "Mecânico de Emergência";
-                    handleContact(nearestMechanic);
-                  } else {
-                    setError("Não encontramos oficinas de emergência abertas nas redondezas.");
-                  }
-                } catch (e) {
-                   setError("Falha ao buscar socorro. Tente novamente.");
-                } finally {
-                  setIsLoading(false);
-                }
-              } else {
-                 setError("Ative sua localização (GPS) para chamar socorro imediato.");
-              }
-            }}
-            disabled={isLoading || isDetectingLocation}
-            className="flex items-center gap-3 bg-rose-600 hover:bg-rose-700 text-white px-8 py-4 rounded-full shadow-lg shadow-rose-600/30 font-bold text-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <AlertCircle size={28} className={isLoading ? "animate-spin" : "animate-pulse"} />
-            {isLoading ? "Buscando Socorro..." : "SOCORRO RÁPIDO"}
-          </button>
-        </div>
-
         {/* GPS Status Badge */}
         <div className="flex justify-center mb-4 relative z-30">
           {isDetectingLocation ? (

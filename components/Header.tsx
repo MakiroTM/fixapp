@@ -7,17 +7,28 @@ interface HeaderProps {
   onLogout?: () => void;
   onProfileClick?: () => void;
   onPlanClick?: () => void;
+  onHomeClick?: () => void;
+  onSosClick?: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ user, onLogout, onProfileClick, onPlanClick, isDarkMode, toggleTheme }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  user, 
+  onLogout, 
+  onProfileClick, 
+  onPlanClick, 
+  onHomeClick,
+  onSosClick,
+  isDarkMode, 
+  toggleTheme 
+}) => {
   const isPremium = user?.plan === 'PRO' || user?.plan === 'PRIME';
 
   return (
     <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-50 transition-colors duration-300 pt-[env(safe-area-inset-top)]">
       <div className="max-w-5xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onClick={() => window.location.href = "/"}>
+        <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onClick={onHomeClick ? onHomeClick : () => window.location.href = "/"}>
           <div className="bg-indigo-600 p-1.5 sm:p-2 rounded-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
             <Wrench size={18} className="sm:w-6 sm:h-6" />
           </div>
@@ -29,7 +40,17 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout, onProfileClick, 
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-3">
+          {user && user.role === 'CLIENT' && onSosClick && (
+            <button
+              onClick={onSosClick}
+              className="flex items-center gap-1 sm:gap-1.5 bg-rose-600 hover:bg-rose-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all shadow-sm hover:scale-105"
+            >
+              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+              <span>SOS</span>
+            </button>
+          )}
+
           <button
             onClick={toggleTheme}
             className="p-1.5 sm:p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
