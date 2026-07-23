@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, ChatMessage, ServiceStatus } from '../types';
-import { Wrench, Star, Clock, MapPin, DollarSign, Settings, Bell, ChevronRight, Lock, Crown, MessageCircle, CheckCircle, Map as MapIcon, Wifi, WifiOff, Power, ShieldAlert } from 'lucide-react';
+import { Wrench, Star, Clock, MapPin, DollarSign, Settings, Bell, ChevronRight, Lock, Crown, MessageCircle, CheckCircle, Map as MapIcon, Wifi, WifiOff, Power, ShieldAlert, Navigation } from 'lucide-react';
 import { ChatInterface } from './ChatInterface';
 import { MapComponent } from './MapComponent';
 import { StatusIndicator } from './StatusIndicator';
 import { EtaWidget } from './EtaWidget';
 import { VerifiedBadge } from './VerifiedBadge';
+import { BackgroundLocationManager, LocationCoordinates } from '../services/backgroundGeolocation';
 
 interface MechanicDashboardProps {
   user: User;
@@ -17,6 +18,10 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
   
   // Real-time Availability State
   const [isOnline, setIsOnline] = useState<boolean>(true);
+
+  // Background Geolocation Tracking State
+  const [currentLocation, setCurrentLocation] = useState<LocationCoordinates | null>(null);
+  const [isBgTrackingActive, setIsBgTrackingActive] = useState<boolean>(false);
 
   // States to simulate job acceptance and chat
   const [activeJob, setActiveJob] = useState<{
@@ -30,6 +35,28 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
   const [showMap, setShowMap] = useState(false);
   const [chatRecipient, setChatRecipient] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
+  // Manage Background Geolocation Lifecycle
+  useEffect(() => {
+    let watcherId: string | null = null;
+
+    if (isOnline) {
+      BackgroundLocationManager.startTracking((coords) => {
+        setCurrentLocation(coords);
+        setIsBgTrackingActive(true);
+      }).then(id => {
+        watcherId = id;
+      });
+    } else {
+      BackgroundLocationManager.stopTracking().then(() => {
+        setIsBgTrackingActive(false);
+      });
+    }
+
+    return () => {
+      BackgroundLocationManager.stopTracking();
+    };
+  }, [isOnline]);
 
   // Coordenadas simuladas para o exemplo
   const activeJobCoords = { lat: -23.5505, lng: -46.6333 };
@@ -98,12 +125,32 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                    GRÁTIS
                  </span>
                )}
+
+               {isOnline && isBgTrackingActive && (
+                 <span className="bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-pulse" title="Sua localização continua sendo atualizada mesmo com a tela bloqueada ou app em segundo plano">
+                   <Navigation size={10} className="text-indigo-300" />
+                   GPS 2º PLANO ATIVO
+                 </span>
+               )}
             </div>
             <div className="flex items-center gap-2.5 flex-wrap mb-1">
               <h2 className="text-2xl sm:text-3xl font-bold truncate">{user.shopName}</h2>
               <VerifiedBadge rating={user.rating || 4.8} size="md" />
             </div>
             <p className="text-slate-300 dark:text-zinc-400 text-xs sm:text-sm">Gerencie seus chamados e performance.</p>
+
+            {/* Live GPS Coordinates Sub-bar when Online */}
+            {isOnline && currentLocation && (
+              <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 bg-black/20 backdrop-blur-sm rounded-lg border border-white/10 text-[11px] text-indigo-200">
+                <MapPin size={12} className="text-emerald-400 shrink-0" />
+                <span>
+                  GPS Vivo: <strong className="text-white">{currentLocation.latitude.toFixed(4)}, {currentLocation.longitude.toFixed(4)}</strong>
+                </span>
+                <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-mono ml-1">
+                  Ativo Minimização
+                </span>
+              </div>
+            )}
           </div>
           
           <div className="flex gap-2 sm:gap-3 w-full md:w-auto">

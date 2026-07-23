@@ -10,6 +10,7 @@ import { PaymentSimulation } from './PaymentSimulation';
 import { ServiceRatingModal } from './ServiceRatingModal';
 import { ServiceSkeleton } from './ServiceSkeleton';
 import { RouteModal } from './RouteModal';
+import { QuickChatCard } from './QuickChatCard';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
 import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';

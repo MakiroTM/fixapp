@@ -18,8 +18,19 @@ import {
   HelpCircle,
   KeyRound,
   Eye,
-  EyeOff
+  EyeOff,
+  Fingerprint,
+  Scan,
+  Smartphone,
+  X,
+  AlertCircle
 } from 'lucide-react';
+import { 
+  checkBiometricAvailability, 
+  authenticateWithBiometrics, 
+  saveBiometricCredentials, 
+  getBiometricSavedCredentials 
+} from '../services/biometricService';
 
 interface AuthScreenProps {
   onLogin: (user: User) => void;
@@ -37,33 +48,99 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [shopName, setShopName] = useState(''); // Only for mechanic
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [enableBiometrics, setEnableBiometrics] = useState<boolean>(true);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   
+  // Biometric States
+  const [hasBiometrics, setHasBiometrics] = useState<boolean>(false);
+  const [biometryTypeName, setBiometryTypeName] = useState<string>('FaceID / Impressão Digital');
+  const [showBiometricModal, setShowBiometricModal] = useState<boolean>(false);
+  const [biometricStatus, setBiometricStatus] = useState<'IDLE' | 'SCANNING' | 'SUCCESS' | 'ERROR'>('IDLE');
+  const [biometricErrorMessage, setBiometricErrorMessage] = useState<string>('');
+
   // Forgot Password Modal state
   const [showForgotModal, setShowForgotModal] = useState<boolean>(false);
   const [forgotEmail, setForgotEmail] = useState<string>('');
   const [forgotSent, setForgotSent] = useState<boolean>(false);
 
-  // Load saved 'Remember Me' preferences on component mount
+  // Load saved 'Remember Me' preferences & Check Biometric availability on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedEmail = localStorage.getItem('fix_saved_email');
-      const savedRemember = localStorage.getItem('fix_remember_me') === 'true';
-      if (savedRemember && savedEmail) {
-        setEmail(savedEmail);
-        setRememberMe(true);
+    const initBiometricsAndPrefs = async () => {
+      if (typeof window !== 'undefined') {
+        // Check Biometrics Availability
+        const avail = await checkBiometricAvailability();
+        setHasBiometrics(avail.available);
+        if (avail.biometryType) {
+          setBiometryTypeName(avail.biometryType);
+        }
+
+        // Load saved email / remember me
+        const savedEmail = localStorage.getItem('fix_saved_email');
+        const savedRemember = localStorage.getItem('fix_remember_me') === 'true';
+        const bioEnabled = localStorage.getItem('fix_biometric_enabled') !== 'false';
+
+        setEnableBiometrics(bioEnabled);
+
+        if (savedRemember && savedEmail) {
+          setEmail(savedEmail);
+          setRememberMe(true);
+        }
       }
-    }
+    };
+
+    initBiometricsAndPrefs();
   }, []);
+
+  // Handle Biometric Login trigger
+  const handleBiometricLogin = async () => {
+    setShowBiometricModal(true);
+    setBiometricStatus('SCANNING');
+    setBiometricErrorMessage('');
+
+    try {
+      const success = await authenticateWithBiometrics(
+        'Acesso por Biometria',
+        'Verifique sua identidade para acessar sua conta FIX'
+      );
+
+      if (success) {
+        setBiometricStatus('SUCCESS');
+        
+        // Retrieve or generate saved user
+        const savedCreds = await getBiometricSavedCredentials();
+        const userEmail = savedCreds?.email || email || 'usuario.biometria@fixapp.com';
+
+        setTimeout(() => {
+          setShowBiometricModal(false);
+          const bioUser: User = {
+            id: 'bio-' + Math.random().toString(36).substr(2, 9),
+            name: userEmail ? userEmail.split('@')[0] : (selectedRole === 'CLIENT' ? 'Motorista Verificado' : 'Mecânico Credenciado'),
+            email: userEmail,
+            role: selectedRole,
+            plan: 'FREE',
+            shopName: selectedRole === 'MECHANIC' ? 'Oficina Mecânica FIX' : undefined,
+            rating: 5.0
+          };
+          onLogin(bioUser);
+        }, 800);
+      } else {
+        setBiometricStatus('ERROR');
+        setBiometricErrorMessage('Falha no reconhecimento biométrico. Tente novamente ou use sua senha.');
+      }
+    } catch (err: any) {
+      setBiometricStatus('ERROR');
+      setBiometricErrorMessage(err?.message || 'Biometria não reconhecida.');
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Handle 'Lembrar senha' persistence
+    // Handle 'Lembrar senha' and biometric persistence
     if (typeof window !== 'undefined') {
       if (rememberMe) {
-        localStorage.setItem('fix_saved_email', email);
-        localStorage.setItem('fix_remember_me', 'true');
+        saveBiometricCredentials(email, password || '123456');
+        localStorage.setItem('fix_biometric_enabled', enableBiometrics ? 'true' : 'false');
       } else {
         localStorage.removeItem('fix_saved_email');
         localStorage.setItem('fix_remember_me', 'false');
@@ -316,6 +393,33 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                
+                {/* Biometric Quick Login Banner if biometrics available or email saved */}
+                {hasBiometrics && (
+                  <div className="p-3.5 bg-gradient-to-r from-indigo-900/40 via-indigo-800/30 to-purple-900/40 dark:from-indigo-950/80 dark:to-zinc-900 border border-indigo-500/30 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+                        <div className="p-1.5 bg-indigo-600 text-white rounded-lg animate-pulse">
+                          <Fingerprint size={18} />
+                        </div>
+                        <span className="text-xs font-black">Acesso Biométrico Disponível</span>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                        Ativo
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleBiometricLogin}
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                    >
+                      <Scan size={16} />
+                      <span>ENTRAR COM {biometryTypeName.toUpperCase()}</span>
+                    </button>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Endereço de E-mail
@@ -358,32 +462,49 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                   </div>
                 </div>
 
-                {/* Lembrar Senha & Esqueceu Senha options */}
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
-                    />
-                    <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      Lembrar senha neste aparelho
-                    </span>
-                  </label>
+                {/* Lembrar Senha & Biometria & Esqueceu Senha options */}
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input 
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                      />
+                      <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        Lembrar sessão neste aparelho
+                      </span>
+                    </label>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotModal(true)}
-                    className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-all"
-                  >
-                    Esqueceu a senha?
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(true)}
+                      className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-all"
+                    >
+                      Esqueceu a senha?
+                    </button>
+                  </div>
+
+                  {rememberMe && (
+                    <label className="flex items-center gap-2 cursor-pointer group pl-6">
+                      <input 
+                        type="checkbox"
+                        checked={enableBiometrics}
+                        onChange={(e) => setEnableBiometrics(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+                      />
+                      <span className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                        <Fingerprint size={13} />
+                        Salvar credencial para Biometria (FaceID/Digital)
+                      </span>
+                    </label>
+                  )}
                 </div>
 
                 <button 
                   type="submit"
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2 cursor-pointer"
                 >
                   <span>ENTRAR NA CONTA</span>
                   <ArrowRight size={18} />
@@ -602,6 +723,108 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Biometric Verification Modal */}
+      {showBiometricModal && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden animate-pop-in space-y-5">
+            
+            <button
+              onClick={() => setShowBiometricModal(false)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded-full transition-colors cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Header */}
+            <div>
+              <span className="text-[10px] uppercase font-black tracking-widest text-indigo-500 block mb-1">
+                Segurança Capacitada FIX
+              </span>
+              <h3 className="text-xl font-extrabold text-zinc-900 dark:text-white">
+                Autenticação Biométrica
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                {biometryTypeName}
+              </p>
+            </div>
+
+            {/* Visual Icon scanner state */}
+            <div className="py-6 flex flex-col items-center justify-center">
+              {biometricStatus === 'SCANNING' && (
+                <div className="relative flex items-center justify-center">
+                  <div className="absolute w-28 h-28 bg-indigo-500/20 rounded-full animate-ping pointer-events-none" />
+                  <div className="w-20 h-20 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-600/40 relative z-10 animate-bounce">
+                    <Fingerprint size={42} />
+                  </div>
+                </div>
+              )}
+
+              {biometricStatus === 'SUCCESS' && (
+                <div className="w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/40 animate-pop-in">
+                  <Check size={42} className="stroke-[3]" />
+                </div>
+              )}
+
+              {biometricStatus === 'ERROR' && (
+                <div className="w-20 h-20 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-rose-500/40 animate-shake">
+                  <AlertCircle size={42} />
+                </div>
+              )}
+            </div>
+
+            {/* Status Messages & Actions */}
+            <div>
+              {biometricStatus === 'SCANNING' && (
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                    Aproxime seu rosto ou dedo no leitor do aparelho
+                  </p>
+                  <p className="text-[11px] text-zinc-400">
+                    Validando chave de acesso nativa do dispositivo...
+                  </p>
+                </div>
+              )}
+
+              {biometricStatus === 'SUCCESS' && (
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
+                    Identidade confirmada com sucesso!
+                  </p>
+                  <p className="text-[11px] text-zinc-400">
+                    Redirecionando para o painel de serviços...
+                  </p>
+                </div>
+              )}
+
+              {biometricStatus === 'ERROR' && (
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-rose-500">
+                    {biometricErrorMessage || 'Não foi possível ler a biometria.'}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowBiometricModal(false)}
+                      className="flex-1 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
+                    >
+                      Usar Senha
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleBiometricLogin}
+                      className="flex-1 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-500 transition-colors shadow-md cursor-pointer"
+                    >
+                      Tentar Novamente
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       )}
