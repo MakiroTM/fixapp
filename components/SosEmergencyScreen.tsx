@@ -295,22 +295,51 @@ export const SosEmergencyScreen: React.FC<SosEmergencyScreenProps> = ({
             />
           </div>
 
-          {/* Main Action Dispatch Button */}
-          <div className="pt-2">
+          {/* Main Action Dispatch Button with Smooth Color Transitions & Pulsing Feedback */}
+          <div className="pt-2 relative">
+            {/* Glowing Backdrop pulse when loading / waiting */}
+            <div 
+              className={`absolute -inset-1 rounded-2xl bg-gradient-to-r from-rose-600 via-amber-500 to-red-600 blur-lg transition-all duration-700 pointer-events-none ${
+                isLoading 
+                  ? 'opacity-100 animate-pulse scale-105 shadow-[0_0_40px_rgba(244,63,94,0.7)]' 
+                  : 'opacity-40 hover:opacity-75'
+              }`}
+            ></div>
+
             <button
               onClick={handleDispatchEmergency}
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white py-4 rounded-xl font-black text-lg sm:text-xl shadow-xl shadow-rose-900/50 flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed border border-rose-500"
+              className={`relative w-full py-4.5 sm:py-5 px-6 rounded-xl font-black text-lg sm:text-xl shadow-2xl flex items-center justify-center gap-3 transition-all duration-500 overflow-hidden border ${
+                isLoading
+                  ? 'bg-gradient-to-r from-rose-800 via-amber-700 to-red-800 text-white border-amber-400/80 shadow-rose-900/80 animate-pulse cursor-wait'
+                  : 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:via-red-500 hover:to-rose-600 text-white border-rose-400/50 hover:scale-[1.01] active:scale-[0.99] shadow-rose-900/60'
+              }`}
             >
+              {/* Dynamic light reflection line */}
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-1000 pointer-events-none"></span>
+
               {isLoading ? (
-                <>
-                  <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Localizando Unidades de Socorro...</span>
-                </>
+                <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-center">
+                    <span className="absolute w-8 h-8 rounded-full bg-amber-300/40 animate-ping"></span>
+                    <ShieldAlert size={28} className="text-amber-300 animate-spin" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-base sm:text-lg font-black tracking-wide leading-tight text-amber-200">
+                      LOCALIZANDO SOCORRO PRÓXIMO...
+                    </p>
+                    <p className="text-xs font-medium text-rose-100/90">
+                      Obtendo coordenadas GPS e sinalizando unidades 24h
+                    </p>
+                  </div>
+                </div>
               ) : (
                 <>
-                  <ShieldAlert size={26} className="animate-pulse" />
-                  <span>ACIONAR SOCORRO IMEDIATO 24H</span>
+                  <div className="relative flex items-center justify-center">
+                    <span className="absolute w-7 h-7 rounded-full bg-white/40 animate-ping"></span>
+                    <ShieldAlert size={28} className="text-white relative z-10 animate-pulse" />
+                  </div>
+                  <span className="tracking-wide">ACIONAR SOCORRO IMEDIATO 24H</span>
                 </>
               )}
             </button>

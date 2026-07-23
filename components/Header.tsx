@@ -44,10 +44,17 @@ export const Header: React.FC<HeaderProps> = ({
           {user && user.role === 'CLIENT' && onSosClick && (
             <button
               onClick={onSosClick}
-              className="flex items-center gap-1 sm:gap-1.5 bg-rose-600 hover:bg-rose-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all shadow-sm hover:scale-105"
+              className="relative group flex items-center gap-1.5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white px-3 py-1.5 rounded-full text-xs font-black transition-all duration-300 shadow-md shadow-rose-600/40 hover:scale-105 active:scale-95 border border-rose-400/30 overflow-hidden"
+              title="Abrir Central SOS Emergência"
             >
-              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
-              <span>SOS</span>
+              <span className="absolute -inset-1 bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 opacity-60 blur-xs animate-pulse rounded-full pointer-events-none"></span>
+              <span className="relative z-10 flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                <span className="tracking-wider">SOS</span>
+              </span>
             </button>
           )}
 

@@ -28,10 +28,13 @@ export const Hero: React.FC<HeroProps> = ({ onEmergencyClick, onPrimeClick }) =>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           <button 
             onClick={onEmergencyClick}
-            className="group flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all hover:scale-105 shadow-xl shadow-rose-900/30 w-full sm:w-auto border border-rose-500"
+            className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:via-red-500 hover:to-rose-600 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-extrabold text-base sm:text-lg transition-all duration-500 hover:scale-105 shadow-2xl shadow-rose-900/60 w-full sm:w-auto border border-rose-400/40 overflow-hidden"
           >
-            <AlertTriangle size={20} className="group-hover:animate-pulse sm:w-6 sm:h-6" />
-            SOS Emergência
+            <span className="absolute -inset-1 rounded-xl bg-gradient-to-r from-rose-600 via-red-500 to-amber-500 opacity-60 blur-md group-hover:opacity-100 transition-opacity animate-pulse pointer-events-none"></span>
+            <span className="relative z-10 flex items-center gap-2.5">
+              <AlertTriangle size={22} className="animate-pulse text-amber-300 sm:w-6 sm:h-6" />
+              <span>SOS Emergência</span>
+            </span>
           </button>
           <div className="flex items-center justify-center gap-2 text-zinc-400 text-[11px] sm:text-sm mt-1 sm:mt-0 px-3 sm:px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
              <ShieldCheck size={14} className="text-emerald-400 sm:w-4 sm:h-4" />
