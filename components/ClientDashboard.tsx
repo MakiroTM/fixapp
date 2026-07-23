@@ -8,6 +8,7 @@ import { StatusIndicator } from './StatusIndicator';
 import { EtaWidget } from './EtaWidget';
 import { PaymentSimulation } from './PaymentSimulation';
 import { ServiceRatingModal } from './ServiceRatingModal';
+import { ServiceSkeleton } from './ServiceSkeleton';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
 import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';
@@ -205,47 +206,41 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     <>
       <Hero onEmergencyClick={handleEmergencyClick} onPrimeClick={onUpgrade} />
       
-      <main className="w-full max-w-5xl mx-auto px-4 relative z-10 pb-20 -mt-8 sm:-mt-14">
+      <main className="w-full max-w-4xl mx-auto px-3 sm:px-4 relative z-10 pb-20 -mt-6 sm:-mt-8">
         
-        {/* GPS Status Badge */}
-        <div className="flex justify-center mb-4 relative z-30">
+        {/* Subtle GPS Status Pill */}
+        <div className="flex justify-center mb-3 relative z-30">
           {isDetectingLocation ? (
-            <div className="inline-flex items-center gap-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold border border-blue-200 dark:border-blue-800 shadow-sm animate-pulse">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>
-              Detectando GPS...
+            <div className="inline-flex items-center gap-1.5 bg-zinc-800/90 text-zinc-300 px-3 py-0.5 rounded-full text-[11px] font-medium border border-zinc-700/60 backdrop-blur-md shadow-sm">
+              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-ping" />
+              <span>Buscando GPS...</span>
             </div>
           ) : location ? (
-            <div className="inline-flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold border border-emerald-200 dark:border-emerald-800 shadow-sm">
-              <Compass size={10} className="text-emerald-500 sm:w-3 sm:h-3" />
-              GPS Ativo • Localização precisa
+            <div className="inline-flex items-center gap-1.5 bg-emerald-950/80 text-emerald-300 px-3 py-0.5 rounded-full text-[11px] font-medium border border-emerald-800/60 backdrop-blur-md shadow-sm">
+              <Compass size={11} className="text-emerald-400" />
+              <span>GPS Ativo</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold border border-zinc-200 dark:border-zinc-700 shadow-sm">
-              <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full"></div>
-              GPS Desativado
+            <div className="inline-flex items-center gap-1.5 bg-zinc-800/90 text-zinc-400 px-3 py-0.5 rounded-full text-[11px] font-medium border border-zinc-700/60 backdrop-blur-md shadow-sm">
+              <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
+              <span>GPS Desativado</span>
             </div>
           )}
         </div>
 
-        {/* Prominent Geolocation Error Alert */}
+        {/* Geolocation Error Alert */}
         {locationError && (
-          <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300 rounded-2xl border border-rose-100 dark:border-rose-800 shadow-lg flex items-center gap-3 animate-fade-in relative z-30 mx-2 sm:mx-4 max-w-4xl lg:mx-auto">
-            <AlertCircle className="flex-shrink-0 text-rose-500" size={24} />
-            <div className="text-sm">
-              <p className="font-bold">Aviso de Localização</p>
-              <p>{locationError}. Por favor, ative o GPS para encontrar mecânicos próximos com precisão.</p>
-            </div>
+          <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded-xl border border-rose-200 dark:border-rose-800/50 flex items-center gap-2.5 text-xs animate-fade-in relative z-30 max-w-3xl mx-auto">
+            <AlertCircle className="flex-shrink-0 text-rose-500" size={18} />
+            <p className="leading-tight">{locationError}. Ative o GPS para resultados mais precisos.</p>
           </div>
         )}
 
         {/* Search Error Alert */}
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300 rounded-2xl border border-rose-100 dark:border-rose-800 shadow-lg flex items-center gap-3 animate-fade-in relative z-30 mx-2 sm:mx-4 max-w-4xl lg:mx-auto">
-            <AlertCircle className="flex-shrink-0 text-rose-500" size={24} />
-            <div className="text-sm">
-              <p className="font-bold">Ops, algo deu errado.</p>
-              <p>{error}</p>
-            </div>
+          <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded-xl border border-rose-200 dark:border-rose-800/50 flex items-center gap-2.5 text-xs animate-fade-in relative z-30 max-w-3xl mx-auto">
+            <AlertCircle className="flex-shrink-0 text-rose-500" size={18} />
+            <p className="leading-tight">{error}</p>
           </div>
         )}
 
@@ -375,8 +370,30 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {/* RESULTS SECTION: Shows either Manual Search OR Nearby Mechanics (Default) */}
         
         {(() => {
+          if (isLoading) {
+            return (
+              <ServiceSkeleton 
+                title="Buscando e comparando melhores opções com IA..." 
+                subtitle="Consultando geolocalização, rotas, especialidades e prestadores credenciados..." 
+                count={3} 
+              />
+            );
+          }
+
           const currentResult = searchResult || nearbyMechanics;
-          if (!currentResult) return null;
+
+          if (!currentResult) {
+            if (loadingNearby) {
+              return (
+                <ServiceSkeleton 
+                  title="Localizando mecânicos e guinchos próximos..." 
+                  subtitle="Mapeando estabelecimentos e oficinas no seu raio de atendimento..." 
+                  count={3} 
+                />
+              );
+            }
+            return null;
+          }
 
           const rawChunks = currentResult.groundingChunks || [];
 
