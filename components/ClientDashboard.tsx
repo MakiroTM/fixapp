@@ -9,10 +9,11 @@ import { EtaWidget } from './EtaWidget';
 import { PaymentSimulation } from './PaymentSimulation';
 import { ServiceRatingModal } from './ServiceRatingModal';
 import { ServiceSkeleton } from './ServiceSkeleton';
+import { RouteModal } from './RouteModal';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
 import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';
-import { AlertCircle, Compass, MapPin, MessageCircle, Clock, CheckCircle2, ChevronRight, X, Filter, Layers, Sparkles, SlidersHorizontal, Star } from 'lucide-react';
+import { AlertCircle, Compass, MapPin, MessageCircle, Navigation, Clock, CheckCircle2, ChevronRight, X, Filter, Layers, Sparkles, SlidersHorizontal, Star } from 'lucide-react';
 
 interface ClientDashboardProps {
   user: User;
@@ -53,6 +54,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const [isRatingModalOpen, setIsRatingModalOpen] = useState<boolean>(false);
   const [ratingMechanicName, setRatingMechanicName] = useState<string>('Mecânico Parceiro FIX');
   const [ratingServiceType, setRatingServiceType] = useState<string>('Atendimento Automotivo');
+
+  // Active Request Route Modal
+  const [isActiveRouteOpen, setIsActiveRouteOpen] = useState<boolean>(false);
 
   // Category filter state for service list with layout transitions
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
@@ -284,6 +288,31 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   setRatingMechanicName(activeRequest.mechanicName);
                   setRatingServiceType(activeRequest.serviceType);
                   setIsRatingModalOpen(true);
+
+                  // Record completed service in maintenanceHistory localStorage
+                  try {
+                    const currentHistory = JSON.parse(localStorage.getItem('maintenanceHistory') || '[]');
+                    const exists = currentHistory.some((item: any) => item.id === activeRequest.id || item.receiptId === activeRequest.receiptId);
+                    if (!exists) {
+                      const newRecord = {
+                        id: activeRequest.id || `FIX-${Math.floor(1000 + Math.random() * 9000)}`,
+                        serviceType: activeRequest.serviceType,
+                        mechanicName: activeRequest.mechanicName,
+                        vehicleInfo: activeRequest.vehicleInfo || 'Veículo do Cliente',
+                        date: new Date().toLocaleDateString('pt-BR'),
+                        price: activeRequest.servicePrice || 180.00,
+                        paymentMethod: activeRequest.paymentMethod || 'PIX',
+                        status: 'COMPLETED',
+                        rating: 5,
+                        notes: `Atendimento concluído via aplicativo FIX em ${activeRequest.locationInfo || 'Localização enviada'}.`,
+                        receiptId: activeRequest.receiptId || `REC-${Date.now().toString().slice(-8)}`
+                      };
+                      localStorage.setItem('maintenanceHistory', JSON.stringify([newRecord, ...currentHistory]));
+                      window.dispatchEvent(new Event('maintenanceHistoryUpdated'));
+                    }
+                  } catch (e) {
+                    console.error('Error saving completed service to history:', e);
+                  }
                 }
               }}
             />
@@ -347,17 +376,40 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 <span>Veículo: <strong className="text-zinc-200">{activeRequest.vehicleInfo}</strong></span>
               </div>
 
-              <button
-                onClick={() => {
-                  setChatRecipient(activeRequest.mechanicName);
-                  setIsChatOpen(true);
-                }}
-                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/30"
-              >
-                <MessageCircle size={16} />
-                <span>Abrir Chat & Detalhes</span>
-              </button>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsActiveRouteOpen(true)}
+                  className="flex-1 sm:flex-initial bg-zinc-800 hover:bg-zinc-700 text-indigo-300 border border-indigo-500/30 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <Navigation size={16} />
+                  <span>Ver Rota In-App</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setChatRecipient(activeRequest.mechanicName);
+                    setIsChatOpen(true);
+                  }}
+                  className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/30 cursor-pointer"
+                >
+                  <MessageCircle size={16} />
+                  <span>Abrir Chat & Detalhes</span>
+                </button>
+              </div>
             </div>
+
+            {/* In-App Route Modal for Active Request */}
+            <RouteModal
+              isOpen={isActiveRouteOpen}
+              onClose={() => setIsActiveRouteOpen(false)}
+              destinationTitle={activeRequest.mechanicName}
+              destinationLat={activeRequest.mechanicCoords?.latitude}
+              destinationLng={activeRequest.mechanicCoords?.longitude}
+              userLat={location?.latitude}
+              userLng={location?.longitude}
+            />
           </div>
         )}
 

@@ -43,6 +43,21 @@ export interface ActiveServiceRequest {
   receiptId?: string;
 }
 
+export interface MaintenanceRecord {
+  id: string;
+  serviceType: string;
+  mechanicName: string;
+  vehicleInfo: string;
+  date: string;
+  price: number;
+  paymentMethod: string;
+  status: 'COMPLETED';
+  rating?: number;
+  notes?: string;
+  receiptId?: string;
+  tags?: string[];
+}
+
 export interface ChatMessage {
   id: string;
   text: string;

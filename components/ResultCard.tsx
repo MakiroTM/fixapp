@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, MessageCircle, Star, Send } from 'lucide-react';
 import { GroundingChunk } from '../types';
 import { VerifiedBadge } from './VerifiedBadge';
+import { RouteModal } from './RouteModal';
 
 interface ResultCardProps {
   chunk: GroundingChunk;
@@ -18,6 +19,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ chunk, onContact }) => {
   const snippet = placeAnswerSources?.reviewSnippets?.[0]?.snippet;
 
   const [ratingInfo, setRatingInfo] = useState<{average: number, count: number} | null>(null);
+  const [isRouteOpen, setIsRouteOpen] = useState(false);
   
   // Inline Chat State
   const [isChatting, setIsChatting] = useState(false);
@@ -140,17 +142,24 @@ export const ResultCard: React.FC<ResultCardProps> = ({ chunk, onContact }) => {
               Negociar
             </button>
           )}
-          <a 
-            href={uri} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 bg-zinc-900 dark:bg-zinc-700 text-white py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm hover:bg-zinc-800 dark:hover:bg-zinc-600 transition-colors"
+          <button 
+            type="button"
+            onClick={() => setIsRouteOpen(true)}
+            className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 bg-zinc-900 dark:bg-zinc-700 text-white py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm hover:bg-zinc-800 dark:hover:bg-zinc-600 transition-colors cursor-pointer"
           >
             <Navigation size={14} className="sm:w-4 sm:h-4" />
-            Rota
-          </a>
+            Rota In-App
+          </button>
         </div>
       )}
+
+      {/* In-App Google Maps Route Modal */}
+      <RouteModal
+        isOpen={isRouteOpen}
+        onClose={() => setIsRouteOpen(false)}
+        destinationTitle={title}
+        destinationAddress={title}
+      />
     </div>
   );
 };
