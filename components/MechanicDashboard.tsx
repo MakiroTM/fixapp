@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { User, ChatMessage } from '../types';
-import { Wrench, Star, Clock, MapPin, DollarSign, Settings, Bell, ChevronRight, Lock, Crown, MessageCircle, CheckCircle, Map as MapIcon } from 'lucide-react';
+import { User, ChatMessage, ServiceStatus } from '../types';
+import { Wrench, Star, Clock, MapPin, DollarSign, Settings, Bell, ChevronRight, Lock, Crown, MessageCircle, CheckCircle, Map as MapIcon, Wifi, WifiOff, Power, ShieldAlert } from 'lucide-react';
 import { ChatInterface } from './ChatInterface';
 import { MapComponent } from './MapComponent';
+import { StatusIndicator } from './StatusIndicator';
+import { EtaWidget } from './EtaWidget';
 
 interface MechanicDashboardProps {
   user: User;
@@ -12,12 +14,16 @@ interface MechanicDashboardProps {
 export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUpgrade }) => {
   const isPro = user.plan === 'PRO';
   
+  // Real-time Availability State
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+
   // States to simulate job acceptance and chat
   const [activeJob, setActiveJob] = useState<{
     clientName: string;
     carInfo: string;
     distanceInfo: string;
   } | null>(null);
+  const [activeJobStatus, setActiveJobStatus] = useState<ServiceStatus>('EN_ROUTE');
   const [isAccepting, setIsAccepting] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showMap, setShowMap] = useState(false);
@@ -33,11 +39,12 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
     // Simular delay de rede para aceitação
     setTimeout(() => {
       setActiveJob({ clientName, carInfo, distanceInfo });
+      setActiveJobStatus('EN_ROUTE');
       setChatRecipient(clientName);
       setChatMessages([
         {
           id: '1',
-          text: `Olá ${clientName}, aceitei seu chamado para o ${carInfo}. Estou analisando a localização e já saio.`,
+          text: `Olá ${clientName}, aceitei seu chamado para o ${carInfo}. Estou a caminho da sua localização!`,
           sender: 'me',
           timestamp: new Date()
         }
@@ -56,10 +63,30 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
           <div className="w-full md:w-auto">
             <div className="flex flex-wrap items-center gap-2 mb-2 sm:mb-3">
-               <span className="bg-emerald-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                 ABERTO AGORA
-               </span>
+               <button
+                 onClick={() => setIsOnline(!isOnline)}
+                 className={`text-[10px] sm:text-xs font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                   isOnline 
+                     ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20 ring-2 ring-emerald-400/30' 
+                     : 'bg-zinc-700 hover:bg-zinc-600 text-zinc-200 border border-zinc-600'
+                 }`}
+                 title={isOnline ? 'Clique para mudar para Offline' : 'Clique para mudar para Online'}
+               >
+                 {isOnline ? (
+                   <>
+                     <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+                     <Wifi size={13} />
+                     <span>ONLINE • Recebendo Chamados</span>
+                   </>
+                 ) : (
+                   <>
+                     <span className="w-2 h-2 bg-zinc-400 rounded-full"></span>
+                     <WifiOff size={13} />
+                     <span>OFFLINE • Indisponível</span>
+                   </>
+                 )}
+               </button>
+
                {isPro ? (
                  <span className="bg-amber-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                    <Crown size={10} fill="white" />
@@ -113,27 +140,77 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
           )}
 
           <div className="flex justify-between items-center px-1">
-             <h3 className="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100">
-               {activeJob ? 'Serviço em Andamento' : 'Solicitações Próximas'}
+             <h3 className="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
+               {!isOnline ? (
+                 <>
+                   <WifiOff size={18} className="text-zinc-400" />
+                   <span>Status: Offline</span>
+                 </>
+               ) : activeJob ? (
+                 'Serviço em Andamento'
+               ) : (
+                 'Solicitações Próximas'
+               )}
              </h3>
              <button className="text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline">Ver mapa</button>
           </div>
 
-          {activeJob ? (
-             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-indigo-500 dark:border-indigo-500/50 shadow-lg relative overflow-hidden animate-pop-in">
-                <div className="absolute top-0 right-0 p-2 sm:p-3">
-                   <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-indigo-600 dark:text-indigo-300 uppercase tracking-wide bg-white/50 dark:bg-black/20 px-2 py-1 rounded">
-                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-                     Em Atendimento
-                   </span>
+          {!isOnline ? (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 text-center space-y-4 shadow-xl animate-fade-in">
+              <div className="w-16 h-16 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                <WifiOff size={32} />
+              </div>
+              <div className="space-y-1.5 max-w-md mx-auto">
+                <h3 className="text-lg font-bold text-white">Você está Offline no Momento</h3>
+                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                  Sua oficina/guincho está oculta no aplicativo. Alterne seu status para <strong className="text-emerald-400">Online</strong> para receber novos chamados e socorros em tempo real.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsOnline(true)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-6 py-3 rounded-xl text-sm shadow-lg shadow-emerald-900/40 inline-flex items-center gap-2 transition-all hover:scale-105"
+              >
+                <Power size={18} />
+                <span>MUDAR PARA ONLINE E RECEBER CHAMADOS</span>
+              </button>
+            </div>
+          ) : activeJob ? (
+             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-indigo-500 dark:border-indigo-500/50 shadow-lg relative overflow-hidden animate-pop-in space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-lg sm:text-xl font-bold text-zinc-800 dark:text-zinc-100">{activeJob.clientName}</h4>
+                  <StatusIndicator status={activeJobStatus} variant="badge" />
                 </div>
-                
-                <h4 className="text-lg sm:text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-1 mt-4 sm:mt-0">{activeJob.clientName}</h4>
-                <div className="space-y-1 mb-4 sm:mb-6">
+
+                <div className="space-y-1">
                   <p className="text-zinc-700 dark:text-zinc-300 text-xs sm:text-sm font-medium">{activeJob.carInfo}</p>
                   <p className="text-zinc-500 dark:text-zinc-400 text-[10px] sm:text-xs flex items-center gap-1">
                     <MapPin size={12} /> {activeJob.distanceInfo}
                   </p>
+                </div>
+
+                {/* Status Stepper Progress Control */}
+                <StatusIndicator 
+                  status={activeJobStatus} 
+                  variant="full" 
+                  isEditable={true} 
+                  onStatusChange={setActiveJobStatus} 
+                />
+
+                {/* Dynamic ETA display for Mechanic */}
+                <EtaWidget 
+                  status={activeJobStatus}
+                />
+
+                {/* Service Payment Status Summary for Mechanic */}
+                <div className="bg-white/80 dark:bg-zinc-900/80 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="text-zinc-500 text-[10px] uppercase font-extrabold tracking-wider block">Valor do Atendimento</span>
+                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">R$ 180,00</span>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    Pagamento via App
+                  </span>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -155,7 +232,10 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                      {showMap ? 'Ocultar Mapa' : 'Ver Mapa'}
                    </button>
                    <button 
-                     onClick={() => setActiveJob(null)}
+                     onClick={() => {
+                       setActiveJobStatus('COMPLETED');
+                       setTimeout(() => setActiveJob(null), 1000);
+                     }}
                      className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl font-bold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors text-sm sm:text-base"
                    >
                      Finalizar
@@ -318,6 +398,8 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
         recipientName={chatRecipient}
         initialMessages={chatMessages}
         userRole="MECHANIC"
+        initialStatus={activeJobStatus}
+        onStatusChange={setActiveJobStatus}
       />
     </div>
   );

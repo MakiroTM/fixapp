@@ -4,9 +4,13 @@ import { Hero } from './Hero';
 import { SearchForm } from './SearchForm';
 import { ResultCard } from './ResultCard';
 import { ChatInterface } from './ChatInterface';
+import { StatusIndicator } from './StatusIndicator';
+import { EtaWidget } from './EtaWidget';
+import { PaymentSimulation } from './PaymentSimulation';
 import { findMechanics } from '../services/geminiService';
-import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage } from '../types';
-import { AlertCircle, Compass, MapPin } from 'lucide-react';
+import { calculateDynamicETA } from '../services/locationUtils';
+import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';
+import { AlertCircle, Compass, MapPin, MessageCircle, Clock, CheckCircle2, ChevronRight, X } from 'lucide-react';
 
 interface ClientDashboardProps {
   user: User;
@@ -34,6 +38,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   // State for nearby mechanics (auto-load)
   const [nearbyMechanics, setNearbyMechanics] = useState<SearchResult | null>(null);
   const [loadingNearby, setLoadingNearby] = useState(false);
+
+  // Active Service Request State
+  const [activeRequest, setActiveRequest] = useState<ActiveServiceRequest | null>(null);
 
   // Chat State
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -102,11 +109,34 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     setChatMessages([
       {
         id: '1',
-        text: `Olá, encontrei o ${name} pelo aplicativo FIX. Gostaria de saber mais sobre os serviços e disponibilidade.`,
+        text: `Olá, encontrei o ${name} pelo aplicativo FIX. Gostaria de solicitar atendimento para o meu veículo.`,
         sender: 'me',
         timestamp: new Date()
       }
     ]);
+    
+    // Calculate dynamic ETA based on location
+    const etaCalc = calculateDynamicETA(location, null);
+
+    // Create active service request for tracking
+    setActiveRequest({
+      id: 'req-' + Date.now(),
+      clientName: user.name,
+      mechanicName: name,
+      vehicleInfo: user.vehicleModel || 'Veículo Registrado',
+      serviceType: 'Solicitação de Atendimento',
+      status: 'PENDING',
+      updatedAt: new Date(),
+      estimatedArrival: etaCalc.formattedEta,
+      distanceKm: etaCalc.distanceKm,
+      etaMinutes: etaCalc.etaMinutes,
+      trafficCondition: etaCalc.trafficCondition,
+      mechanicCoords: etaCalc.mechanicCoords,
+      clientCoords: location || undefined,
+      paymentStatus: 'UNPAID',
+      servicePrice: 180.00
+    });
+
     setIsChatOpen(true);
   };
 
@@ -154,6 +184,101 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             <div className="text-sm">
               <p className="font-bold">Ops, algo deu errado.</p>
               <p>{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Active Service Request Tracking Card */}
+        {activeRequest && (
+          <div className="mb-8 bg-zinc-900 text-white rounded-2xl p-5 sm:p-6 border border-indigo-500/40 shadow-2xl shadow-indigo-900/30 animate-pop-in space-y-4 relative z-30">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-indigo-600 rounded-xl text-white">
+                  <Clock size={20} className="animate-spin" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Acompanhamento em Tempo Real</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  </div>
+                  <h3 className="text-lg font-black text-white">{activeRequest.mechanicName}</h3>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <StatusIndicator status={activeRequest.status} variant="badge" />
+                <button
+                  onClick={() => setActiveRequest(null)}
+                  className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                  title="Ocultar do Dashboard"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Stepper Progress Visual Indicator */}
+            <StatusIndicator 
+              status={activeRequest.status} 
+              variant="full" 
+              isEditable={true}
+              onStatusChange={(newStatus) => setActiveRequest(prev => prev ? { ...prev, status: newStatus } : null)}
+            />
+
+            {/* Dynamic Estimated Time of Arrival (ETA) Display */}
+            <EtaWidget 
+              status={activeRequest.status}
+              userCoords={location}
+              mechanicCoords={activeRequest.mechanicCoords}
+              initialEtaMinutes={activeRequest.etaMinutes}
+              initialDistanceKm={activeRequest.distanceKm}
+              trafficCondition={activeRequest.trafficCondition}
+            />
+
+            {/* Simplified Payment Simulation Flow */}
+            <PaymentSimulation 
+              servicePrice={activeRequest.servicePrice || 180.00}
+              paymentStatus={activeRequest.paymentStatus || 'UNPAID'}
+              paymentMethod={activeRequest.paymentMethod || 'PIX'}
+              receiptId={activeRequest.receiptId}
+              mechanicName={activeRequest.mechanicName}
+              serviceType={activeRequest.serviceType}
+              onPaymentSuccess={(method, receiptId) => {
+                setActiveRequest(prev => prev ? {
+                  ...prev,
+                  paymentStatus: 'PAID',
+                  paymentMethod: method,
+                  receiptId: receiptId
+                } : null);
+
+                // Send payment confirmation message into chat
+                setChatMessages(prev => [
+                  ...prev,
+                  {
+                    id: Date.now().toString(),
+                    text: `✅ **Pagamento Confirmado!**\nComprovante: \`${receiptId}\`\nForma de Pagamento: ${method}\n\n*O valor de R$ ${(activeRequest.servicePrice || 180.00).toFixed(2)} foi processado com sucesso.*`,
+                    sender: 'me',
+                    timestamp: new Date()
+                  }
+                ]);
+              }}
+            />
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="text-xs text-zinc-400 flex items-center gap-4">
+                <span>Veículo: <strong className="text-zinc-200">{activeRequest.vehicleInfo}</strong></span>
+              </div>
+
+              <button
+                onClick={() => {
+                  setChatRecipient(activeRequest.mechanicName);
+                  setIsChatOpen(true);
+                }}
+                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/30"
+              >
+                <MessageCircle size={16} />
+                <span>Abrir Chat & Detalhes</span>
+              </button>
             </div>
           </div>
         )}
@@ -220,6 +345,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         recipientName={chatRecipient}
         initialMessages={chatMessages}
         userRole="CLIENT"
+        initialStatus={activeRequest?.status || 'PENDING'}
+        onStatusChange={(newStatus) => {
+          setActiveRequest(prev => prev ? { ...prev, status: newStatus } : null);
+        }}
       />
     </>
   );

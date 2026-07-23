@@ -20,6 +20,7 @@ import { Coordinates, SearchResult, User } from '../types';
 import { findMechanics } from '../services/geminiService';
 import { VehicleType, ServiceType } from '../types';
 import { ResultCard } from './ResultCard';
+import { EtaWidget } from './EtaWidget';
 
 interface SosEmergencyScreenProps {
   user: User;
@@ -386,6 +387,12 @@ export const SosEmergencyScreen: React.FC<SosEmergencyScreenProps> = ({
                 {searchResult.text}
               </div>
             )}
+
+            {/* Dynamic ETA Widget for Emergency Dispatch */}
+            <EtaWidget 
+              status="EN_ROUTE"
+              userCoords={location}
+            />
 
             {/* Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
