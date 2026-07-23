@@ -130,7 +130,7 @@ export const SosEmergencyScreen: React.FC<SosEmergencyScreenProps> = ({
         location
       );
 
-      if (result && result.groundingChunks && result.groundingChunks.length > 0) {
+      if (result) {
         setSearchResult(result);
       } else {
         setErrorMsg('Não foi possível localizar unidades 24h imediatamente próximas. Recomendamos ligar para os serviços públicos abaixo.');

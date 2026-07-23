@@ -5,6 +5,7 @@ import { ChatInterface } from './ChatInterface';
 import { MapComponent } from './MapComponent';
 import { StatusIndicator } from './StatusIndicator';
 import { EtaWidget } from './EtaWidget';
+import { VerifiedBadge } from './VerifiedBadge';
 
 interface MechanicDashboardProps {
   user: User;
@@ -98,7 +99,10 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                  </span>
                )}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-1 truncate">{user.shopName}</h2>
+            <div className="flex items-center gap-2.5 flex-wrap mb-1">
+              <h2 className="text-2xl sm:text-3xl font-bold truncate">{user.shopName}</h2>
+              <VerifiedBadge rating={user.rating || 4.8} size="md" />
+            </div>
             <p className="text-slate-300 dark:text-zinc-400 text-xs sm:text-sm">Gerencie seus chamados e performance.</p>
           </div>
           

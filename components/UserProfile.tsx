@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { User as UserIcon, MapPin, Phone, Mail, Car, Store, Save, ArrowLeft, Building } from 'lucide-react';
+import { VerifiedBadge } from './VerifiedBadge';
 
 interface UserProfileProps {
   user: User;
@@ -45,7 +46,12 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onSave, onBack }
               {formData.role === 'MECHANIC' ? <Store size={32} className="sm:w-10 sm:h-10" /> : <UserIcon size={32} className="sm:w-10 sm:h-10" />}
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-1">{formData.name}</h2>
+              <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start mb-1">
+                <h2 className="text-2xl sm:text-3xl font-bold">{formData.name}</h2>
+                {formData.role === 'MECHANIC' && (
+                  <VerifiedBadge rating={formData.rating || 4.8} size="md" />
+                )}
+              </div>
               <p className="text-slate-300 dark:text-zinc-400 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base">
                 {formData.role === 'MECHANIC' ? 'Parceiro FIX' : 'Cliente FIX'}
                 <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider">

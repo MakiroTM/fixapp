@@ -7,10 +7,11 @@ import { ChatInterface } from './ChatInterface';
 import { StatusIndicator } from './StatusIndicator';
 import { EtaWidget } from './EtaWidget';
 import { PaymentSimulation } from './PaymentSimulation';
+import { ServiceRatingModal } from './ServiceRatingModal';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
 import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';
-import { AlertCircle, Compass, MapPin, MessageCircle, Clock, CheckCircle2, ChevronRight, X } from 'lucide-react';
+import { AlertCircle, Compass, MapPin, MessageCircle, Clock, CheckCircle2, ChevronRight, X, Filter, Layers, Sparkles, SlidersHorizontal, Star } from 'lucide-react';
 
 interface ClientDashboardProps {
   user: User;
@@ -47,9 +48,32 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const [chatRecipient, setChatRecipient] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
+  // Service Rating Modal State
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState<boolean>(false);
+  const [ratingMechanicName, setRatingMechanicName] = useState<string>('Mecânico Parceiro FIX');
+  const [ratingServiceType, setRatingServiceType] = useState<string>('Atendimento Automotivo');
+
+  // Category filter state for service list with layout transitions
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [isFilterAnimating, setIsFilterAnimating] = useState<boolean>(false);
+
+  // Trigger smooth layout transition when category or location filters change
+  const handleCategoryFilterChange = (filterKey: string) => {
+    if (categoryFilter === filterKey) return;
+    setIsFilterAnimating(true);
+    setCategoryFilter(filterKey);
+    setTimeout(() => {
+      setIsFilterAnimating(false);
+    }, 180);
+  };
+
   // Fetch nearby mechanics automatically once location is found
   useEffect(() => {
     if (location && !nearbyMechanics && !loadingNearby) {
+      console.log('[DEBUG ClientDashboard] Auto-fetching nearby mechanics with location:', {
+        lat: location.latitude,
+        lng: location.longitude
+      });
       setLoadingNearby(true);
       findMechanics(
         "Listar todas as oficinas mecânicas disponíveis na região",
@@ -58,9 +82,13 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         location
       )
       .then((result) => {
+        console.log('[DEBUG ClientDashboard] Auto-fetch nearby mechanics succeeded:', {
+          chunksCount: result.groundingChunks?.length || 0,
+          hasText: !!result.text
+        });
         setNearbyMechanics(result);
       })
-      .catch((e) => console.error("Auto fetch failed", e))
+      .catch((e) => console.error("[DEBUG ClientDashboard] Auto fetch failed:", e))
       .finally(() => setLoadingNearby(false));
     }
   }, [location]);
@@ -72,20 +100,53 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     carModel: string,
     problemCategory: string
   ) => {
+    console.log('[DEBUG ClientDashboard] handleSearch initiated', {
+      vehicle,
+      service,
+      query,
+      carModel,
+      problemCategory,
+      location: location ? `${location.latitude}, ${location.longitude}` : 'GPS unavailable',
+      timestamp: new Date().toISOString()
+    });
+
     setIsLoading(true);
     setError(null);
     setSearchResult(null);
+    setCategoryFilter('ALL');
     try {
       let effectiveQuery = query.trim();
       if (!effectiveQuery && problemCategory) {
         effectiveQuery = `Problema reportado: ${problemCategory}`;
       } else if (!effectiveQuery && !problemCategory) {
-         effectiveQuery = `Preciso de serviço de ${service}`;
+        effectiveQuery = `Preciso de serviço de ${service}`;
       }
+
+      console.log('[DEBUG ClientDashboard] Executing findMechanics with effective query:', effectiveQuery);
       
       const result = await findMechanics(effectiveQuery, vehicle, service, location, carModel, problemCategory);
+      
+      console.log('[DEBUG ClientDashboard] Search completed successfully', {
+        textSnippet: result.text ? result.text.substring(0, 100) + '...' : 'empty',
+        groundingChunksCount: result.groundingChunks?.length || 0,
+        mapTitles: result.groundingChunks?.map(c => c.maps?.title)
+      });
+
       setSearchResult(result);
-    } catch (err) {
+      
+      // Auto-scroll to search results section
+      setTimeout(() => {
+        const resultsElement = document.getElementById('search-results-section');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } catch (err: any) {
+      console.error("[DEBUG ClientDashboard Error] Exception caught during search:", {
+        message: err?.message,
+        stack: err?.stack,
+        errorObj: err
+      });
       setError("Ocorreu um erro ao buscar as informações. Tente novamente.");
     } finally {
       setIsLoading(false);
@@ -222,8 +283,30 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               status={activeRequest.status} 
               variant="full" 
               isEditable={true}
-              onStatusChange={(newStatus) => setActiveRequest(prev => prev ? { ...prev, status: newStatus } : null)}
+              onStatusChange={(newStatus) => {
+                setActiveRequest(prev => prev ? { ...prev, status: newStatus } : null);
+                if (newStatus === 'COMPLETED') {
+                  setRatingMechanicName(activeRequest.mechanicName);
+                  setRatingServiceType(activeRequest.serviceType);
+                  setIsRatingModalOpen(true);
+                }
+              }}
             />
+
+            {/* Rate Mechanic Button if service is completed */}
+            {activeRequest.status === 'COMPLETED' && (
+              <button
+                onClick={() => {
+                  setRatingMechanicName(activeRequest.mechanicName);
+                  setRatingServiceType(activeRequest.serviceType);
+                  setIsRatingModalOpen(true);
+                }}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 cursor-pointer transition-all animate-pulse"
+              >
+                <Star className="fill-white" size={18} />
+                Avaliar Atendimento de {activeRequest.mechanicName}
+              </button>
+            )}
 
             {/* Dynamic Estimated Time of Arrival (ETA) Display */}
             <EtaWidget 
@@ -291,53 +374,199 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
         {/* RESULTS SECTION: Shows either Manual Search OR Nearby Mechanics (Default) */}
         
-        {(searchResult || nearbyMechanics) && (
-          <div className="mt-8 sm:mt-12 animate-fade-in-up">
-            
-            {/* Header Title Switch */}
-            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 px-1 sm:px-2">
-               <div className={`h-6 sm:h-8 w-1 rounded-full ${searchResult ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
-               <h3 className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-zinc-100">
-                 {searchResult ? 'Recomendações da IA' : 'Oficinas em Destaque na Sua Região'}
-               </h3>
-               {!searchResult && loadingNearby && (
-                 <span className="text-[10px] sm:text-sm text-zinc-400 animate-pulse">Carregando locais...</span>
-               )}
-            </div>
-            
-            {/* Display Text Content (Tips) */}
-            <div className="bg-white dark:bg-zinc-800 p-5 sm:p-8 rounded-2xl shadow-lg shadow-zinc-200/50 dark:shadow-none border border-zinc-100 dark:border-zinc-700 mb-6 sm:mb-8 prose prose-sm sm:prose-base prose-zinc dark:prose-invert max-w-none prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-headings:text-zinc-800 dark:prose-headings:text-zinc-100 prose-strong:text-indigo-700 dark:prose-strong:text-indigo-400">
-               <ReactMarkdown>
-                 {(searchResult || nearbyMechanics)?.text || ''}
-               </ReactMarkdown>
-            </div>
+        {(() => {
+          const currentResult = searchResult || nearbyMechanics;
+          if (!currentResult) return null;
 
-            {/* Display Cards */}
-            {((searchResult || nearbyMechanics)?.groundingChunks?.length ?? 0) > 0 && (
-              <div className="space-y-4 sm:space-y-6">
-                <div className="flex items-center justify-between px-1 sm:px-2">
-                   <h4 className="text-[10px] sm:text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                     {searchResult ? 'Locais Encontrados' : 'Perto de Você'}
-                   </h4>
-                   <span className="text-[8px] sm:text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">Google Maps Platform</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {(searchResult || nearbyMechanics)?.groundingChunks.map((chunk, index) => (
-                     <ResultCard key={index} chunk={chunk} onContact={handleContact} />
-                  ))}
-                </div>
+          const rawChunks = currentResult.groundingChunks || [];
+
+          // Filter grounding chunks based on category filter
+          const filteredChunks = rawChunks.filter(chunk => {
+            if (categoryFilter === 'ALL') return true;
+            const title = (chunk.maps?.title || '').toLowerCase();
+            const snippet = (chunk.maps?.placeAnswerSources?.reviewSnippets?.[0]?.snippet || '').toLowerCase();
+            const text = `${title} ${snippet}`;
+
+            if (categoryFilter === 'GUINCHO') {
+              return text.includes('guincho') || text.includes('socorro') || text.includes('reboque') || text.includes('resgate');
+            }
+            if (categoryFilter === 'PNEU') {
+              return text.includes('pneu') || text.includes('borracharia') || text.includes('vulcaniza');
+            }
+            if (categoryFilter === 'ELETRICA') {
+              return text.includes('elétric') || text.includes('eletro') || text.includes('bateria') || text.includes('moura') || text.includes('heliar');
+            }
+            if (categoryFilter === 'PECAS') {
+              return text.includes('peça') || text.includes('autopeça') || text.includes('distribuidora');
+            }
+            if (categoryFilter === 'MECANICA') {
+              return text.includes('mecânic') || text.includes('oficina') || text.includes('centro automotivo') || text.includes('diagnóstico') || text.includes('freio') || text.includes('suspensão');
+            }
+            return true;
+          });
+
+          const filterOptions = [
+            { id: 'ALL', label: 'Todos os Locais', icon: '📍' },
+            { id: 'MECANICA', label: 'Mecânica Geral', icon: '🔧' },
+            { id: 'GUINCHO', label: 'Socorro / Guincho', icon: '🚨' },
+            { id: 'ELETRICA', label: 'Auto Elétrica', icon: '⚡' },
+            { id: 'PNEU', label: 'Borracharia', icon: '🛞' },
+            { id: 'PECAS', label: 'Auto Peças', icon: '📦' },
+          ];
+
+          return (
+            <div id="search-results-section" className="mt-8 sm:mt-12 animate-fade-in-up">
+              
+              {/* Header Title Switch */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6 px-1 sm:px-2">
+                 <div className="flex items-center gap-2 sm:gap-3">
+                   <div className={`h-6 sm:h-8 w-1.5 rounded-full ${searchResult ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
+                   <div>
+                     <h3 className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
+                       {searchResult ? 'Recomendações da IA' : 'Oficinas em Destaque na Sua Região'}
+                       {location && (
+                         <span className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40 inline-flex items-center gap-1">
+                           <MapPin size={12} className="text-emerald-500 animate-pulse" /> GPS Ativo
+                         </span>
+                       )}
+                     </h3>
+                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                       {location ? 'Resultados ordenados por proximidade e dados geográficos em tempo real' : 'Listagem de prestadores credenciados'}
+                     </p>
+                   </div>
+                 </div>
+
+                 {!searchResult && loadingNearby && (
+                   <span className="text-[10px] sm:text-sm text-zinc-400 animate-pulse flex items-center gap-1.5">
+                     <Clock size={14} className="animate-spin" /> Atualizando localização...
+                   </span>
+                 )}
               </div>
-            )}
-            
-            {/* Empty State */}
-            {((searchResult || nearbyMechanics)?.groundingChunks?.length ?? 0) === 0 && !loadingNearby && (
-              <p className="text-zinc-500 dark:text-zinc-400 text-center italic mt-4 bg-zinc-100 dark:bg-zinc-800 p-4 rounded-lg text-xs sm:text-sm">
-                Nenhum local específico foi retornado pelo mapa, mas verifique as sugestões no texto acima.
-              </p>
-            )}
-          </div>
-        )}
+              
+              {/* Interactive Category Filter Toolbar with layout animations */}
+              {rawChunks.length > 0 && (
+                <div className="mb-6 p-2 sm:p-3 bg-zinc-100/80 dark:bg-zinc-850/80 backdrop-blur-md rounded-2xl border border-zinc-200/80 dark:border-zinc-700/60 shadow-inner">
+                  <div className="flex items-center justify-between mb-2 px-1">
+                    <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300 flex items-center gap-1.5 uppercase tracking-wider">
+                      <SlidersHorizontal size={14} className="text-indigo-500" />
+                      Filtrar Serviços por Categoria
+                    </span>
+                    <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded-full border border-zinc-200 dark:border-zinc-700">
+                      {filteredChunks.length} de {rawChunks.length} exibidos
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none pt-0.5">
+                    {filterOptions.map((opt) => {
+                      const isActive = categoryFilter === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          onClick={() => handleCategoryFilterChange(opt.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer select-none ${
+                            isActive
+                              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-105 ring-2 ring-indigo-400/50'
+                              : 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-750 border border-zinc-200/60 dark:border-zinc-700/60 hover:scale-[1.02]'
+                          }`}
+                        >
+                          <span>{opt.icon}</span>
+                          <span>{opt.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Display Text Content (Tips) */}
+              <div className="bg-white dark:bg-zinc-800 p-5 sm:p-8 rounded-2xl shadow-lg shadow-zinc-200/50 dark:shadow-none border border-zinc-100 dark:border-zinc-700 mb-6 sm:mb-8 prose prose-sm sm:prose-base prose-zinc dark:prose-invert max-w-none prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-headings:text-zinc-800 dark:prose-headings:text-zinc-100 prose-strong:text-indigo-700 dark:prose-strong:text-indigo-400">
+                 <ReactMarkdown>
+                   {currentResult.text || ''}
+                 </ReactMarkdown>
+              </div>
+
+              {/* Display Animated Grid Cards */}
+              {rawChunks.length > 0 && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex items-center justify-between px-1 sm:px-2">
+                     <h4 className="text-[10px] sm:text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                       <span>{searchResult ? 'Locais Encontrados' : 'Perto de Você'}</span>
+                       {categoryFilter !== 'ALL' && (
+                         <span className="normal-case text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md text-xs font-semibold border border-indigo-200 dark:border-indigo-800/40">
+                           Filtro ativo
+                         </span>
+                       )}
+                     </h4>
+                     <span className="text-[8px] sm:text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">Google Maps Platform</span>
+                  </div>
+
+                  {filteredChunks.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      {filteredChunks.map((chunk, index) => (
+                         <div
+                           key={`${categoryFilter}-${chunk.maps?.title || index}`}
+                           className={`transition-all duration-300 ease-out transform ${
+                             isFilterAnimating 
+                               ? 'opacity-0 translate-y-3 scale-95' 
+                               : 'animate-fade-in-up opacity-100 translate-y-0 scale-100'
+                           }`}
+                           style={{ 
+                             animationDelay: `${index * 60}ms`,
+                             animationFillMode: 'backwards' 
+                           }}
+                         >
+                           <ResultCard chunk={chunk} onContact={handleContact} />
+                         </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-zinc-50 dark:bg-zinc-850 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 animate-fade-in">
+                      <p className="text-zinc-600 dark:text-zinc-300 font-semibold text-sm mb-2">
+                        Nenhum estabelecimento encontrado nesta categoria específica.
+                      </p>
+                      <button
+                        onClick={() => handleCategoryFilterChange('ALL')}
+                        className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <X size={14} /> Limpar filtro de categoria
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Empty State */}
+              {rawChunks.length === 0 && !loadingNearby && (
+                <p className="text-zinc-500 dark:text-zinc-400 text-center italic mt-4 bg-zinc-100 dark:bg-zinc-800 p-4 rounded-lg text-xs sm:text-sm animate-fade-in">
+                  Nenhum local específico foi retornado pelo mapa, mas verifique as sugestões no texto acima.
+                </p>
+              )}
+            </div>
+          );
+        })()}
       </main>
+
+      <ServiceRatingModal
+        isOpen={isRatingModalOpen}
+        onClose={() => setIsRatingModalOpen(false)}
+        mechanicName={ratingMechanicName}
+        serviceType={ratingServiceType}
+        onSubmitRating={(rating, comment, tags) => {
+          // Add review summary message into chat history if active
+          if (activeRequest) {
+            setChatMessages(prev => [
+              ...prev,
+              {
+                id: Date.now().toString(),
+                text: `⭐ **Avaliação Enviada!**\nNota: **${rating}/5 estrelas**` + (tags.length ? `\n\n🏷️ ${tags.join(' • ')}` : '') + (comment ? `\n\n💬 *"${comment}"*` : ''),
+                sender: 'me',
+                timestamp: new Date()
+              }
+            ]);
+          }
+          setIsRatingModalOpen(false);
+        }}
+      />
 
       <ChatInterface 
         isOpen={isChatOpen}
@@ -348,6 +577,11 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         initialStatus={activeRequest?.status || 'PENDING'}
         onStatusChange={(newStatus) => {
           setActiveRequest(prev => prev ? { ...prev, status: newStatus } : null);
+          if (newStatus === 'COMPLETED') {
+            setRatingMechanicName(activeRequest?.mechanicName || 'Mecânico Parceiro FIX');
+            setRatingServiceType(activeRequest?.serviceType || 'Atendimento Automotivo');
+            setIsRatingModalOpen(true);
+          }
         }}
       />
     </>

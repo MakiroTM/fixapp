@@ -60,6 +60,7 @@ const App: React.FC = () => {
   // Geolocation Logic
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.geolocation) {
+      console.log('[DEBUG Geolocation] Requesting current position via navigator.geolocation...');
       setIsDetectingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -67,12 +68,16 @@ const App: React.FC = () => {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           };
+          console.log('[DEBUG Geolocation] Position acquired successfully:', coords);
           setLocation(coords);
           setLocationError(null);
           setIsDetectingLocation(false);
         },
         (err: any) => {
-          console.error("Geolocation error:", err);
+          console.error("[DEBUG Geolocation Error]", {
+            code: err.code,
+            message: err.message
+          });
           let msg = "Erro de localização.";
           if (err.code === 1) msg = "Permissão negada.";
           else if (err.code === 2) msg = "Sinal indisponível.";
@@ -83,6 +88,7 @@ const App: React.FC = () => {
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
+      console.warn('[DEBUG Geolocation] Geolocation API is not supported in this environment.');
       setLocationError("Não suportado.");
     }
   }, []);

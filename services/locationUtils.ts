@@ -15,7 +15,13 @@ export function calculateDistanceKm(coord1: Coordinates, coord2: Coordinates): n
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
-  return Math.max(0.3, Math.round(distance * 10) / 10);
+  const rounded = Math.max(0.3, Math.round(distance * 10) / 10);
+  console.log('[DEBUG LocationUtils] calculateDistanceKm:', {
+    from: `${coord1.latitude}, ${coord1.longitude}`,
+    to: `${coord2.latitude}, ${coord2.longitude}`,
+    distanceKm: rounded
+  });
+  return rounded;
 }
 
 /**

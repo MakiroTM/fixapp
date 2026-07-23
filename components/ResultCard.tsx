@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, MessageCircle, Star, Send } from 'lucide-react';
 import { GroundingChunk } from '../types';
+import { VerifiedBadge } from './VerifiedBadge';
 
 interface ResultCardProps {
   chunk: GroundingChunk;
@@ -68,9 +69,12 @@ export const ResultCard: React.FC<ResultCardProps> = ({ chunk, onContact }) => {
             <MapPin size={18} className="sm:w-5 sm:h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-zinc-800 dark:text-zinc-100 text-base sm:text-lg group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors leading-tight">{title}</h3>
-            <div className="flex items-center gap-2 mt-0.5 sm:mt-1">
-              <p className="text-[10px] sm:text-xs text-zinc-500 dark:text-zinc-400">Local verificado</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-bold text-zinc-800 dark:text-zinc-100 text-base sm:text-lg group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors leading-tight">{title}</h3>
+              <VerifiedBadge rating={ratingInfo ? ratingInfo.average : 4.8} size="sm" />
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-[10px] sm:text-xs text-zinc-500 dark:text-zinc-400">Estabelecimento credenciado</p>
               {ratingInfo && (
                 <>
                   <span className="text-zinc-300 dark:text-zinc-600 text-[10px]">•</span>

@@ -5,6 +5,8 @@ import { ChatMessage, ServiceStatus } from '../types';
 import { MapComponent } from './MapComponent';
 import { StatusIndicator, STATUS_CONFIG } from './StatusIndicator';
 import { EtaWidget } from './EtaWidget';
+import { VerifiedBadge } from './VerifiedBadge';
+import { ServiceRatingModal } from './ServiceRatingModal';
 
 interface ChatInterfaceProps {
   recipientName: string;
@@ -49,6 +51,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setStatus(newStatus);
     if (onStatusChange) {
       onStatusChange(newStatus);
+    }
+
+    if (newStatus === 'COMPLETED' && userRole === 'CLIENT') {
+      setShowRating(true);
     }
 
     const conf = STATUS_CONFIG[newStatus];
@@ -154,8 +160,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {recipientName.charAt(0)}
             </div>
             <div>
-              <h3 className="font-bold text-sm">{recipientName}</h3>
-              <p className="text-xs text-indigo-200 flex items-center gap-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h3 className="font-bold text-sm">{recipientName}</h3>
+                {userRole === 'CLIENT' && <VerifiedBadge size="sm" rating={4.8} />}
+              </div>
+              <p className="text-xs text-indigo-200 flex items-center gap-1 mt-0.5">
                 <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
                 Online agora
               </p>
@@ -241,61 +250,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           })}
           <div ref={messagesEndRef} />
 
-          {/* Rating Overlay */}
-          {showRating && (
-            <div className="absolute inset-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-fade-in rounded-b-2xl">
-               <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-2">Avaliar Serviço</h3>
-               <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6 text-center">Como foi o atendimento de {recipientName}?</p>
-               
-               <div className="flex gap-2 mb-8">
-                 {[1, 2, 3, 4, 5].map((star) => (
-                   <button 
-                     key={star}
-                     type="button"
-                     onMouseEnter={() => setHoverStars(star)}
-                     onMouseLeave={() => setHoverStars(0)}
-                     onClick={() => setSelectedStars(star)}
-                     className="p-1 transition-transform hover:scale-110"
-                   >
-                     <Star 
-                       size={40} 
-                       className={`${(hoverStars || selectedStars) >= star ? 'fill-amber-400 text-amber-400' : 'text-zinc-300 dark:text-zinc-600'} transition-colors`} 
-                     />
-                   </button>
-                 ))}
-               </div>
-
-               <div className="flex gap-3 w-full max-w-xs">
-                 <button 
-                   onClick={() => { setShowRating(false); setSelectedStars(0); }}
-                   className="flex-1 py-2.5 rounded-xl font-bold text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                 >
-                   Cancelar
-                 </button>
-                 <button 
-                   onClick={() => {
-                     if (selectedStars > 0) {
-                        const currentRatings = JSON.parse(localStorage.getItem('mechanicRatings') || '{}');
-                        const mechanicCurrent = currentRatings[recipientName] || { total: 0, count: 0 };
-                        mechanicCurrent.total += selectedStars;
-                        mechanicCurrent.count += 1;
-                        currentRatings[recipientName] = mechanicCurrent;
-                        localStorage.setItem('mechanicRatings', JSON.stringify(currentRatings));
-                        window.dispatchEvent(new Event('ratingsUpdated'));
-                        setShowRating(false);
-                        setSelectedStars(0);
-                        handleSend(undefined, `Serviço concluído. Avaliei com ${selectedStars} estrela(s). Obrigado!`);
-                     }
-                   }}
-                   disabled={selectedStars === 0}
-                   className="flex-1 py-2.5 rounded-xl font-bold text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                 >
-                   Avaliar
-                 </button>
-               </div>
-            </div>
-          )}
-
           {/* Map Overlay inside Chat */}
           {selectedLocation && (
             <div className="absolute inset-0 z-20 p-2 animate-fade-in">
@@ -343,6 +297,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </button>
         </form>
       </div>
+
+      {/* Service Rating Modal */}
+      <ServiceRatingModal
+        isOpen={showRating}
+        onClose={() => setShowRating(false)}
+        mechanicName={recipientName}
+        serviceType="Atendimento via Chat FIX"
+        onSubmitRating={(rating, comment, tags) => {
+          let msgText = `✅ **Serviço Concluído & Avaliado!**\n\n★ Avaliação: **${rating}/5 estrelas**`;
+          if (tags && tags.length > 0) {
+            msgText += `\n\n🏷️ Destaques: ${tags.join(' • ')}`;
+          }
+          if (comment && comment.trim()) {
+            msgText += `\n\n💬 *"${comment.trim()}"*`;
+          }
+          handleSend(undefined, msgText);
+          setShowRating(false);
+        }}
+      />
     </div>
   );
 };

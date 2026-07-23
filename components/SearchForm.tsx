@@ -53,20 +53,38 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const effectiveService = activeTab === 'parts' ? ServiceType.PARTS : service;
+    console.log('[DEBUG SearchForm] Submitting search parameters', {
+      activeTab,
+      vehicle,
+      effectiveService,
+      query,
+      carModel,
+      problemCategory
+    });
     onSearch(vehicle, effectiveService, query, carModel, problemCategory);
   };
 
   const handleChipSelect = (text: string) => {
+    console.log('[DEBUG SearchForm] Selected chip/problem option:', text);
     if (activeTab === 'parts') {
        // For parts, we populate the query directly
        setQuery(text);
     } else {
        // For services, we set the problem category
        const isDeselecting = text === problemCategory;
-       setProblemCategory(isDeselecting ? '' : text);
+       const nextProblem = isDeselecting ? '' : text;
+       setProblemCategory(nextProblem);
        
+       // Automatically sync service type based on problem category selected
+       if (!isDeselecting) {
+         if (text.includes("Pneu")) setService(ServiceType.TIRE);
+         else if (text.includes("Bateria") || text.includes("Elétrica")) setService(ServiceType.ELECTRICAL);
+         else if (text.includes("Pane") || text.includes("Acidente")) setService(ServiceType.EMERGENCY);
+         else setService(ServiceType.MAINTENANCE);
+       }
+
        // Se estiver selecionando e o campo de texto estiver vazio, preenchemos ele também
-       if (!isDeselecting && !query) {
+       if (!isDeselecting && (!query || query === problemCategory)) {
          setQuery(text);
        }
     }
