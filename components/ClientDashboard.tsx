@@ -12,6 +12,8 @@ import { ServiceSkeleton } from './ServiceSkeleton';
 import { RouteModal } from './RouteModal';
 import { QuickChatCard } from './QuickChatCard';
 import { MapView } from './MapView';
+import { SearchResultsView } from './SearchResultsView';
+import { ConfirmationModal } from './ConfirmationModal';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
 import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';
@@ -46,6 +48,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
   // Active Service Request State
   const [activeRequest, setActiveRequest] = useState<ActiveServiceRequest | null>(null);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   // Chat State
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -207,6 +210,56 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
     setIsChatOpen(true);
   };
+
+  // If user performed a search, display the new separate results page
+  if (searchResult) {
+    return (
+      <>
+        <SearchResultsView 
+          result={searchResult}
+          userLocation={location}
+          onBack={() => setSearchResult(null)}
+          onContact={handleContact}
+        />
+        <ChatInterface 
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          recipientName={chatRecipient}
+          initialMessages={chatMessages}
+          userRole="CLIENT"
+          initialStatus={activeRequest?.status || 'PENDING'}
+          onStatusChange={(newStatus) => {
+            setActiveRequest(prev => prev ? { ...prev, status: newStatus } : null);
+            if (newStatus === 'COMPLETED') {
+              setRatingMechanicName(activeRequest?.mechanicName || 'Mecânico Parceiro FIX');
+              setRatingServiceType(activeRequest?.serviceType || 'Atendimento Automotivo');
+              setIsRatingModalOpen(true);
+            }
+          }}
+        />
+        <ServiceRatingModal
+          isOpen={isRatingModalOpen}
+          onClose={() => setIsRatingModalOpen(false)}
+          mechanicName={ratingMechanicName}
+          serviceType={ratingServiceType}
+          onSubmitRating={(rating, comment, tags) => {
+            if (activeRequest) {
+              setChatMessages(prev => [
+                ...prev,
+                {
+                  id: Date.now().toString(),
+                  text: `⭐ **Avaliação Enviada!**\nNota: **${rating}/5 estrelas**` + (tags.length ? `\n\n🏷️ ${tags.join(' • ')}` : '') + (comment ? `\n\n💬 *"${comment}"*` : ''),
+                  sender: 'me',
+                  timestamp: new Date()
+                }
+              ]);
+            }
+            setIsRatingModalOpen(false);
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -379,6 +432,17 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
+                {activeRequest.status !== 'COMPLETED' && activeRequest.status !== 'CANCELLED' && (
+                  <button
+                    type="button"
+                    onClick={() => setIsCancelModalOpen(true)}
+                    className="flex-1 sm:flex-initial bg-rose-900/40 hover:bg-rose-900/60 text-rose-300 border border-rose-500/30 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  >
+                    <X size={16} />
+                    <span>Cancelar</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={() => setIsActiveRouteOpen(true)}
@@ -663,6 +727,20 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             setIsRatingModalOpen(true);
           }
         }}
+      />
+
+      <ConfirmationModal
+        isOpen={isCancelModalOpen}
+        title="Cancelar Pedido de Socorro"
+        message="Tem certeza que deseja cancelar este pedido? O profissional pode já estar a caminho."
+        confirmText="Sim, Cancelar Pedido"
+        cancelText="Não, Voltar"
+        isDestructive={true}
+        onConfirm={() => {
+          setActiveRequest(prev => prev ? { ...prev, status: 'CANCELLED' } : null);
+          setIsCancelModalOpen(false);
+        }}
+        onCancel={() => setIsCancelModalOpen(false)}
       />
     </>
   );

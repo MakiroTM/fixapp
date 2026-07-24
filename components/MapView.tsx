@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Coordinates, TechnicalCall } from '../types';
 import { MapPin, Navigation, Clock, Activity, X, LocateFixed, Layers, Plus, Minus, User, Map, Image as ImageIcon, CheckCircle, Edit, Play } from 'lucide-react';
+import { ConfirmationModal } from './ConfirmationModal';
 
 // Fix for default marker icons in Leaflet with Webpack/Vite
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -85,7 +86,7 @@ const RecenterAutomatically = ({ lat, lng, trigger }: { lat: number; lng: number
   return null;
 };
 
-export const MapView: React.FC<MapViewProps> = ({ userLocation, initialCalls = [] }) => {
+export const MapView: React.FC<MapViewProps> = ({ userLocation, initialCalls }) => {
   // Default to somewhere in SP if no location
   const centerLat = userLocation?.latitude || -23.5505;
   const centerLng = userLocation?.longitude || -46.6333;
@@ -100,6 +101,7 @@ export const MapView: React.FC<MapViewProps> = ({ userLocation, initialCalls = [
   const [selectionMode, setSelectionMode] = useState<'origin' | 'destination' | null>(null);
   const [calls, setCalls] = useState<TechnicalCall[]>(initialCalls || []);
   const [recenterTrigger, setRecenterTrigger] = useState(0);
+  const [callToComplete, setCallToComplete] = useState<string | null>(null);
 
   const activeOrigin = manualOrigin || userLocation;
 
@@ -114,7 +116,8 @@ export const MapView: React.FC<MapViewProps> = ({ userLocation, initialCalls = [
     } else {
       setCalls(initialCalls);
     }
-  }, [initialCalls, centerLat, centerLng]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCalls]);
 
   const fetchRoute = async (start: Coordinates, end: Coordinates) => {
     setIsRouting(true);
@@ -383,7 +386,7 @@ export const MapView: React.FC<MapViewProps> = ({ userLocation, initialCalls = [
                       
                       {call.status !== 'COMPLETED' && (
                         <button 
-                          onClick={() => handleUpdateCallStatus(call.id, 'COMPLETED')}
+                          onClick={() => setCallToComplete(call.id)}
                           className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-1.5"
                         >
                           <CheckCircle size={14} /> Concluir chamado
@@ -470,6 +473,20 @@ export const MapView: React.FC<MapViewProps> = ({ userLocation, initialCalls = [
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={!!callToComplete}
+        title="Concluir Chamado"
+        message="Tem certeza que deseja marcar este chamado como concluído? Esta ação não pode ser desfeita."
+        confirmText="Sim, concluir"
+        onConfirm={() => {
+          if (callToComplete) {
+            handleUpdateCallStatus(callToComplete, 'COMPLETED');
+            setCallToComplete(null);
+          }
+        }}
+        onCancel={() => setCallToComplete(null)}
+      />
     </div>
   );
 };
