@@ -59,45 +59,49 @@ const App: React.FC = () => {
 
   // Geolocation Logic
   useEffect(() => {
+    let watchId: number | null = null;
     const requestLocation = async () => {
       if (typeof window !== 'undefined') {
         try {
           setIsDetectingLocation(true);
           
           // First, check permission natively if using Capacitor
-          const { Geolocation } = await import('@capacitor/geolocation');
+          const { Geolocation } = await import('@capacitor/geolocation').catch(() => ({ Geolocation: null }));
           
-          try {
-            const permStatus = await Geolocation.checkPermissions();
-            if (permStatus.location !== 'granted' && permStatus.location !== 'prompt') {
-               const reqStatus = await Geolocation.requestPermissions();
-               if (reqStatus.location !== 'granted') {
-                 setLocationError("Permissão de localização negada pelo usuário.");
-                 setIsDetectingLocation(false);
-                 return;
-               }
-            } else if (permStatus.location === 'prompt') {
-               const reqStatus = await Geolocation.requestPermissions();
-               if (reqStatus.location !== 'granted') {
-                 setLocationError("Permissão de localização negada pelo usuário.");
-                 setIsDetectingLocation(false);
-                 return;
-               }
+          if (Geolocation) {
+            try {
+              const permStatus = await Geolocation.checkPermissions();
+              if (permStatus.location !== 'granted' && permStatus.location !== 'prompt') {
+                 const reqStatus = await Geolocation.requestPermissions();
+                 if (reqStatus.location !== 'granted') {
+                   setLocationError("Permissão de localização negada pelo usuário.");
+                   setIsDetectingLocation(false);
+                   return;
+                 }
+              } else if (permStatus.location === 'prompt') {
+                 const reqStatus = await Geolocation.requestPermissions();
+                 if (reqStatus.location !== 'granted') {
+                   setLocationError("Permissão de localização negada pelo usuário.");
+                   setIsDetectingLocation(false);
+                   return;
+                 }
+              }
+            } catch (capacitorError) {
+               console.log('[DEBUG Geolocation] Not running in capacitor natively, fallback to web geolocation.', capacitorError);
             }
-          } catch (capacitorError) {
-             console.log('[DEBUG Geolocation] Not running in capacitor natively, fallback to web geolocation.', capacitorError);
           }
 
           if (navigator.geolocation) {
-            console.log('[DEBUG Geolocation] Requesting current position via navigator.geolocation...');
+            console.log('[DEBUG Geolocation] Requesting continuous position via navigator.geolocation.watchPosition...');
             
-            navigator.geolocation.getCurrentPosition(
+            watchId = navigator.geolocation.watchPosition(
               (position) => {
                 const coords = {
                   latitude: position.coords.latitude,
                   longitude: position.coords.longitude,
+                  accuracy: position.coords.accuracy,
                 };
-                console.log('[DEBUG Geolocation] Position acquired successfully:', coords);
+                console.log('[DEBUG Geolocation] Position updated:', coords);
                 setLocation(coords);
                 setLocationError(null);
                 setIsDetectingLocation(false);
@@ -135,6 +139,12 @@ const App: React.FC = () => {
     };
 
     requestLocation();
+    
+    return () => {
+      if (watchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
   }, []);
 
   const toggleTheme = () => {

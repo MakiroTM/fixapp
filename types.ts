@@ -88,6 +88,7 @@ export interface User {
 export interface Coordinates {
   latitude: number;
   longitude: number;
+  accuracy?: number;
 }
 
 export interface MapSource {
@@ -109,6 +110,17 @@ export interface GroundingChunk {
       }[];
     };
   };
+}
+
+export interface TechnicalCall {
+  id: string;
+  clientName: string;
+  address: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  technicianName?: string;
+  photoUrls?: string[];
+  createdAt: Date;
+  coords: Coordinates;
 }
 
 export interface SearchResult {

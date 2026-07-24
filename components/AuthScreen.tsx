@@ -1,153 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { 
-  Wrench, 
   Car, 
-  Store, 
-  ArrowRight, 
-  Check, 
-  Lock, 
+  Wrench, 
   Mail, 
-  ShieldCheck, 
-  Sparkles, 
-  UserPlus, 
-  LogIn, 
-  ArrowLeft, 
-  Clock, 
-  CheckCircle2, 
-  HelpCircle,
   KeyRound,
   Eye,
   EyeOff,
-  Fingerprint,
-  Scan,
-  Smartphone,
-  X,
-  AlertCircle
+  UserPlus, 
+  LogIn
 } from 'lucide-react';
-import { 
-  checkBiometricAvailability, 
-  authenticateWithBiometrics, 
-  saveBiometricCredentials, 
-  getBiometricSavedCredentials 
-} from '../services/biometricService';
 
 interface AuthScreenProps {
   onLogin: (user: User) => void;
 }
 
-type AuthMode = 'WELCOME' | 'LOGIN' | 'REGISTER';
-
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
-  const [authMode, setAuthMode] = useState<AuthMode>('WELCOME');
+  const [authMode, setAuthMode] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
   const [selectedRole, setSelectedRole] = useState<UserRole>('CLIENT');
   
   // Form States
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [shopName, setShopName] = useState(''); // Only for mechanic
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
-  const [enableBiometrics, setEnableBiometrics] = useState<boolean>(true);
+  const [shopName, setShopName] = useState(''); 
   const [showPassword, setShowPassword] = useState<boolean>(false);
   
-  // Biometric States
-  const [hasBiometrics, setHasBiometrics] = useState<boolean>(false);
-  const [biometryTypeName, setBiometryTypeName] = useState<string>('FaceID / Impressão Digital');
-  const [showBiometricModal, setShowBiometricModal] = useState<boolean>(false);
-  const [biometricStatus, setBiometricStatus] = useState<'IDLE' | 'SCANNING' | 'SUCCESS' | 'ERROR'>('IDLE');
-  const [biometricErrorMessage, setBiometricErrorMessage] = useState<string>('');
-
-  // Forgot Password Modal state
-  const [showForgotModal, setShowForgotModal] = useState<boolean>(false);
-  const [forgotEmail, setForgotEmail] = useState<string>('');
-  const [forgotSent, setForgotSent] = useState<boolean>(false);
-
-  // Load saved 'Remember Me' preferences & Check Biometric availability on mount
-  useEffect(() => {
-    const initBiometricsAndPrefs = async () => {
-      if (typeof window !== 'undefined') {
-        // Check Biometrics Availability
-        const avail = await checkBiometricAvailability();
-        setHasBiometrics(avail.available);
-        if (avail.biometryType) {
-          setBiometryTypeName(avail.biometryType);
-        }
-
-        // Load saved email / remember me
-        const savedEmail = localStorage.getItem('fix_saved_email');
-        const savedRemember = localStorage.getItem('fix_remember_me') === 'true';
-        const bioEnabled = localStorage.getItem('fix_biometric_enabled') !== 'false';
-
-        setEnableBiometrics(bioEnabled);
-
-        if (savedRemember && savedEmail) {
-          setEmail(savedEmail);
-          setRememberMe(true);
-        }
-      }
-    };
-
-    initBiometricsAndPrefs();
-  }, []);
-
-  // Handle Biometric Login trigger
-  const handleBiometricLogin = async () => {
-    setShowBiometricModal(true);
-    setBiometricStatus('SCANNING');
-    setBiometricErrorMessage('');
-
-    try {
-      const success = await authenticateWithBiometrics(
-        'Acesso por Biometria',
-        'Verifique sua identidade para acessar sua conta FIX'
-      );
-
-      if (success) {
-        setBiometricStatus('SUCCESS');
-        
-        // Retrieve or generate saved user
-        const savedCreds = await getBiometricSavedCredentials();
-        const userEmail = savedCreds?.email || email || 'usuario.biometria@fixapp.com';
-
-        setTimeout(() => {
-          setShowBiometricModal(false);
-          const bioUser: User = {
-            id: 'bio-' + Math.random().toString(36).substr(2, 9),
-            name: userEmail ? userEmail.split('@')[0] : (selectedRole === 'CLIENT' ? 'Motorista Verificado' : 'Mecânico Credenciado'),
-            email: userEmail,
-            role: selectedRole,
-            plan: 'FREE',
-            shopName: selectedRole === 'MECHANIC' ? 'Oficina Mecânica FIX' : undefined,
-            rating: 5.0
-          };
-          onLogin(bioUser);
-        }, 800);
-      } else {
-        setBiometricStatus('ERROR');
-        setBiometricErrorMessage('Falha no reconhecimento biométrico. Tente novamente ou use sua senha.');
-      }
-    } catch (err: any) {
-      setBiometricStatus('ERROR');
-      setBiometricErrorMessage(err?.message || 'Biometria não reconhecida.');
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Handle 'Lembrar senha' and biometric persistence
-    if (typeof window !== 'undefined') {
-      if (rememberMe) {
-        saveBiometricCredentials(email, password || '123456');
-        localStorage.setItem('fix_biometric_enabled', enableBiometrics ? 'true' : 'false');
-      } else {
-        localStorage.removeItem('fix_saved_email');
-        localStorage.setItem('fix_remember_me', 'false');
-      }
-    }
-
-    // Simulating authentication
     const mockUser: User = {
       id: Math.random().toString(36).substr(2, 9),
       name: name || (email ? email.split('@')[0] : (selectedRole === 'CLIENT' ? 'Motorista FIX' : 'Mecânico Socorrista')),
@@ -160,674 +41,174 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     onLogin(mockUser);
   };
 
-  const handleSendForgotPassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!forgotEmail) return;
-    setForgotSent(true);
-    setTimeout(() => {
-      setShowForgotModal(false);
-      setForgotSent(false);
-      setForgotEmail('');
-    }, 2500);
-  };
-
-  const handleGoogleLogin = () => {
-    const googleUser: User = {
-      id: 'google-' + Math.random().toString(36).substr(2, 9),
-      name: selectedRole === 'CLIENT' ? 'Usuário Google' : 'Mecânico Google Credenciado',
-      email: 'usuario.google@gmail.com',
-      role: selectedRole,
-      plan: 'FREE',
-      shopName: selectedRole === 'MECHANIC' ? 'Oficina Parceira Google' : undefined,
-      rating: 5.0
-    };
-    onLogin(googleUser);
-  };
-
-  const GoogleIcon = () => (
-    <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-      />
-    </svg>
-  );
-
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-3 sm:p-6 transition-colors duration-300">
-      <div className="w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl shadow-indigo-500/10 dark:shadow-none overflow-hidden border border-zinc-200 dark:border-zinc-800 flex flex-col md:flex-row transition-all duration-300">
+    <div className="min-h-[calc(100vh-64px)] bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4 transition-colors duration-300">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-xl shadow-indigo-500/5 dark:shadow-none border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-300">
         
-        {/* Left Side - Visual Hero & Profile Selector */}
-        <div className={`md:w-1/2 p-6 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden transition-all duration-500 ${
-          selectedRole === 'CLIENT' 
-            ? 'bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900' 
-            : 'bg-gradient-to-br from-zinc-800 via-slate-900 to-zinc-950'
-        }`}>
-           <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
-           <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500 opacity-20 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none"></div>
-           
-           <div className="relative z-10 space-y-4 sm:space-y-6">
-             <div className="flex items-center gap-3">
-               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
-                 <Wrench size={22} className="text-white" />
-               </div>
-               <div>
-                 <span className="text-[11px] font-black tracking-widest text-indigo-200 uppercase">FIX Auto & Socorro</span>
-                 <h1 className="text-lg font-black text-white leading-none">Assistência 24h</h1>
-               </div>
-             </div>
+        {/* Role Tabs */}
+        <div className="flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
+          <button 
+            type="button"
+            onClick={() => setSelectedRole('CLIENT')}
+            className={`flex-1 py-4 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+              selectedRole === 'CLIENT' 
+                ? 'bg-white dark:bg-zinc-900 text-indigo-600 border-b-2 border-indigo-600' 
+                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 border-b-2 border-transparent'
+            }`}
+          >
+            <Car size={18} />
+            Sou Motorista
+          </button>
 
-             <div>
-               <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 leading-tight tracking-tight">
-                 {selectedRole === 'CLIENT' ? 'Problemas na estrada ou manutenção?' : 'Sua oficina na palma da mão.'}
-               </h2>
-               <p className="text-white/80 text-xs sm:text-sm leading-relaxed">
-                 {selectedRole === 'CLIENT' 
-                   ? 'Conecte-se com guinchos, borracharias e mecânicos credenciados em tempo real com rastreamento GPS.' 
-                   : 'Atenda chamados de emergência, receba pagamentos instantâneos via Pix e conquiste novos clientes.'}
-               </p>
-             </div>
-
-             {/* Highlight badges */}
-             <div className="space-y-2 pt-2">
-               <div className="flex items-center gap-2 text-xs font-semibold text-white/90">
-                 <CheckCircle2 size={16} className="text-emerald-400" />
-                 <span>Atendimento ágil com ETA dinâmico em tempo real</span>
-               </div>
-               <div className="flex items-center gap-2 text-xs font-semibold text-white/90">
-                 <ShieldCheck size={16} className="text-emerald-400" />
-                 <span>Profissionais avaliados e pagamentos seguros</span>
-               </div>
-             </div>
-           </div>
-
-           {/* Profile Role Selector */}
-           <div className="relative z-10 mt-8 pt-6 border-t border-white/10">
-             <p className="text-[10px] sm:text-xs uppercase tracking-widest font-black text-white/70 mb-3">
-               Como você deseja usar o FIX?
-             </p>
-             <div className="grid grid-cols-2 gap-3">
-               <button 
-                 type="button"
-                 onClick={() => setSelectedRole('CLIENT')}
-                 className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
-                   selectedRole === 'CLIENT' 
-                     ? 'bg-white text-indigo-900 border-white shadow-xl scale-[1.02]' 
-                     : 'border-white/20 text-white hover:bg-white/10'
-                 }`}
-               >
-                 <Car size={20} className={selectedRole === 'CLIENT' ? 'text-indigo-600' : 'text-white'} />
-                 <div className="mt-2">
-                   <span className="block font-black text-xs sm:text-sm">Motorista</span>
-                   <span className="text-[10px] opacity-75">Quero socorro & serviços</span>
-                 </div>
-               </button>
-
-               <button 
-                 type="button"
-                 onClick={() => setSelectedRole('MECHANIC')}
-                 className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
-                   selectedRole === 'MECHANIC' 
-                     ? 'bg-white text-zinc-900 border-white shadow-xl scale-[1.02]' 
-                     : 'border-white/20 text-white hover:bg-white/10'
-                 }`}
-               >
-                 <Store size={20} className={selectedRole === 'MECHANIC' ? 'text-zinc-900' : 'text-white'} />
-                 <div className="mt-2">
-                   <span className="block font-black text-xs sm:text-sm">Mecânico</span>
-                   <span className="text-[10px] opacity-75">Quero receber chamados</span>
-                 </div>
-               </button>
-             </div>
-           </div>
+          <button 
+            type="button"
+            onClick={() => setSelectedRole('MECHANIC')}
+            className={`flex-1 py-4 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+              selectedRole === 'MECHANIC' 
+                ? 'bg-white dark:bg-zinc-900 text-rose-600 border-b-2 border-rose-600' 
+                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 border-b-2 border-transparent'
+            }`}
+          >
+            <Wrench size={18} />
+            Sou Mecânico
+          </button>
         </div>
 
-        {/* Right Side - Interactive View Container */}
-        <div className="md:w-1/2 p-6 sm:p-10 flex flex-col justify-center bg-white dark:bg-zinc-900 transition-colors duration-300">
-          
-          {/* VIEW 1: WELCOME SCREEN */}
-          {authMode === 'WELCOME' && (
-            <div className="space-y-6 animate-fade-in">
-              <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-3 border border-indigo-500/20">
-                  <Sparkles size={14} /> Bem-vindo ao FIX
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white leading-tight">
-                  Sua jornada com tranquilidade na estrada.
-                </h3>
-                <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm mt-2 leading-relaxed">
-                  Escolha uma das opções abaixo para começar. Acesse sua conta existente ou crie um cadastro em menos de 1 minuto.
-                </p>
-              </div>
+        <div className="p-6 sm:p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-white">
+              {authMode === 'LOGIN' ? 'Acesse sua conta' : 'Crie sua conta'}
+            </h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
+              {selectedRole === 'CLIENT' 
+                ? 'Encontre socorro automotivo rápido e seguro.'
+                : 'Conecte-se a motoristas e receba chamados.'}
+            </p>
+          </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setAuthMode('REGISTER')}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-between group transition-all transform hover:-translate-y-0.5"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-xl">
-                      <UserPlus size={20} />
-                    </div>
-                    <div className="text-left">
-                      <span className="block text-sm">Criar nova conta</span>
-                      <span className="block text-[11px] font-normal opacity-90">Cadastro rápido e 100% gratuito</span>
-                    </div>
-                  </div>
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </button>
+          {/* Auth Mode Tabs */}
+          <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl mb-6">
+            <button
+              type="button"
+              onClick={() => setAuthMode('LOGIN')}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+                authMode === 'LOGIN'
+                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('REGISTER')}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+                authMode === 'REGISTER'
+                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
+              }`}
+            >
+              Cadastrar
+            </button>
+          </div>
 
-                <button
-                  type="button"
-                  onClick={() => setAuthMode('LOGIN')}
-                  className="w-full bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-100 font-extrabold py-3.5 px-6 rounded-2xl border border-zinc-200 dark:border-zinc-700 flex items-center justify-between group transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-200 dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 rounded-xl">
-                      <LogIn size={20} />
-                    </div>
-                    <div className="text-left">
-                      <span className="block text-sm">Já tenho uma conta (Login)</span>
-                      <span className="block text-[11px] font-normal text-zinc-500 dark:text-zinc-400">Entre com seu e-mail e senha</span>
-                    </div>
-                  </div>
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform text-zinc-400" />
-                </button>
-
-                <div className="relative py-2 flex items-center justify-center">
-                  <div className="border-t border-zinc-200 dark:border-zinc-800 w-full"></div>
-                  <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleGoogleLogin}
-                  className="w-full bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-100 font-extrabold py-3.5 px-6 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
-                >
-                  <GoogleIcon />
-                  <span className="text-sm">Continuar com o Google</span>
-                </button>
-              </div>
-
-              {/* Informational Footer note */}
-              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/60 text-center text-[11px] text-zinc-400 flex items-center justify-center gap-1.5">
-                <Lock size={12} className="text-emerald-500" />
-                <span>Ambiente seguro com criptografia de ponta a ponta</span>
-              </div>
-            </div>
-          )}
-
-          {/* VIEW 2: LOGIN SCREEN (with Lembrar Senha) */}
-          {authMode === 'LOGIN' && (
-            <div className="space-y-5 animate-fade-in">
-              <button
-                type="button"
-                onClick={() => setAuthMode('WELCOME')}
-                className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-1"
-              >
-                <ArrowLeft size={16} />
-                <span>Voltar ao início</span>
-              </button>
-
-              <div>
-                <h3 className="text-2xl font-black text-zinc-900 dark:text-white">
-                  Bem-vindo de volta!
-                </h3>
-                <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
-                  Entre na sua conta para acessar os serviços e histórico.
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                
-                {/* Biometric Quick Login Banner if biometrics available or email saved */}
-                {hasBiometrics && (
-                  <div className="p-3.5 bg-gradient-to-r from-indigo-900/40 via-indigo-800/30 to-purple-900/40 dark:from-indigo-950/80 dark:to-zinc-900 border border-indigo-500/30 rounded-2xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
-                        <div className="p-1.5 bg-indigo-600 text-white rounded-lg animate-pulse">
-                          <Fingerprint size={18} />
-                        </div>
-                        <span className="text-xs font-black">Acesso Biométrico Disponível</span>
-                      </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                        Ativo
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleBiometricLogin}
-                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
-                    >
-                      <Scan size={16} />
-                      <span>ENTRAR COM {biometryTypeName.toUpperCase()}</span>
-                    </button>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Endereço de E-mail
-                  </label>
-                  <div className="relative">
-                    <input 
-                      type="email" 
-                      required 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                      placeholder="seu.email@exemplo.com"
-                    />
-                    <Mail size={18} className="absolute left-3 top-3.5 text-zinc-400" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Sua Senha
-                  </label>
-                  <div className="relative">
-                    <input 
-                      type={showPassword ? 'text' : 'password'} 
-                      required 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                      placeholder="••••••••"
-                    />
-                    <KeyRound size={18} className="absolute left-3 top-3.5 text-zinc-400" />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-                      title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Lembrar Senha & Biometria & Esqueceu Senha options */}
-                <div className="space-y-2 pt-1">
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                      <input 
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
-                      />
-                      <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        Lembrar sessão neste aparelho
-                      </span>
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowForgotModal(true)}
-                      className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-all"
-                    >
-                      Esqueceu a senha?
-                    </button>
-                  </div>
-
-                  {rememberMe && (
-                    <label className="flex items-center gap-2 cursor-pointer group pl-6">
-                      <input 
-                        type="checkbox"
-                        checked={enableBiometrics}
-                        onChange={(e) => setEnableBiometrics(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
-                      />
-                      <span className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-                        <Fingerprint size={13} />
-                        Salvar credencial para Biometria (FaceID/Digital)
-                      </span>
-                    </label>
-                  )}
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2 cursor-pointer"
-                >
-                  <span>ENTRAR NA CONTA</span>
-                  <ArrowRight size={18} />
-                </button>
-              </form>
-
-              <div className="relative py-1 flex items-center justify-center">
-                <div className="border-t border-zinc-200 dark:border-zinc-800 w-full"></div>
-                <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou entre com</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                className="w-full bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-100 font-extrabold py-3 px-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] text-sm"
-              >
-                <GoogleIcon />
-                <span>Entrar com o Google</span>
-              </button>
-
-              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-center">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Ainda não tem uma conta?{' '}
-                  <button 
-                    type="button"
-                    onClick={() => setAuthMode('REGISTER')}
-                    className="font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
-                  >
-                    Criar conta grátis
-                  </button>
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* VIEW 3: REGISTER SCREEN */}
-          {authMode === 'REGISTER' && (
-            <div className="space-y-5 animate-fade-in">
-              <button
-                type="button"
-                onClick={() => setAuthMode('WELCOME')}
-                className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-1"
-              >
-                <ArrowLeft size={16} />
-                <span>Voltar ao início</span>
-              </button>
-
-              <div>
-                <h3 className="text-2xl font-black text-zinc-900 dark:text-white">
-                  Crie sua conta no FIX
-                </h3>
-                <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
-                  Cadastro rápido para {selectedRole === 'CLIENT' ? 'Motoristas' : 'Mecânicos e Oficinas'}.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                className="w-full bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-100 font-extrabold py-3 px-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] text-sm"
-              >
-                <GoogleIcon />
-                <span>Cadastrar com o Google</span>
-              </button>
-
-              <div className="relative py-1 flex items-center justify-center">
-                <div className="border-t border-zinc-200 dark:border-zinc-800 w-full"></div>
-                <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou com seu e-mail</span>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-3.5">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Nome Completo
-                  </label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    placeholder="Seu nome e sobrenome"
-                  />
-                </div>
-
-                {selectedRole === 'MECHANIC' && (
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Nome da Oficina / Guincho
-                    </label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={shopName}
-                      onChange={(e) => setShopName(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                      placeholder="Ex: Auto Center Express"
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Endereço de E-mail
-                  </label>
-                  <input 
-                    type="email" 
-                    required 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    placeholder="seu.email@exemplo.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Crie uma Senha Segura
-                  </label>
-                  <input 
-                    type="password" 
-                    required 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    placeholder="Mínimo de 6 caracteres"
-                  />
-                </div>
-
-                <label className="flex items-start gap-2 cursor-pointer pt-1">
-                  <input 
-                    type="checkbox" 
-                    required 
-                    defaultChecked
-                    className="w-4 h-4 mt-0.5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 accent-indigo-600"
-                  />
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight">
-                    Li e concordo com os <a href="#" className="text-indigo-600 underline">Termos de Uso</a> e a <a href="#" className="text-indigo-600 underline">Política de Privacidade</a> do FIX App.
-                  </span>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {authMode === 'REGISTER' && (
+              <div className="animate-fade-in">
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Nome Completo
                 </label>
+                <input 
+                  type="text" 
+                  required 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="Seu nome"
+                />
+              </div>
+            )}
 
-                <button 
-                  type="submit"
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2"
-                >
-                  <span>CRIAR CONTA GRATUITA</span>
-                  <ArrowRight size={18} />
-                </button>
-              </form>
+            {authMode === 'REGISTER' && selectedRole === 'MECHANIC' && (
+              <div className="animate-fade-in">
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Nome da Oficina (Opcional)
+                </label>
+                <input 
+                  type="text" 
+                  value={shopName}
+                  onChange={(e) => setShopName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                  placeholder="Ex: Auto Center SP"
+                />
+              </div>
+            )}
 
-              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-center">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Já possui uma conta criada?{' '}
-                  <button 
-                    type="button"
-                    onClick={() => setAuthMode('LOGIN')}
-                    className="font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
-                  >
-                    Fazer Login
-                  </button>
-                </p>
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                E-mail
+              </label>
+              <div className="relative">
+                <input 
+                  type="email" 
+                  required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="seu@email.com"
+                />
+                <Mail size={18} className="absolute left-3 top-3.5 text-zinc-400" />
               </div>
             </div>
-          )}
 
+            <div>
+              <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Senha
+              </label>
+              <div className="relative">
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-10 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="••••••••"
+                />
+                <KeyRound size={18} className="absolute left-3 top-3.5 text-zinc-400" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className={`w-full font-bold py-3.5 px-6 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all mt-6 ${
+                selectedRole === 'CLIENT'
+                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/30'
+                  : 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/30'
+              }`}
+            >
+              {authMode === 'LOGIN' ? (
+                <>
+                  <LogIn size={18} />
+                  Entrar
+                </>
+              ) : (
+                <>
+                  <UserPlus size={18} />
+                  Criar Conta
+                </>
+              )}
+            </button>
+          </form>
         </div>
       </div>
-
-      {/* Forgot Password Modal */}
-      {showForgotModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl">
-                <HelpCircle size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-zinc-900 dark:text-white">Recuperar Senha</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Enviaremos um link de redefinição para o seu e-mail.</p>
-              </div>
-            </div>
-
-            {forgotSent ? (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-2">
-                <CheckCircle2 size={18} />
-                <span>E-mail de recuperação enviado com sucesso! Verifique sua caixa de entrada.</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSendForgotPassword} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">E-mail Cadastrado</label>
-                  <input 
-                    type="email"
-                    required
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="seu.email@exemplo.com"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotModal(false)}
-                    className="px-4 py-2.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md transition-all"
-                  >
-                    Enviar Link
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Biometric Verification Modal */}
-      {showBiometricModal && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden animate-pop-in space-y-5">
-            
-            <button
-              onClick={() => setShowBiometricModal(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded-full transition-colors cursor-pointer"
-            >
-              <X size={18} />
-            </button>
-
-            {/* Header */}
-            <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-indigo-500 block mb-1">
-                Segurança Capacitada FIX
-              </span>
-              <h3 className="text-xl font-extrabold text-zinc-900 dark:text-white">
-                Autenticação Biométrica
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                {biometryTypeName}
-              </p>
-            </div>
-
-            {/* Visual Icon scanner state */}
-            <div className="py-6 flex flex-col items-center justify-center">
-              {biometricStatus === 'SCANNING' && (
-                <div className="relative flex items-center justify-center">
-                  <div className="absolute w-28 h-28 bg-indigo-500/20 rounded-full animate-ping pointer-events-none" />
-                  <div className="w-20 h-20 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-600/40 relative z-10 animate-bounce">
-                    <Fingerprint size={42} />
-                  </div>
-                </div>
-              )}
-
-              {biometricStatus === 'SUCCESS' && (
-                <div className="w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/40 animate-pop-in">
-                  <Check size={42} className="stroke-[3]" />
-                </div>
-              )}
-
-              {biometricStatus === 'ERROR' && (
-                <div className="w-20 h-20 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-rose-500/40 animate-shake">
-                  <AlertCircle size={42} />
-                </div>
-              )}
-            </div>
-
-            {/* Status Messages & Actions */}
-            <div>
-              {biometricStatus === 'SCANNING' && (
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
-                    Aproxime seu rosto ou dedo no leitor do aparelho
-                  </p>
-                  <p className="text-[11px] text-zinc-400">
-                    Validando chave de acesso nativa do dispositivo...
-                  </p>
-                </div>
-              )}
-
-              {biometricStatus === 'SUCCESS' && (
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
-                    Identidade confirmada com sucesso!
-                  </p>
-                  <p className="text-[11px] text-zinc-400">
-                    Redirecionando para o painel de serviços...
-                  </p>
-                </div>
-              )}
-
-              {biometricStatus === 'ERROR' && (
-                <div className="space-y-3">
-                  <p className="text-xs font-bold text-rose-500">
-                    {biometricErrorMessage || 'Não foi possível ler a biometria.'}
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowBiometricModal(false)}
-                      className="flex-1 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
-                    >
-                      Usar Senha
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleBiometricLogin}
-                      className="flex-1 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-500 transition-colors shadow-md cursor-pointer"
-                    >
-                      Tentar Novamente
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </div>
-      )}
     </div>
   );
 };

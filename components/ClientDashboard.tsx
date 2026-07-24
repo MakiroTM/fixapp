@@ -11,7 +11,7 @@ import { ServiceRatingModal } from './ServiceRatingModal';
 import { ServiceSkeleton } from './ServiceSkeleton';
 import { RouteModal } from './RouteModal';
 import { QuickChatCard } from './QuickChatCard';
-import { NearbyMap } from './NearbyMap';
+import { MapView } from './MapView';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
 import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';
@@ -421,7 +421,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             <MapPin size={18} className="text-indigo-500" />
             <h3 className="font-bold text-zinc-800 dark:text-zinc-100">Profissionais Próximos</h3>
           </div>
-          <NearbyMap userLocation={location} />
+          <MapView userLocation={location} />
         </div>
 
         <SearchForm 
