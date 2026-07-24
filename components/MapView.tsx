@@ -85,34 +85,12 @@ const RecenterAutomatically = ({ lat, lng, trigger }: { lat: number; lng: number
   return null;
 };
 
-// Custom Zoom Controls
-const CustomZoomControls = () => {
-  const map = useMap();
-  return (
-    <div className="absolute right-4 bottom-24 flex flex-col gap-2 z-[1000]">
-      <button 
-        onClick={() => map.zoomIn()}
-        className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 p-2 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
-        title="Mais zoom"
-      >
-        <Plus size={20} />
-      </button>
-      <button 
-        onClick={() => map.zoomOut()}
-        className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 p-2 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
-        title="Menos zoom"
-      >
-        <Minus size={20} />
-      </button>
-    </div>
-  );
-};
-
-export const MapView: React.FC<MapViewProps> = ({ userLocation, mechanics = [] }) => {
+export const MapView: React.FC<MapViewProps> = ({ userLocation, initialCalls = [] }) => {
   // Default to somewhere in SP if no location
   const centerLat = userLocation?.latitude || -23.5505;
   const centerLng = userLocation?.longitude || -46.6333;
 
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [mapStyle, setMapStyle] = useState<'standard' | 'satellite'>('standard');
   const [manualOrigin, setManualOrigin] = useState<Coordinates | null>(null);
   const [destination, setDestination] = useState<Coordinates | null>(null);
@@ -323,6 +301,7 @@ export const MapView: React.FC<MapViewProps> = ({ userLocation, mechanics = [] }
           center={[centerLat, centerLng]} 
           zoom={15} 
           zoomControl={false}
+          ref={setMapInstance}
           style={{ height: '100%', width: '100%', zIndex: 1, cursor: selectionMode ? 'crosshair' : 'crosshair' }}
         >
           {mapStyle === 'standard' ? (
@@ -337,7 +316,6 @@ export const MapView: React.FC<MapViewProps> = ({ userLocation, mechanics = [] }
             />
           )}
           
-          <CustomZoomControls />
           <MapClickHandler onMapClick={handleMapClick} />
           
           {/* Active Origin Marker */}
@@ -437,6 +415,26 @@ export const MapView: React.FC<MapViewProps> = ({ userLocation, mechanics = [] }
           )}
         </MapContainer>
         
+        {/* Custom Zoom Controls */}
+        {mapInstance && (
+          <div className="absolute right-4 bottom-24 flex flex-col gap-2 z-[1000] pointer-events-auto">
+            <button 
+              onClick={() => mapInstance.zoomIn()}
+              className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 p-2 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              title="Mais zoom"
+            >
+              <Plus size={20} />
+            </button>
+            <button 
+              onClick={() => mapInstance.zoomOut()}
+              className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 p-2 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+              title="Menos zoom"
+            >
+              <Minus size={20} />
+            </button>
+          </div>
+        )}
+
         {/* Recenter Button */}
         {userLocation && (
           <button 
