@@ -5,11 +5,10 @@ import { ClientDashboard } from './components/ClientDashboard';
 import { MechanicDashboard } from './components/MechanicDashboard';
 import { UserProfile } from './components/UserProfile';
 import { SubscriptionScreen } from './components/SubscriptionScreen';
-import { SosEmergencyScreen } from './components/SosEmergencyScreen';
 import { SplashScreen } from './components/SplashScreen';
 import { User, Coordinates } from './types';
 
-type ViewState = 'dashboard' | 'profile' | 'subscription' | 'sos';
+type ViewState = 'dashboard' | 'profile' | 'subscription';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -59,92 +58,32 @@ const App: React.FC = () => {
 
   // Geolocation Logic
   useEffect(() => {
-    let watchId: number | null = null;
-    const requestLocation = async () => {
-      if (typeof window !== 'undefined') {
-        try {
-          setIsDetectingLocation(true);
-          
-          // First, check permission natively if using Capacitor
-          const { Geolocation } = await import('@capacitor/geolocation').catch(() => ({ Geolocation: null }));
-          
-          if (Geolocation) {
-            try {
-              const permStatus = await Geolocation.checkPermissions();
-              if (permStatus.location !== 'granted' && permStatus.location !== 'prompt') {
-                 const reqStatus = await Geolocation.requestPermissions();
-                 if (reqStatus.location !== 'granted') {
-                   setLocationError("Permissão de localização negada pelo usuário.");
-                   setIsDetectingLocation(false);
-                   return;
-                 }
-              } else if (permStatus.location === 'prompt') {
-                 const reqStatus = await Geolocation.requestPermissions();
-                 if (reqStatus.location !== 'granted') {
-                   setLocationError("Permissão de localização negada pelo usuário.");
-                   setIsDetectingLocation(false);
-                   return;
-                 }
-              }
-            } catch (capacitorError) {
-               console.log('[DEBUG Geolocation] Not running in capacitor natively, fallback to web geolocation.', capacitorError);
-            }
-          }
-
-          if (navigator.geolocation) {
-            console.log('[DEBUG Geolocation] Requesting continuous position via navigator.geolocation.watchPosition...');
-            
-            watchId = navigator.geolocation.watchPosition(
-              (position) => {
-                const coords = {
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                  accuracy: position.coords.accuracy,
-                };
-                console.log('[DEBUG Geolocation] Position updated:', coords);
-                setLocation(coords);
-                setLocationError(null);
-                setIsDetectingLocation(false);
-              },
-              (err: any) => {
-                console.error("[DEBUG Geolocation Error]", {
-                  code: err.code,
-                  message: err.message
-                });
-                let msg = "Erro de localização.";
-                if (err.code === 1) msg = "Permissão negada.";
-                else if (err.code === 2) msg = "Sinal indisponível.";
-                else if (err.code === 3) msg = "Tempo esgotado.";
-                setLocationError(msg);
-                setIsDetectingLocation(false);
-                
-                // Alert se negou ou falhou na web e o usuario precisa saber
-                if (err.code === 1) {
-                  alert("Por favor, ative a localização do seu aparelho para encontrar socorristas próximos.");
-                }
-              },
-              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-          } else {
-            console.warn('[DEBUG Geolocation] Geolocation API is not supported in this environment.');
-            setLocationError("Não suportado.");
-            setIsDetectingLocation(false);
-          }
-        } catch (error) {
-          console.error("Geolocation global error:", error);
-          setLocationError("Erro interno.");
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      setIsDetectingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          setLocation(coords);
+          setLocationError(null);
           setIsDetectingLocation(false);
-        }
-      }
-    };
-
-    requestLocation();
-    
-    return () => {
-      if (watchId !== null && navigator.geolocation) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-    };
+        },
+        (err: any) => {
+          console.error("Geolocation error:", err);
+          let msg = "Erro de localização.";
+          if (err.code === 1) msg = "Permissão negada.";
+          else if (err.code === 2) msg = "Sinal indisponível.";
+          else if (err.code === 3) msg = "Tempo esgotado.";
+          setLocationError(msg);
+          setIsDetectingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      setLocationError("Não suportado.");
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -194,8 +133,6 @@ const App: React.FC = () => {
         onLogout={handleLogout} 
         onProfileClick={() => setCurrentView('profile')}
         onPlanClick={() => setCurrentView('subscription')}
-        onHomeClick={() => setCurrentView('dashboard')}
-        onSosClick={() => setCurrentView('sos')}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
       />
@@ -219,21 +156,12 @@ const App: React.FC = () => {
                 onSubscribe={handleSubscribe}
                 onBack={() => setCurrentView('dashboard')}
               />
-            ) : currentView === 'sos' ? (
-              <SosEmergencyScreen
-                user={user}
-                location={location}
-                locationError={locationError}
-                isDetectingLocation={isDetectingLocation}
-                onBack={() => setCurrentView('dashboard')}
-              />
             ) : (
               <>
                 {user.role === 'CLIENT' ? (
                   <ClientDashboard 
                     user={user} 
                     onUpgrade={() => setCurrentView('subscription')} 
-                    onSosClick={() => setCurrentView('sos')}
                     location={location}
                     locationError={locationError}
                     isDetectingLocation={isDetectingLocation}

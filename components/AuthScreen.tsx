@@ -1,212 +1,159 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
-import { 
-  Car, 
-  Wrench, 
-  Mail, 
-  KeyRound,
-  Eye,
-  EyeOff,
-  UserPlus, 
-  LogIn
-} from 'lucide-react';
+import { Wrench, Car, Store, ArrowRight, Check } from 'lucide-react';
 
 interface AuthScreenProps {
   onLogin: (user: User) => void;
 }
 
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
-  const [authMode, setAuthMode] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
+  const [isLogin, setIsLogin] = useState(true);
   const [selectedRole, setSelectedRole] = useState<UserRole>('CLIENT');
   
   // Form States
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [shopName, setShopName] = useState(''); 
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  
+  const [shopName, setShopName] = useState(''); // Only for mechanic
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    // Simulating authentication
     const mockUser: User = {
       id: Math.random().toString(36).substr(2, 9),
-      name: name || (email ? email.split('@')[0] : (selectedRole === 'CLIENT' ? 'Motorista FIX' : 'Mecânico Socorrista')),
-      email: email || 'usuario@fixapp.com',
+      name: name || (selectedRole === 'CLIENT' ? 'Cliente Exemplo' : 'Mecânico Exemplo'),
+      email: email || 'user@example.com',
       role: selectedRole,
-      plan: 'FREE',
-      shopName: selectedRole === 'MECHANIC' ? (shopName || 'Oficina Mecânica Especializada') : undefined,
-      rating: 4.9
+      plan: 'FREE', // Padrão Grátis
+      shopName: selectedRole === 'MECHANIC' ? (shopName || 'Oficina Mecânica Top') : undefined,
+      rating: 4.8
     };
     onLogin(mockUser);
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4 transition-colors duration-300">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-xl shadow-indigo-500/5 dark:shadow-none border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-300">
+    <div className="min-h-[calc(100vh-64px)] bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-3 sm:p-4 transition-colors duration-300">
+      <div className="w-full max-w-4xl bg-white dark:bg-zinc-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-zinc-200/50 dark:shadow-none overflow-hidden flex flex-col md:flex-row md:min-h-[600px] border border-zinc-100 dark:border-zinc-700">
         
-        {/* Role Tabs */}
-        <div className="flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
-          <button 
-            type="button"
-            onClick={() => setSelectedRole('CLIENT')}
-            className={`flex-1 py-4 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-              selectedRole === 'CLIENT' 
-                ? 'bg-white dark:bg-zinc-900 text-indigo-600 border-b-2 border-indigo-600' 
-                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 border-b-2 border-transparent'
-            }`}
-          >
-            <Car size={18} />
-            Sou Motorista
-          </button>
+        {/* Left Side - Hero / Image */}
+        <div className={`md:w-1/2 p-5 sm:p-8 text-white flex flex-col justify-between relative overflow-hidden transition-colors duration-500 ${selectedRole === 'CLIENT' ? 'bg-indigo-600' : 'bg-slate-800 dark:bg-zinc-900'}`}>
+           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+           <div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-10 rounded-full -ml-20 -mb-20 blur-3xl"></div>
+           
+           <div className="relative z-10">
+             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm mb-3 sm:mb-6">
+               <Wrench size={18} className="text-white sm:w-6 sm:h-6" />
+             </div>
+             <h2 className="text-xl sm:text-3xl font-bold mb-2 sm:mb-4 leading-tight">
+               {selectedRole === 'CLIENT' ? 'Problemas com seu carro?' : 'Expanda sua oficina.'}
+             </h2>
+             <p className="text-white/80 text-xs sm:text-base leading-relaxed">
+               {selectedRole === 'CLIENT' 
+                 ? 'Conecte-se com os melhores mecânicos e serviços de socorro da sua região em segundos.' 
+                 : 'Cadastre sua oficina, receba chamados de emergência e gerencie seus clientes em um só lugar.'}
+             </p>
+           </div>
 
-          <button 
-            type="button"
-            onClick={() => setSelectedRole('MECHANIC')}
-            className={`flex-1 py-4 px-4 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-              selectedRole === 'MECHANIC' 
-                ? 'bg-white dark:bg-zinc-900 text-rose-600 border-b-2 border-rose-600' 
-                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 border-b-2 border-transparent'
-            }`}
-          >
-            <Wrench size={18} />
-            Sou Mecânico
-          </button>
+           <div className="relative z-10 mt-5 sm:mt-8">
+             <p className="text-[9px] sm:text-xs uppercase tracking-widest font-semibold opacity-70 mb-2 sm:mb-4">Escolha seu perfil</p>
+             <div className="grid grid-cols-2 gap-2 sm:gap-3">
+               <button 
+                 onClick={() => setSelectedRole('CLIENT')}
+                 className={`p-2.5 sm:p-4 rounded-xl border text-left transition-all ${selectedRole === 'CLIENT' ? 'bg-white text-indigo-600 border-white shadow-lg' : 'border-white/30 text-white hover:bg-white/10'}`}
+               >
+                 <Car size={18} className="mb-1 sm:mb-2 sm:w-6 sm:h-6" />
+                 <span className="block font-bold text-[10px] sm:text-sm">Sou Motorista</span>
+               </button>
+               <button 
+                 onClick={() => setSelectedRole('MECHANIC')}
+                 className={`p-2.5 sm:p-4 rounded-xl border text-left transition-all ${selectedRole === 'MECHANIC' ? 'bg-white text-slate-800 border-white shadow-lg' : 'border-white/30 text-white hover:bg-white/10'}`}
+               >
+                 <Store size={18} className="mb-1 sm:mb-2 sm:w-6 sm:h-6" />
+                 <span className="block font-bold text-[10px] sm:text-sm">Sou Mecânico</span>
+               </button>
+             </div>
+           </div>
         </div>
 
-        <div className="p-6 sm:p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-black text-zinc-900 dark:text-white">
-              {authMode === 'LOGIN' ? 'Acesse sua conta' : 'Crie sua conta'}
-            </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-              {selectedRole === 'CLIENT' 
-                ? 'Encontre socorro automotivo rápido e seguro.'
-                : 'Conecte-se a motoristas e receba chamados.'}
-            </p>
+        {/* Right Side - Form */}
+        <div className="md:w-1/2 p-5 sm:p-8 md:p-12 flex flex-col justify-center bg-white dark:bg-zinc-800 transition-colors duration-300">
+          <div className="mb-5 sm:mb-8">
+             <h3 className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-zinc-100 mb-1">
+               {isLogin ? 'Bem-vindo de volta' : 'Crie sua conta'}
+             </h3>
+             <p className="text-zinc-500 dark:text-zinc-400 text-[11px] sm:text-sm">
+               {isLogin ? 'Entre para acessar sua conta' : `Cadastro gratuito para ${selectedRole === 'CLIENT' ? 'motoristas' : 'parceiros'}`}
+             </p>
           </div>
 
-          {/* Auth Mode Tabs */}
-          <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl mb-6">
-            <button
-              type="button"
-              onClick={() => setAuthMode('LOGIN')}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
-                authMode === 'LOGIN'
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-            >
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMode('REGISTER')}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
-                authMode === 'REGISTER'
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-            >
-              Cadastrar
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {authMode === 'REGISTER' && (
-              <div className="animate-fade-in">
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Nome Completo
-                </label>
-                <input 
-                  type="text" 
-                  required 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="Seu nome"
-                />
-              </div>
-            )}
-
-            {authMode === 'REGISTER' && selectedRole === 'MECHANIC' && (
-              <div className="animate-fade-in">
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Nome da Oficina (Opcional)
-                </label>
-                <input 
-                  type="text" 
-                  value={shopName}
-                  onChange={(e) => setShopName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
-                  placeholder="Ex: Auto Center SP"
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-4">
+            {!isLogin && (
+              <>
+                <div>
+                  <label className="block text-[11px] sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Nome Completo</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-xs sm:text-base"
+                    placeholder="Seu nome"
+                  />
+                </div>
+                {selectedRole === 'MECHANIC' && (
+                  <div>
+                    <label className="block text-[11px] sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Nome da Oficina</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={shopName}
+                      onChange={(e) => setShopName(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-xs sm:text-base"
+                      placeholder="Ex: Auto Center Silva"
+                    />
+                  </div>
+                )}
+              </>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                E-mail
-              </label>
-              <div className="relative">
-                <input 
-                  type="email" 
-                  required 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="seu@email.com"
-                />
-                <Mail size={18} className="absolute left-3 top-3.5 text-zinc-400" />
-              </div>
+              <label className="block text-[11px] sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">E-mail</label>
+              <input 
+                type="email" 
+                required 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-xs sm:text-base"
+                placeholder="seu@email.com"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Senha
-              </label>
-              <div className="relative">
-                <input 
-                  type={showPassword ? 'text' : 'password'} 
-                  required 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="••••••••"
-                />
-                <KeyRound size={18} className="absolute left-3 top-3.5 text-zinc-400" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+              <label className="block text-[11px] sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Senha</label>
+              <input 
+                type="password" 
+                required 
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-xs sm:text-base"
+                placeholder="••••••••"
+              />
             </div>
 
-            <button
+            <button 
               type="submit"
-              className={`w-full font-bold py-3.5 px-6 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all mt-6 ${
-                selectedRole === 'CLIENT'
-                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/30'
-                  : 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/30'
-              }`}
+              className={`w-full py-2.5 sm:py-4 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all mt-1.5 sm:mt-4 text-sm sm:text-base ${selectedRole === 'CLIENT' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 dark:shadow-none' : 'bg-slate-800 dark:bg-zinc-900 hover:bg-slate-900 dark:hover:bg-black shadow-slate-200 dark:shadow-none'}`}
             >
-              {authMode === 'LOGIN' ? (
-                <>
-                  <LogIn size={18} />
-                  Entrar
-                </>
-              ) : (
-                <>
-                  <UserPlus size={18} />
-                  Criar Conta
-                </>
-              )}
+              {isLogin ? 'Entrar' : 'Cadastrar Grátis'}
+              <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
           </form>
+
+          <div className="mt-5 sm:mt-8 text-center">
+            <button 
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-[11px] sm:text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            >
+              {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Fazer login'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
