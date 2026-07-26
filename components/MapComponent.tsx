@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Navigation, MapPin } from 'lucide-react';
+import L from 'leaflet';
 
 interface MapComponentProps {
   latitude: number;
@@ -19,15 +20,108 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   userLongitude
 }) => {
   const [viewMode, setViewMode] = useState<'PIN' | 'ROUTE'>('PIN');
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
-  // Single location pin URL
-  const pinMapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
 
-  // Embedded directions route URL
-  const originParam = (userLatitude && userLongitude) ? `${userLatitude},${userLongitude}` : 'Minha+Localizacao';
-  const routeMapUrl = `https://maps.google.com/maps?saddr=${originParam}&daddr=${latitude},${longitude}&dirflg=d&output=embed`;
+    // Clean up existing map instance if re-initializing
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
 
-  const activeMapUrl = viewMode === 'ROUTE' ? routeMapUrl : pinMapUrl;
+    const centerLat = latitude;
+    const centerLng = longitude;
+
+    // Initialize Leaflet Map centered on target or midpoint if route
+    let initialLat = centerLat;
+    let initialLng = centerLng;
+    let initialZoom = 15;
+
+    if (viewMode === 'ROUTE' && userLatitude && userLongitude) {
+      initialLat = (userLatitude + latitude) / 2;
+      initialLng = (userLongitude + longitude) / 2;
+      initialZoom = 13;
+    }
+
+    const map = L.map(mapContainerRef.current, {
+      center: [initialLat, initialLng],
+      zoom: initialZoom,
+      zoomControl: true,
+    });
+
+    mapInstanceRef.current = map;
+
+    // OpenStreetMap Tile Layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Custom Red Pin Icon for Destination
+    const destIcon = L.divIcon({
+      className: 'custom-leaflet-marker',
+      html: `
+        <div style="background-color: #ef4444; width: 32px; height: 32px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    // Custom Blue Pin Icon for User
+    const userIcon = L.divIcon({
+      className: 'custom-leaflet-user-marker',
+      html: `
+        <div style="background-color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    // Add Destination Marker
+    const destMarker = L.marker([latitude, longitude], { icon: destIcon }).addTo(map);
+    destMarker.bindPopup(`<strong>${title || 'Localização'}</strong>`).openPopup();
+
+    if (viewMode === 'ROUTE' && userLatitude && userLongitude) {
+      // Add User Marker
+      const uMarker = L.marker([userLatitude, userLongitude], { icon: userIcon }).addTo(map);
+      uMarker.bindPopup('<strong>Você está aqui</strong>');
+
+      // Draw polyline connecting user to destination
+      const polyline = L.polyline([
+        [userLatitude, userLongitude],
+        [latitude, longitude]
+      ], {
+        color: '#4f46e5',
+        weight: 5,
+        opacity: 0.8,
+        dashArray: '10, 10'
+      }).addTo(map);
+
+      // Fit map bounds to show both points
+      map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+    }
+
+    // Force map size update after render
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [latitude, longitude, viewMode, userLatitude, userLongitude, title]);
 
   return (
     <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-2xl">
@@ -48,17 +142,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         )}
       </div>
 
-      <div className="flex-1 relative min-h-[320px]">
-        <iframe
-          title="Google Maps"
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          style={{ border: 0 }}
-          src={activeMapUrl}
-          allowFullScreen
-          className="absolute inset-0 w-full h-full"
-        ></iframe>
+      <div className="flex-1 relative min-h-[320px] z-0">
+        <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
       </div>
 
       <div className="p-3 bg-zinc-50 dark:bg-zinc-900/90 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-2">
@@ -89,8 +174,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           </button>
         </div>
 
-        <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline">
-          Google Maps Integrado
+        <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline flex items-center gap-1">
+          🌍 OpenStreetMap Integrado
         </span>
       </div>
     </div>

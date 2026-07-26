@@ -70,7 +70,7 @@ const generateContextualFallback = (
     text += `**Diagnóstico & Atendimento:**\nOs locais abaixo contam com diagnóstico computadorizado e profissionais habilitados para solucionar seu problema de ${problemCategory || serviceType}.\n\n`;
   }
 
-  const locParam = location ? `&center=${location.latitude},${location.longitude}&zoom=14` : '';
+  const locParam = location ? `&lat=${location.latitude}&lon=${location.longitude}` : '';
   const searchPrefix = carModel ? `${carModel} ` : '';
 
   let fallbackChunks: GroundingChunk[] = [];
@@ -80,7 +80,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Casa das Peças & Autopeças ${carModel ? carModel.split(' ')[0] : 'Express'}`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Autopeças ${searchPrefix}${vehicleType}`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Autopeças ${searchPrefix}${vehicleType}`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Estoque completo de componentes para ${carModel || vehicleType}. Entrega via motoboy expressa e nota fiscal.` }
@@ -91,7 +91,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Distribuidora de Peças & Baterias Central`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Distribuidora de Peças Automotivas`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Distribuidora de Peças Automotivas`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Grande variedade de óleos, filtros, pastilhas de freio e baterias originais com desconto no Pix.` }
@@ -102,7 +102,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Center Auto Peças & Acessórios`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Auto Peças`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Auto Peças`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Atendimento ágil pelo chat do aplicativo FIX. Peças com garantia de fabricação.` }
@@ -116,7 +116,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Borracharia & Socorro de Pneus 24 Horas`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Borracharia 24h`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Borracharia 24h`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Borracharia móvel com atendimento no local em cerca de 15 a 20 minutos. Conserto de furos e troca de estepe.` }
@@ -127,7 +127,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Centro Automotivo & Pneubras Express`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Centro de Pneus e Borracharia`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Centro de Pneus e Borracharia`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Venda de pneus novos e seminovos, alinhamento 3D e balanceamento rápido.` }
@@ -138,7 +138,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Socorro de Pneu Móvel & Vulcanização`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Borracharia e Troca de Pneu`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Borracharia e Troca de Pneu`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Atendimento de emergência 24h para carros, motos e utilitários.` }
@@ -152,7 +152,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Guincho & Socorro Plataforma 24h`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Guincho 24 horas`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Guincho 24 horas`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Chegada ágil no local com caminhão plataforma. Transporte seguro de veículos com sistema hidráulico moderno.` }
@@ -163,7 +163,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Auto Socorro Rodoviário & Reboque`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Auto Socorro e Reboque 24h`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Auto Socorro e Reboque 24h`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Equipe especializada em reboque urgente urbano e rodoviário. Rastreamento em tempo real.` }
@@ -174,7 +174,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Resgate Automotivo & Asa Delta 24h`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Serviço de Guincho`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Serviço de Guincho`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Profissionais capacitados e remoção sem danos para oficinas credenciadas.` }
@@ -188,7 +188,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Auto Elétrica & Socorro de Baterias 24h`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Auto Eletrica e Baterias`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Auto Eletrica e Baterias`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Atendimento móvel para teste de alternador, bateria e auxílio de partida (chupeta) em minutos.` }
@@ -199,7 +199,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `EletroCar Diagnóstico & Injeção Eletrônica`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Auto Elétrica`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Auto Elétrica`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Especialistas em pane elétrica, faróis, motor de arranque e diagnóstico via scanner.` }
@@ -210,7 +210,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Casa da Bateria Moura & Heliar 24h`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Casa de Baterias`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Casa de Baterias`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Entrega e instalação gratuita no local com garantia nacional.` }
@@ -224,7 +224,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Centro Especializado em Freios & Segurança`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Oficina de Freios e Discos`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Oficina de Freios e Discos`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Troca de pastilhas, fluido de freio, retífica de discos e diagnóstico do sistema ABS.` }
@@ -235,7 +235,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Auto Center Pastilhas & Discos Express`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Manutenção de Freios`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Manutenção de Freios`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Atendimento rápido para freio duro, ruídos ao frear e vazamentos do sistema hidráulico.` }
@@ -249,7 +249,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Centro de Suspensão, Amortecedores & Alinhamento 3D`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Oficina de Suspensão e Amortecedor`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Oficina de Suspensão e Amortecedor`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Especialistas em amortecedores, buchas, pivôs, pivôs e geometria 3D computadorizada.` }
@@ -260,7 +260,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Mecânica de Precisão & Geometria Automotiva`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Alinhamento e Suspensão`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Alinhamento e Suspensão`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Diagnóstico de barulhos na suspensão e batidas secas. Peças originais com garantia.` }
@@ -274,7 +274,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Oficina de Radiadores & Arrefecimento 24h`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Oficina de Radiadores e Arrefecimento`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Oficina de Radiadores e Arrefecimento`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Limpeza do sistema de arrefecimento, substituição de aditivo, bomba d'água e válvula termostática.` }
@@ -285,7 +285,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Socorro de Motor & Superaquecimento`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Mecânica de Motores e Radiadores`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Mecânica de Motores e Radiadores`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Atendimento móvel e oficina para testes de estanqueidade e vazamento de junta de cabeçote.` }
@@ -299,7 +299,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Auto Center Especializado & Diagnóstico ${carModel ? carModel.split(' ')[0] : ''}`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Oficina Mecânica ${carModel || ''}`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Oficina Mecânica ${carModel || ''}`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Oficina completa com scanner automotivo, mecânicos certificados e garantia em peças e serviços.` }
@@ -310,7 +310,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Mecânica de Precisão & Centro Automotivo`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Centro Automotivo`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Centro Automotivo`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Atendimento ágil para motoristas. Revisão de freios, suspensão, motor e troca de óleo.` }
@@ -321,7 +321,7 @@ const generateContextualFallback = (
       {
         maps: {
           title: `Oficina Mecânica & Socorro Rápido 24h`,
-          uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Mecânica e Socorro Automotivo`)}${locParam}`,
+          uri: `https://www.openstreetmap.org/search?query=${encodeURIComponent(`Mecânica e Socorro Automotivo`)}${locParam}`,
           placeAnswerSources: {
             reviewSnippets: [
               { snippet: `Excelente avaliação na região, orçamento transparente e pagamento facilitado.` }

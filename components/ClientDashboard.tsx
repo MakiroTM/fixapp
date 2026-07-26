@@ -577,7 +577,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                          </span>
                        )}
                      </h4>
-                     <span className="text-[8px] sm:text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">Google Maps Platform</span>
+                     <span className="text-[8px] sm:text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">OpenStreetMap</span>
                   </div>
 
                   {filteredChunks.length > 0 ? (

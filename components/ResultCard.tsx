@@ -153,7 +153,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ chunk, onContact }) => {
         </div>
       )}
 
-      {/* In-App Google Maps Route Modal */}
+      {/* In-App OpenStreetMap Route Modal */}
       <RouteModal
         isOpen={isRouteOpen}
         onClose={() => setIsRouteOpen(false)}
