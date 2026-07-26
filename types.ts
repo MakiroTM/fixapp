@@ -16,6 +16,48 @@ export type UserRole = 'CLIENT' | 'MECHANIC';
 
 export type UserPlan = 'FREE' | 'PRO' | 'PRIME';
 
+export type ServiceStatus = 'PENDING' | 'EN_ROUTE' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+
+export type PaymentStatus = 'UNPAID' | 'PROCESSING' | 'PAID';
+export type PaymentMethod = 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'CASH';
+
+export interface ActiveServiceRequest {
+  id: string;
+  clientName: string;
+  mechanicName: string;
+  vehicleInfo: string;
+  serviceType: string;
+  status: ServiceStatus;
+  updatedAt: Date;
+  locationInfo?: string;
+  estimatedArrival?: string;
+  distanceKm?: number;
+  etaMinutes?: number;
+  trafficCondition?: 'LIVRE' | 'MODERADO' | 'INTENSO';
+  mechanicCoords?: Coordinates;
+  clientCoords?: Coordinates;
+  // Payment simulation fields
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: PaymentMethod;
+  servicePrice?: number;
+  receiptId?: string;
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  serviceType: string;
+  mechanicName: string;
+  vehicleInfo: string;
+  date: string;
+  price: number;
+  paymentMethod: string;
+  status: 'COMPLETED';
+  rating?: number;
+  notes?: string;
+  receiptId?: string;
+  tags?: string[];
+}
+
 export interface ChatMessage {
   id: string;
   text: string;

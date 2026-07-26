@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, X, Phone, MoreVertical, Paperclip, MapPin, Map as MapIcon } from 'lucide-react';
+import { Send, X, Phone, MoreVertical, Paperclip, MapPin, Map as MapIcon, CheckCircle, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import Markdown from 'react-markdown';
-import { ChatMessage } from '../types';
+import { ChatMessage, ServiceStatus } from '../types';
 import { MapComponent } from './MapComponent';
+import { StatusIndicator, STATUS_CONFIG } from './StatusIndicator';
+import { EtaWidget } from './EtaWidget';
+import { VerifiedBadge } from './VerifiedBadge';
+import { ServiceRatingModal } from './ServiceRatingModal';
 
 interface ChatInterfaceProps {
   recipientName: string;
@@ -10,6 +14,8 @@ interface ChatInterfaceProps {
   onClose: () => void;
   isOpen: boolean;
   userRole: 'CLIENT' | 'MECHANIC';
+  initialStatus?: ServiceStatus;
+  onStatusChange?: (status: ServiceStatus) => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
@@ -17,13 +23,49 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   initialMessages = [], 
   onClose, 
   isOpen,
-  userRole
+  userRole,
+  initialStatus = 'PENDING',
+  onStatusChange
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [newMessage, setNewMessage] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [showRating, setShowRating] = useState(false);
+  const [selectedStars, setSelectedStars] = useState(0);
+  const [hoverStars, setHoverStars] = useState(0);
+  
+  // Service Status State
+  const [status, setStatus] = useState<ServiceStatus>(initialStatus);
+  const [showStatusDetails, setShowStatusDetails] = useState(true);
+
+  useEffect(() => {
+    if (initialStatus) {
+      setStatus(initialStatus);
+    }
+  }, [initialStatus]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleUpdateStatus = (newStatus: ServiceStatus) => {
+    setStatus(newStatus);
+    if (onStatusChange) {
+      onStatusChange(newStatus);
+    }
+
+    if (newStatus === 'COMPLETED' && userRole === 'CLIENT') {
+      setShowRating(true);
+    }
+
+    const conf = STATUS_CONFIG[newStatus];
+    const systemMsg: ChatMessage = {
+      id: Date.now().toString(),
+      text: `🔄 **Status do chamado alterado para:** ${conf.label}\n\n*${conf.description}*`,
+      sender: 'them',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, systemMsg]);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -118,18 +160,48 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {recipientName.charAt(0)}
             </div>
             <div>
-              <h3 className="font-bold text-sm">{recipientName}</h3>
-              <p className="text-xs text-indigo-200 flex items-center gap-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h3 className="font-bold text-sm">{recipientName}</h3>
+                {userRole === 'CLIENT' && <VerifiedBadge size="sm" rating={4.8} />}
+              </div>
+              <p className="text-xs text-indigo-200 flex items-center gap-1 mt-0.5">
                 <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
                 Online agora
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+             <EtaWidget compact={true} status={status} />
+             <button 
+               onClick={() => setShowStatusDetails(!showStatusDetails)} 
+               className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
+               title="Alternar Detalhes do Status"
+             >
+               <StatusIndicator status={status} variant="badge" />
+               {showStatusDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+             </button>
+             {userRole === 'CLIENT' && (
+               <button onClick={() => setShowRating(true)} className="p-2 hover:bg-white/10 rounded-full transition-colors flex items-center gap-1 text-xs" title="Concluir Serviço e Avaliar">
+                 <CheckCircle size={18} />
+                 <span className="hidden sm:inline font-medium">Concluir</span>
+               </button>
+             )}
              <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><Phone size={18} /></button>
              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={20} /></button>
           </div>
         </div>
+
+        {/* Live Service Status Stepper Tracker */}
+        {showStatusDetails && (
+          <div className="p-3 bg-zinc-100 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 animate-fade-in">
+            <StatusIndicator 
+              status={status} 
+              variant="full" 
+              isEditable={userRole === 'MECHANIC' || userRole === 'CLIENT'}
+              onStatusChange={handleUpdateStatus} 
+            />
+          </div>
+        )}
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-900/50 scrollbar-thin relative">
@@ -225,6 +297,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </button>
         </form>
       </div>
+
+      {/* Service Rating Modal */}
+      <ServiceRatingModal
+        isOpen={showRating}
+        onClose={() => setShowRating(false)}
+        mechanicName={recipientName}
+        serviceType="Atendimento via Chat FIX"
+        onSubmitRating={(rating, comment, tags) => {
+          let msgText = `✅ **Serviço Concluído & Avaliado!**\n\n★ Avaliação: **${rating}/5 estrelas**`;
+          if (tags && tags.length > 0) {
+            msgText += `\n\n🏷️ Destaques: ${tags.join(' • ')}`;
+          }
+          if (comment && comment.trim()) {
+            msgText += `\n\n💬 *"${comment.trim()}"*`;
+          }
+          handleSend(undefined, msgText);
+          setShowRating(false);
+        }}
+      />
     </div>
   );
 };

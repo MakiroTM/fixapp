@@ -7,17 +7,28 @@ interface HeaderProps {
   onLogout?: () => void;
   onProfileClick?: () => void;
   onPlanClick?: () => void;
+  onHomeClick?: () => void;
+  onSosClick?: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ user, onLogout, onProfileClick, onPlanClick, isDarkMode, toggleTheme }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  user, 
+  onLogout, 
+  onProfileClick, 
+  onPlanClick, 
+  onHomeClick,
+  onSosClick,
+  isDarkMode, 
+  toggleTheme 
+}) => {
   const isPremium = user?.plan === 'PRO' || user?.plan === 'PRIME';
 
   return (
     <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-50 transition-colors duration-300 pt-[env(safe-area-inset-top)]">
       <div className="max-w-5xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onClick={() => window.location.href = "/"}>
+        <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onClick={onHomeClick ? onHomeClick : () => window.location.href = "/"}>
           <div className="bg-indigo-600 p-1.5 sm:p-2 rounded-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
             <Wrench size={18} className="sm:w-6 sm:h-6" />
           </div>
@@ -29,7 +40,24 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout, onProfileClick, 
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-3">
+          {user && user.role === 'CLIENT' && onSosClick && (
+            <button
+              onClick={onSosClick}
+              className="relative group flex items-center gap-1.5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white px-3 py-1.5 rounded-full text-xs font-black transition-all duration-300 shadow-md shadow-rose-600/40 hover:scale-105 active:scale-95 border border-rose-400/30 overflow-hidden"
+              title="Abrir Central SOS Emergência"
+            >
+              <span className="absolute -inset-1 bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 opacity-60 blur-xs animate-pulse rounded-full pointer-events-none"></span>
+              <span className="relative z-10 flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                <span className="tracking-wider">SOS</span>
+              </span>
+            </button>
+          )}
+
           <button
             onClick={toggleTheme}
             className="p-1.5 sm:p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"

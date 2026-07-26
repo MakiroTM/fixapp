@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FIX</string>
+    <string name="title_activity_main">FIX</string>
+    <string name="package_name">com.fix.app</string>
+    <string name="custom_url_scheme">com.fix.app</string>
+</resources>
