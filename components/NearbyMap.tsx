@@ -19,6 +19,8 @@ interface NearbyMapProps {
 export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = [] }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const mechanicMarkersRef = useRef<L.Marker[]>([]);
 
   // Default center (São Paulo) if no user location
   const centerLat = userLocation?.latitude || -23.5505;
@@ -32,13 +34,9 @@ export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = 
     { id: '4', name: 'EletroAuto Silva', lat: centerLat - 0.007, lng: centerLng - 0.008, type: 'Elétrica' },
   ];
 
+  // Initialize Map Once
   useEffect(() => {
-    if (!mapContainerRef.current) return;
-
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
+    if (!mapContainerRef.current || mapInstanceRef.current) return;
 
     const map = L.map(mapContainerRef.current, {
       center: [centerLat, centerLng],
@@ -53,6 +51,28 @@ export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = 
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+
+    // Recalculate size after component mount
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update Markers when location or mechanics change
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    // Clear old mechanic markers
+    mechanicMarkersRef.current.forEach(marker => marker.remove());
+    mechanicMarkersRef.current = [];
 
     // Custom Icon for Mechanics
     const mechanicIcon = L.divIcon({
@@ -83,13 +103,20 @@ export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = 
       popupAnchor: [0, -16]
     });
 
-    // Add user marker if available
+    // Update User Marker
     if (userLocation) {
-      const uMarker = L.marker([userLocation.latitude, userLocation.longitude], { icon: userIcon }).addTo(map);
-      uMarker.bindPopup('<div style="text-align: center; font-weight: bold; font-family: sans-serif;">Você está aqui</div>');
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setLatLng([userLocation.latitude, userLocation.longitude]);
+      } else {
+        const uMarker = L.marker([userLocation.latitude, userLocation.longitude], { icon: userIcon }).addTo(map);
+        uMarker.bindPopup('<div style="text-align: center; font-weight: bold; font-family: sans-serif;">Você está aqui</div>');
+        userMarkerRef.current = uMarker;
+      }
+      // Optionally re-center map on user location if it moves significantly
+      // map.setView([userLocation.latitude, userLocation.longitude]);
     }
 
-    // Add mechanic markers
+    // Add new mechanic markers
     displayMechanics.forEach((mech) => {
       const mMarker = L.marker([mech.lat, mech.lng], { icon: mechanicIcon }).addTo(map);
       mMarker.bindPopup(`
@@ -98,19 +125,9 @@ export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = 
           <span style="font-size: 12px; color: #61616b;">${mech.type}</span>
         </div>
       `);
+      mechanicMarkersRef.current.push(mMarker);
     });
 
-    // Recalculate size after component mount
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 200);
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
   }, [userLocation?.latitude, userLocation?.longitude, mechanics]);
 
   return (

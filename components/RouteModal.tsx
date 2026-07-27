@@ -26,6 +26,7 @@ export const RouteModal: React.FC<RouteModalProps> = ({
   const [travelMode, setTravelMode] = useState<'car' | 'foot' | 'bike'>('car');
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const layersRef = useRef<L.Layer[]>([]);
 
   // Fallback destination lat/lng if not provided directly
   const destLat = destinationLat || -23.5505;
@@ -35,13 +36,9 @@ export const RouteModal: React.FC<RouteModalProps> = ({
   const origLat = userLat || destLat - 0.02;
   const origLng = userLng || destLng - 0.02;
 
+  // Initialize Map Once
   useEffect(() => {
-    if (!isOpen || !mapContainerRef.current) return;
-
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
+    if (!isOpen || !mapContainerRef.current || mapInstanceRef.current) return;
 
     const midpointLat = (origLat + destLat) / 2;
     const midpointLng = (origLng + destLng) / 2;
@@ -59,6 +56,35 @@ export const RouteModal: React.FC<RouteModalProps> = ({
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+
+  }, [isOpen]);
+
+  // Clean up on unmount or close
+  useEffect(() => {
+    if (!isOpen && mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
+    return () => {
+      if (!isOpen && mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [isOpen]);
+
+  // Update Markers and Polyline
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !isOpen) return;
+
+    // Clear old layers
+    layersRef.current.forEach(layer => layer.remove());
+    layersRef.current = [];
 
     // Custom Icon for Destination
     const destIcon = L.divIcon({
@@ -89,9 +115,11 @@ export const RouteModal: React.FC<RouteModalProps> = ({
     // Add Markers
     const dMarker = L.marker([destLat, destLng], { icon: destIcon }).addTo(map);
     dMarker.bindPopup(`<strong>Destino: ${destinationTitle}</strong>`).openPopup();
+    layersRef.current.push(dMarker);
 
     const uMarker = L.marker([origLat, origLng], { icon: userIcon }).addTo(map);
     uMarker.bindPopup('<strong>Origem: Ponto de Partida</strong>');
+    layersRef.current.push(uMarker);
 
     // Draw Polyline Route
     const polylineColor = travelMode === 'car' ? '#4f46e5' : travelMode === 'foot' ? '#10b981' : '#f59e0b';
@@ -104,20 +132,11 @@ export const RouteModal: React.FC<RouteModalProps> = ({
       opacity: 0.85,
       dashArray: travelMode === 'foot' ? '6, 8' : '10, 8'
     }).addTo(map);
+    layersRef.current.push(polyline);
 
     // Fit Bounds
     map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
 
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 200);
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
   }, [isOpen, origLat, origLng, destLat, destLng, destinationTitle, travelMode]);
 
   if (!isOpen) return null;
