@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, LogOut, User as UserIcon, Store, Moon, Sun, Crown } from 'lucide-react';
+import { Wrench, LogOut, User as UserIcon, Store, Moon, Sun, Crown, Map as MapIcon } from 'lucide-react';
 import { User } from '../types';
 
 interface HeaderProps {
@@ -9,6 +9,7 @@ interface HeaderProps {
   onPlanClick?: () => void;
   onHomeClick?: () => void;
   onSosClick?: () => void;
+  onMapClick?: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 }
@@ -20,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   onPlanClick, 
   onHomeClick,
   onSosClick,
+  onMapClick,
   isDarkMode, 
   toggleTheme 
 }) => {
@@ -41,6 +43,17 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-3">
+          {user && user.role === 'CLIENT' && onMapClick && (
+            <button
+              onClick={onMapClick}
+              className="p-1.5 sm:p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-full transition-colors flex items-center gap-1.5"
+              title="Oficinas Próximas"
+            >
+              <MapIcon size={16} className="sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline text-xs font-bold">Oficinas</span>
+            </button>
+          )}
+
           {user && user.role === 'CLIENT' && onSosClick && (
             <button
               onClick={onSosClick}

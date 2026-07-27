@@ -7,9 +7,10 @@ import { UserProfile } from './components/UserProfile';
 import { SubscriptionScreen } from './components/SubscriptionScreen';
 import { SosEmergencyScreen } from './components/SosEmergencyScreen';
 import { SplashScreen } from './components/SplashScreen';
+import { NearbyWorkshopsScreen } from './components/NearbyWorkshopsScreen';
 import { User, Coordinates } from './types';
 
-type ViewState = 'dashboard' | 'profile' | 'subscription' | 'sos';
+type ViewState = 'dashboard' | 'profile' | 'subscription' | 'sos' | 'nearby';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -186,17 +187,18 @@ const App: React.FC = () => {
         onPlanClick={() => setCurrentView('subscription')}
         onHomeClick={() => setCurrentView('dashboard')}
         onSosClick={() => setCurrentView('sos')}
+        onMapClick={() => setCurrentView('nearby')}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
       />
       
-      <main className="flex-grow">
+      <main className="flex-grow flex flex-col relative">
         {!user ? (
           <div className="animate-page-enter">
             <AuthScreen onLogin={handleLogin} />
           </div>
         ) : (
-          <div key={currentView} className="animate-page-enter">
+          <div key={currentView} className="animate-page-enter flex-1 flex flex-col">
             {currentView === 'profile' ? (
               <UserProfile 
                 user={user} 
@@ -216,6 +218,13 @@ const App: React.FC = () => {
                 locationError={locationError}
                 isDetectingLocation={isDetectingLocation}
                 onBack={() => setCurrentView('dashboard')}
+              />
+            ) : currentView === 'nearby' ? (
+              <NearbyWorkshopsScreen
+                user={user}
+                location={location}
+                onBack={() => setCurrentView('dashboard')}
+                onContact={() => {}}
               />
             ) : (
               <>
