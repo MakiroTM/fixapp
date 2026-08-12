@@ -10,9 +10,10 @@ interface NearbyWorkshopsScreenProps {
   location: Coordinates | null;
   onBack: () => void;
   onContact: (name: string) => void;
+  onSelectWorkshop?: (chunk: GroundingChunk) => void;
 }
 
-export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ user, location, onBack, onContact }) => {
+export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ user, location, onBack, onContact, onSelectWorkshop }) => {
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [mechanics, setMechanics] = useState<SearchResult | null>(null);
@@ -258,11 +259,14 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
               </div>
 
               <div className="flex gap-2">
-                <button 
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
-                >
-                  <Navigation size={16} /> Rotas
-                </button>
+                {onSelectWorkshop && (
+                  <button 
+                    onClick={() => onSelectWorkshop(selectedWorkshop)}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-md"
+                  >
+                    <Store size={16} /> Ver Página
+                  </button>
+                )}
                 <button 
                   onClick={() => onContact(selectedWorkshop.maps?.title || 'Oficina')}
                   className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"

@@ -14,13 +14,14 @@ import { QuickChatCard } from './QuickChatCard';
 import { NearbyMap } from './NearbyMap';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
-import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus } from '../types';
+import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus, GroundingChunk } from '../types';
 import { AlertCircle, Compass, MapPin, MessageCircle, Navigation, Clock, CheckCircle2, ChevronRight, X, Filter, Layers, Sparkles, SlidersHorizontal, Star } from 'lucide-react';
 
 interface ClientDashboardProps {
   user: User;
   onUpgrade: () => void;
   onSosClick?: () => void;
+  onSelectWorkshop?: (chunk: GroundingChunk) => void;
   location: Coordinates | null;
   locationError: string | null;
   isDetectingLocation: boolean;
@@ -30,6 +31,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   user, 
   onUpgrade,
   onSosClick,
+  onSelectWorkshop,
   location,
   locationError,
   isDetectingLocation
@@ -516,12 +518,59 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                    </div>
                  </div>
 
-                 {!searchResult && loadingNearby && (
-                   <span className="text-[10px] sm:text-sm text-zinc-400 animate-pulse flex items-center gap-1.5">
-                     <Clock size={14} className="animate-spin" /> Atualizando localização...
-                   </span>
-                 )}
+                 <div className="flex items-center gap-2">
+                   {searchResult && (
+                     <button
+                       type="button"
+                       onClick={() => {
+                         setSearchResult(null);
+                         setError(null);
+                       }}
+                       className="flex items-center gap-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-800 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 transition-all cursor-pointer shadow-sm active:scale-95"
+                       title="Fechar aba de pesquisa e voltar aos locais padrão"
+                     >
+                       <X size={16} />
+                       <span>Fechar Aba</span>
+                     </button>
+                   )}
+                   {!searchResult && loadingNearby && (
+                     <span className="text-[10px] sm:text-sm text-zinc-400 animate-pulse flex items-center gap-1.5">
+                       <Clock size={14} className="animate-spin" /> Atualizando localização...
+                     </span>
+                   )}
+                 </div>
               </div>
+
+              {searchResult && (
+                <div className="mb-6 bg-indigo-50/90 dark:bg-indigo-950/50 p-3.5 sm:p-4 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 flex items-center justify-between gap-3 shadow-sm animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-sm shrink-0">
+                      <Sparkles size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs sm:text-sm text-indigo-950 dark:text-indigo-200">
+                        Exibindo resultados da sua pesquisa
+                      </h4>
+                      <p className="text-[11px] sm:text-xs text-indigo-700 dark:text-indigo-300">
+                        Clique em "Fechar Aba" para fechar esta busca e ver todos os locais recomendados.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchResult(null);
+                      setError(null);
+                    }}
+                    className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-xl transition-colors shrink-0 flex items-center gap-1 text-xs font-bold border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
+                    title="Fechar aba de pesquisa"
+                    aria-label="Fechar aba"
+                  >
+                    <X size={18} />
+                    <span className="hidden sm:inline">Fechar</span>
+                  </button>
+                </div>
+              )}
               
               {/* Interactive Category Filter Toolbar with layout animations */}
               {rawChunks.length > 0 && (
@@ -558,13 +607,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 </div>
               )}
 
-              {/* Display Text Content (Tips) */}
-              <div className="bg-white dark:bg-zinc-800 p-5 sm:p-8 rounded-2xl shadow-lg shadow-zinc-200/50 dark:shadow-none border border-zinc-100 dark:border-zinc-700 mb-6 sm:mb-8 prose prose-sm sm:prose-base prose-zinc dark:prose-invert max-w-none prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-headings:text-zinc-800 dark:prose-headings:text-zinc-100 prose-strong:text-indigo-700 dark:prose-strong:text-indigo-400">
-                 <ReactMarkdown>
-                   {currentResult.text || ''}
-                 </ReactMarkdown>
-              </div>
-
               {/* Display Animated Grid Cards */}
               {rawChunks.length > 0 && (
                 <div className="space-y-4 sm:space-y-6">
@@ -595,7 +637,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                              animationFillMode: 'backwards' 
                            }}
                          >
-                           <ResultCard chunk={chunk} onContact={handleContact} />
+                           <ResultCard chunk={chunk} onContact={handleContact} onSelectWorkshop={onSelectWorkshop} />
                          </div>
                       ))}
                     </div>

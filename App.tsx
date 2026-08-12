@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Header } from './components/Header';
 import { AuthScreen } from './components/AuthScreen';
 import { ClientDashboard } from './components/ClientDashboard';
@@ -8,14 +9,16 @@ import { SubscriptionScreen } from './components/SubscriptionScreen';
 import { SosEmergencyScreen } from './components/SosEmergencyScreen';
 import { SplashScreen } from './components/SplashScreen';
 import { NearbyWorkshopsScreen } from './components/NearbyWorkshopsScreen';
-import { User, Coordinates } from './types';
+import { WorkshopDetailScreen } from './components/WorkshopDetailScreen';
+import { User, Coordinates, GroundingChunk } from './types';
 
-type ViewState = 'dashboard' | 'profile' | 'subscription' | 'sos' | 'nearby';
+type ViewState = 'dashboard' | 'profile' | 'subscription' | 'sos' | 'nearby' | 'workshop-detail';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
+  const [selectedWorkshop, setSelectedWorkshop] = useState<GroundingChunk | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   
   // Geolocation State
@@ -174,6 +177,11 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSelectWorkshop = (chunk: GroundingChunk) => {
+    setSelectedWorkshop(chunk);
+    setCurrentView('workshop-detail');
+  };
+
   if (loading) {
     return <SplashScreen onFinish={() => setLoading(false)} />;
   }
@@ -192,58 +200,85 @@ const App: React.FC = () => {
         toggleTheme={toggleTheme}
       />
       
-      <main className="flex-grow flex flex-col relative">
-        {!user ? (
-          <div className="animate-page-enter">
-            <AuthScreen onLogin={handleLogin} />
-          </div>
-        ) : (
-          <div key={currentView} className="animate-page-enter flex-1 flex flex-col">
-            {currentView === 'profile' ? (
-              <UserProfile 
-                user={user} 
-                onSave={handleUpdateUser} 
-                onBack={() => setCurrentView('dashboard')} 
-              />
-            ) : currentView === 'subscription' ? (
-              <SubscriptionScreen 
-                user={user}
-                onSubscribe={handleSubscribe}
-                onBack={() => setCurrentView('dashboard')}
-              />
-            ) : currentView === 'sos' ? (
-              <SosEmergencyScreen
-                user={user}
-                location={location}
-                locationError={locationError}
-                isDetectingLocation={isDetectingLocation}
-                onBack={() => setCurrentView('dashboard')}
-              />
-            ) : currentView === 'nearby' ? (
-              <NearbyWorkshopsScreen
-                user={user}
-                location={location}
-                onBack={() => setCurrentView('dashboard')}
-                onContact={() => {}}
-              />
-            ) : (
-              <>
-                {user.role === 'CLIENT' ? (
-                  <ClientDashboard 
-                    user={user} 
-                    onUpgrade={() => setCurrentView('subscription')} 
-                    onSosClick={() => setCurrentView('sos')}
-                    location={location}
-                    locationError={locationError}
-                    isDetectingLocation={isDetectingLocation}
-                  />
-                ) : (
-                  <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
-                )}
-              </>
-            )}
-          </div>
-        )}
+      <main className="flex-grow flex flex-col relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {!user ? (
+            <motion.div
+              key="auth"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.25 }}
+            >
+              <AuthScreen onLogin={handleLogin} />
+            </motion.div>
+          ) : (
+            <motion.div 
+              key={currentView} 
+              initial={{ opacity: 0, y: 18, scale: 0.99 }} 
+              animate={{ opacity: 1, y: 0, scale: 1 }} 
+              exit={{ opacity: 0, y: -18, scale: 0.99 }} 
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="flex-1 flex flex-col"
+            >
+              {currentView === 'profile' ? (
+                <UserProfile 
+                  user={user} 
+                  onSave={handleUpdateUser} 
+                  onBack={() => setCurrentView('dashboard')} 
+                />
+              ) : currentView === 'subscription' ? (
+                <SubscriptionScreen 
+                  user={user}
+                  onSubscribe={handleSubscribe}
+                  onBack={() => setCurrentView('dashboard')}
+                />
+              ) : currentView === 'sos' ? (
+                <SosEmergencyScreen
+                  user={user}
+                  location={location}
+                  locationError={locationError}
+                  isDetectingLocation={isDetectingLocation}
+                  onBack={() => setCurrentView('dashboard')}
+                />
+              ) : currentView === 'nearby' ? (
+                <NearbyWorkshopsScreen
+                  user={user}
+                  location={location}
+                  onBack={() => setCurrentView('dashboard')}
+                  onContact={() => {}}
+                  onSelectWorkshop={handleSelectWorkshop}
+                />
+              ) : currentView === 'workshop-detail' && selectedWorkshop ? (
+                <WorkshopDetailScreen
+                  chunk={selectedWorkshop}
+                  userLocation={location}
+                  onBack={() => setCurrentView('dashboard')}
+                  onContact={(name) => {
+                    // Direct to dashboard chat or handle contact
+                    setCurrentView('dashboard');
+                  }}
+                />
+              ) : (
+                <>
+                  {user.role === 'CLIENT' ? (
+                    <ClientDashboard 
+                      user={user} 
+                      onUpgrade={() => setCurrentView('subscription')} 
+                      onSosClick={() => setCurrentView('sos')}
+                      onSelectWorkshop={handleSelectWorkshop}
+                      location={location}
+                      locationError={locationError}
+                      isDetectingLocation={isDetectingLocation}
+                    />
+                  ) : (
+                    <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
+                  )}
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
       
       {/* Footer com ajuste para Safe Area do iPhone */}
