@@ -206,8 +206,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   );
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-zinc-950 flex items-center justify-center p-3 sm:p-6 transition-colors duration-300">
-      <div className="w-full max-w-4xl bg-zinc-950 rounded-3xl shadow-2xl shadow-indigo-500/10 overflow-hidden border border-zinc-800 flex flex-col md:flex-row transition-all duration-300">
+    <div className="min-h-[calc(100vh-64px)] bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-3 sm:p-6 transition-colors duration-300">
+      <div className="w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl shadow-indigo-500/10 dark:shadow-none overflow-hidden border border-zinc-200 dark:border-zinc-800 flex flex-col md:flex-row transition-all duration-300">
         
         {/* Left Side - Visual Hero & Profile Selector */}
         <div className={`md:w-1/2 p-6 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden transition-all duration-500 ${
@@ -215,12 +215,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             ? 'bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900' 
             : 'bg-gradient-to-br from-zinc-800 via-slate-900 to-zinc-950'
         }`}>
-           <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-950 opacity-10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
-           <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-900/200 opacity-20 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none"></div>
+           <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
+           <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500 opacity-20 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none"></div>
            
            <div className="relative z-10 space-y-4 sm:space-y-6">
              <div className="flex items-center gap-3">
-               <div className="w-12 h-12 bg-zinc-950/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
+               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
                  <Wrench size={22} className="text-white" />
                </div>
                <div>
@@ -264,11 +264,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                  onClick={() => setSelectedRole('CLIENT')}
                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                    selectedRole === 'CLIENT' 
-                     ? 'bg-zinc-950 text-indigo-900 border-white shadow-xl scale-[1.02]' 
-                     : 'border-white/20 text-white hover:bg-zinc-950/10'
+                     ? 'bg-white text-indigo-900 border-white shadow-xl scale-[1.02]' 
+                     : 'border-white/20 text-white hover:bg-white/10'
                  }`}
                >
-                 <Car size={20} className={selectedRole === 'CLIENT' ? 'text-blue-400' : 'text-white'} />
+                 <Car size={20} className={selectedRole === 'CLIENT' ? 'text-indigo-600' : 'text-white'} />
                  <div className="mt-2">
                    <span className="block font-black text-xs sm:text-sm">Motorista</span>
                    <span className="text-[10px] opacity-75">Quero socorro & serviços</span>
@@ -280,11 +280,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                  onClick={() => setSelectedRole('MECHANIC')}
                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                    selectedRole === 'MECHANIC' 
-                     ? 'bg-zinc-950 text-white border-white shadow-xl scale-[1.02]' 
-                     : 'border-white/20 text-white hover:bg-zinc-950/10'
+                     ? 'bg-white text-zinc-900 border-white shadow-xl scale-[1.02]' 
+                     : 'border-white/20 text-white hover:bg-white/10'
                  }`}
                >
-                 <Store size={20} className={selectedRole === 'MECHANIC' ? 'text-white' : 'text-white'} />
+                 <Store size={20} className={selectedRole === 'MECHANIC' ? 'text-zinc-900' : 'text-white'} />
                  <div className="mt-2">
                    <span className="block font-black text-xs sm:text-sm">Mecânico</span>
                    <span className="text-[10px] opacity-75">Quero receber chamados</span>
@@ -295,19 +295,19 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
         </div>
 
         {/* Right Side - Interactive View Container */}
-        <div className="md:w-1/2 p-6 sm:p-10 flex flex-col justify-center bg-zinc-950 transition-colors duration-300">
+        <div className="md:w-1/2 p-6 sm:p-10 flex flex-col justify-center bg-white dark:bg-zinc-900 transition-colors duration-300">
           
           {/* VIEW 1: WELCOME SCREEN */}
           {authMode === 'WELCOME' && (
             <div className="space-y-6 animate-fade-in">
               <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-900/200/10 text-blue-400 text-xs font-bold mb-3 border border-indigo-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-3 border border-indigo-500/20">
                   <Sparkles size={14} /> Bem-vindo ao FIX
                 </span>
-                <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+                <h3 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white leading-tight">
                   Sua jornada com tranquilidade na estrada.
                 </h3>
-                <p className="text-zinc-400 text-xs sm:text-sm mt-2 leading-relaxed">
+                <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm mt-2 leading-relaxed">
                   Escolha uma das opções abaixo para começar. Acesse sua conta existente ou crie um cadastro em menos de 1 minuto.
                 </p>
               </div>
@@ -317,10 +317,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 <button
                   type="button"
                   onClick={() => setAuthMode('REGISTER')}
-                  className="w-full bg-blue-600 hover:bg-blue-900/200 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg shadow-blue-900/30 flex items-center justify-between group transition-all transform hover:-translate-y-0.5"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-between group transition-all transform hover:-translate-y-0.5"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-950/20 rounded-xl">
+                    <div className="p-2 bg-white/20 rounded-xl">
                       <UserPlus size={20} />
                     </div>
                     <div className="text-left">
@@ -334,29 +334,29 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 <button
                   type="button"
                   onClick={() => setAuthMode('LOGIN')}
-                  className="w-full bg-zinc-900/80 hover:bg-zinc-200:bg-zinc-800 text-white font-extrabold py-3.5 px-6 rounded-2xl border border-zinc-800 flex items-center justify-between group transition-all"
+                  className="w-full bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-100 font-extrabold py-3.5 px-6 rounded-2xl border border-zinc-200 dark:border-zinc-700 flex items-center justify-between group transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-zinc-200 text-blue-400 rounded-xl">
+                    <div className="p-2 bg-zinc-200 dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 rounded-xl">
                       <LogIn size={20} />
                     </div>
                     <div className="text-left">
                       <span className="block text-sm">Já tenho uma conta (Login)</span>
-                      <span className="block text-[11px] font-normal text-zinc-400">Entre com seu e-mail e senha</span>
+                      <span className="block text-[11px] font-normal text-zinc-500 dark:text-zinc-400">Entre com seu e-mail e senha</span>
                     </div>
                   </div>
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform text-zinc-400" />
                 </button>
 
                 <div className="relative py-2 flex items-center justify-center">
-                  <div className="border-t border-zinc-800 w-full"></div>
-                  <span className="bg-zinc-950 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou</span>
+                  <div className="border-t border-zinc-200 dark:border-zinc-800 w-full"></div>
+                  <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou</span>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold py-3.5 px-6 rounded-2xl border border-zinc-800 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-100 font-extrabold py-3.5 px-6 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <GoogleIcon />
                   <span className="text-sm">Continuar com o Google</span>
@@ -364,7 +364,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               </div>
 
               {/* Informational Footer note */}
-              <div className="pt-4 border-t border-zinc-800/60 text-center text-[11px] text-zinc-400 flex items-center justify-center gap-1.5">
+              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/60 text-center text-[11px] text-zinc-400 flex items-center justify-center gap-1.5">
                 <Lock size={12} className="text-emerald-500" />
                 <span>Ambiente seguro com criptografia de ponta a ponta</span>
               </div>
@@ -377,17 +377,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={() => setAuthMode('WELCOME')}
-                className="inline-flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-blue-400 transition-colors mb-1"
+                className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-1"
               >
                 <ArrowLeft size={16} />
                 <span>Voltar ao início</span>
               </button>
 
               <div>
-                <h3 className="text-2xl font-black text-white">
+                <h3 className="text-2xl font-black text-zinc-900 dark:text-white">
                   Bem-vindo de volta!
                 </h3>
-                <p className="text-zinc-400 text-xs mt-1">
+                <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
                   Entre na sua conta para acessar os serviços e histórico.
                 </p>
               </div>
@@ -396,15 +396,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 
                 {/* Biometric Quick Login Banner if biometrics available or email saved */}
                 {hasBiometrics && (
-                  <div className="p-3.5 bg-gradient-to-r from-indigo-900/40 via-indigo-800/30 to-purple-900/40 border border-indigo-500/30 rounded-2xl space-y-2">
+                  <div className="p-3.5 bg-gradient-to-r from-indigo-900/40 via-indigo-800/30 to-purple-900/40 dark:from-indigo-950/80 dark:to-zinc-900 border border-indigo-500/30 rounded-2xl space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-indigo-700">
-                        <div className="p-1.5 bg-blue-600 text-white rounded-lg animate-pulse">
+                      <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+                        <div className="p-1.5 bg-indigo-600 text-white rounded-lg animate-pulse">
                           <Fingerprint size={18} />
                         </div>
                         <span className="text-xs font-black">Acesso Biométrico Disponível</span>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                         Ativo
                       </span>
                     </div>
@@ -412,7 +412,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                     <button
                       type="button"
                       onClick={handleBiometricLogin}
-                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-900/200 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                     >
                       <Scan size={16} />
                       <span>ENTRAR COM {biometryTypeName.toUpperCase()}</span>
@@ -421,7 +421,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1.5">
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Endereço de E-mail
                   </label>
                   <div className="relative">
@@ -430,7 +430,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                       required 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                       placeholder="seu.email@exemplo.com"
                     />
                     <Mail size={18} className="absolute left-3 top-3.5 text-zinc-400" />
@@ -438,7 +438,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1.5">
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Sua Senha
                   </label>
                   <div className="relative">
@@ -447,14 +447,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                       required 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 rounded-xl border border-zinc-800 bg-zinc-950 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-10 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                       placeholder="••••••••"
                     />
                     <KeyRound size={18} className="absolute left-3 top-3.5 text-zinc-400" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-200 transition-colors"
+                      className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
                       title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -470,9 +470,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-4 h-4 rounded border-zinc-700 text-blue-400 focus:ring-blue-500 cursor-pointer accent-indigo-600"
+                        className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
                       />
-                      <span className="text-xs font-semibold text-zinc-400 group-hover:text-blue-400 transition-colors">
+                      <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         Lembrar sessão neste aparelho
                       </span>
                     </label>
@@ -480,7 +480,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                     <button
                       type="button"
                       onClick={() => setShowForgotModal(true)}
-                      className="text-xs font-bold text-blue-400 hover:underline transition-all"
+                      className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-all"
                     >
                       Esqueceu a senha?
                     </button>
@@ -492,9 +492,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                         type="checkbox"
                         checked={enableBiometrics}
                         onChange={(e) => setEnableBiometrics(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-zinc-700 text-blue-400 focus:ring-blue-500 cursor-pointer accent-indigo-600"
+                        className="w-3.5 h-3.5 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
                       />
-                      <span className="text-[11px] font-medium text-blue-400 flex items-center gap-1">
+                      <span className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
                         <Fingerprint size={13} />
                         Salvar credencial para Biometria (FaceID/Digital)
                       </span>
@@ -504,7 +504,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 
                 <button 
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-900/200 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2 cursor-pointer"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2 cursor-pointer"
                 >
                   <span>ENTRAR NA CONTA</span>
                   <ArrowRight size={18} />
@@ -512,26 +512,26 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               </form>
 
               <div className="relative py-1 flex items-center justify-center">
-                <div className="border-t border-zinc-800 w-full"></div>
-                <span className="bg-zinc-950 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou entre com</span>
+                <div className="border-t border-zinc-200 dark:border-zinc-800 w-full"></div>
+                <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou entre com</span>
               </div>
 
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold py-3 px-4 rounded-2xl border border-zinc-800 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] text-sm"
+                className="w-full bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-100 font-extrabold py-3 px-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] text-sm"
               >
                 <GoogleIcon />
                 <span>Entrar com o Google</span>
               </button>
 
-              <div className="pt-3 border-t border-zinc-800 text-center">
-                <p className="text-xs text-zinc-400">
+              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-center">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   Ainda não tem uma conta?{' '}
                   <button 
                     type="button"
                     onClick={() => setAuthMode('REGISTER')}
-                    className="font-extrabold text-blue-400 hover:underline"
+                    className="font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
                   >
                     Criar conta grátis
                   </button>
@@ -546,17 +546,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={() => setAuthMode('WELCOME')}
-                className="inline-flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-blue-400 transition-colors mb-1"
+                className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-1"
               >
                 <ArrowLeft size={16} />
                 <span>Voltar ao início</span>
               </button>
 
               <div>
-                <h3 className="text-2xl font-black text-white">
+                <h3 className="text-2xl font-black text-zinc-900 dark:text-white">
                   Crie sua conta no FIX
                 </h3>
-                <p className="text-zinc-400 text-xs mt-1">
+                <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
                   Cadastro rápido para {selectedRole === 'CLIENT' ? 'Motoristas' : 'Mecânicos e Oficinas'}.
                 </p>
               </div>
@@ -564,20 +564,20 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold py-3 px-4 rounded-2xl border border-zinc-800 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] text-sm"
+                className="w-full bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 text-zinc-800 dark:text-zinc-100 font-extrabold py-3 px-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] text-sm"
               >
                 <GoogleIcon />
                 <span>Cadastrar com o Google</span>
               </button>
 
               <div className="relative py-1 flex items-center justify-center">
-                <div className="border-t border-zinc-800 w-full"></div>
-                <span className="bg-zinc-950 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou com seu e-mail</span>
+                <div className="border-t border-zinc-200 dark:border-zinc-800 w-full"></div>
+                <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider absolute">ou com seu e-mail</span>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
                     Nome Completo
                   </label>
                   <input 
@@ -585,14 +585,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                     required 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     placeholder="Seu nome e sobrenome"
                   />
                 </div>
 
                 {selectedRole === 'MECHANIC' && (
                   <div>
-                    <label className="block text-xs font-bold text-zinc-300 mb-1">
+                    <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
                       Nome da Oficina / Guincho
                     </label>
                     <input 
@@ -600,14 +600,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                       required 
                       value={shopName}
                       onChange={(e) => setShopName(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                       placeholder="Ex: Auto Center Express"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
                     Endereço de E-mail
                   </label>
                   <input 
@@ -615,13 +615,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                     required 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     placeholder="seu.email@exemplo.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
                     Crie uma Senha Segura
                   </label>
                   <input 
@@ -629,7 +629,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                     required 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     placeholder="Mínimo de 6 caracteres"
                   />
                 </div>
@@ -639,29 +639,29 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                     type="checkbox" 
                     required 
                     defaultChecked
-                    className="w-4 h-4 mt-0.5 rounded border-zinc-300 text-blue-400 focus:ring-blue-500 accent-indigo-600"
+                    className="w-4 h-4 mt-0.5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 accent-indigo-600"
                   />
-                  <span className="text-[11px] text-zinc-400 leading-tight">
-                    Li e concordo com os <a href="#" className="text-blue-400 underline">Termos de Uso</a> e a <a href="#" className="text-blue-400 underline">Política de Privacidade</a> do FIX App.
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight">
+                    Li e concordo com os <a href="#" className="text-indigo-600 underline">Termos de Uso</a> e a <a href="#" className="text-indigo-600 underline">Política de Privacidade</a> do FIX App.
                   </span>
                 </label>
 
                 <button 
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-900/200 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all text-sm mt-2"
                 >
                   <span>CRIAR CONTA GRATUITA</span>
                   <ArrowRight size={18} />
                 </button>
               </form>
 
-              <div className="pt-3 border-t border-zinc-800 text-center">
-                <p className="text-xs text-zinc-400">
+              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-center">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   Já possui uma conta criada?{' '}
                   <button 
                     type="button"
                     onClick={() => setAuthMode('LOGIN')}
-                    className="font-extrabold text-blue-400 hover:underline"
+                    className="font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline"
                   >
                     Fazer Login
                   </button>
@@ -676,32 +676,32 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       {/* Forgot Password Modal */}
       {showForgotModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-900/200/10 text-blue-400 rounded-2xl">
+              <div className="p-3 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl">
                 <HelpCircle size={24} />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">Recuperar Senha</h3>
-                <p className="text-xs text-zinc-400">Enviaremos um link de redefinição para o seu e-mail.</p>
+                <h3 className="text-lg font-black text-zinc-900 dark:text-white">Recuperar Senha</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">Enviaremos um link de redefinição para o seu e-mail.</p>
               </div>
             </div>
 
             {forgotSent ? (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl text-emerald-400 text-xs font-bold flex items-center gap-2">
+              <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-2">
                 <CheckCircle2 size={18} />
                 <span>E-mail de recuperação enviado com sucesso! Verifique sua caixa de entrada.</span>
               </div>
             ) : (
               <form onSubmit={handleSendForgotPassword} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1">E-mail Cadastrado</label>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">E-mail Cadastrado</label>
                   <input 
                     type="email"
                     required
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="seu.email@exemplo.com"
                   />
                 </div>
@@ -710,13 +710,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="px-4 py-2.5 text-xs font-bold text-zinc-400 hover:bg-zinc-800 rounded-xl transition-colors"
+                    className="px-4 py-2.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 text-xs font-bold bg-blue-600 hover:bg-blue-900/200 text-white rounded-xl shadow-md transition-all"
+                    className="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md transition-all"
                   >
                     Enviar Link
                   </button>
@@ -730,24 +730,24 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
       {/* Biometric Verification Modal */}
       {showBiometricModal && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden animate-pop-in space-y-5">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden animate-pop-in space-y-5">
             
             <button
               onClick={() => setShowBiometricModal(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-200 p-1 rounded-full transition-colors cursor-pointer"
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1 rounded-full transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
 
             {/* Header */}
             <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-blue-500 block mb-1">
+              <span className="text-[10px] uppercase font-black tracking-widest text-indigo-500 block mb-1">
                 Segurança Capacitada FIX
               </span>
-              <h3 className="text-xl font-extrabold text-white">
+              <h3 className="text-xl font-extrabold text-zinc-900 dark:text-white">
                 Autenticação Biométrica
               </h3>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                 {biometryTypeName}
               </p>
             </div>
@@ -756,8 +756,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             <div className="py-6 flex flex-col items-center justify-center">
               {biometricStatus === 'SCANNING' && (
                 <div className="relative flex items-center justify-center">
-                  <div className="absolute w-28 h-28 bg-blue-900/200/20 rounded-full animate-ping pointer-events-none" />
-                  <div className="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-blue-900/40 relative z-10 animate-bounce">
+                  <div className="absolute w-28 h-28 bg-indigo-500/20 rounded-full animate-ping pointer-events-none" />
+                  <div className="w-20 h-20 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-600/40 relative z-10 animate-bounce">
                     <Fingerprint size={42} />
                   </div>
                 </div>
@@ -780,7 +780,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
             <div>
               {biometricStatus === 'SCANNING' && (
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-zinc-200">
+                  <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
                     Aproxime seu rosto ou dedo no leitor do aparelho
                   </p>
                   <p className="text-[11px] text-zinc-400">
@@ -791,7 +791,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 
               {biometricStatus === 'SUCCESS' && (
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-emerald-400 flex items-center justify-center gap-1">
+                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
                     Identidade confirmada com sucesso!
                   </p>
                   <p className="text-[11px] text-zinc-400">
@@ -809,14 +809,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
                     <button
                       type="button"
                       onClick={() => setShowBiometricModal(false)}
-                      className="flex-1 py-2.5 bg-zinc-900 text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
+                      className="flex-1 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
                     >
                       Usar Senha
                     </button>
                     <button
                       type="button"
                       onClick={handleBiometricLogin}
-                      className="flex-1 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-900/200 transition-colors shadow-md cursor-pointer"
+                      className="flex-1 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-500 transition-colors shadow-md cursor-pointer"
                     >
                       Tentar Novamente
                     </button>

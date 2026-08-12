@@ -145,12 +145,12 @@ export const RouteModal: React.FC<RouteModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
-      <div className="bg-zinc-950 dark:bg-zinc-900 w-full max-w-3xl h-[85vh] sm:h-[80vh] rounded-3xl shadow-2xl border border-zinc-800 dark:border-zinc-800 flex flex-col overflow-hidden animate-pop-in relative">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-3xl h-[85vh] sm:h-[80vh] rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden animate-pop-in relative">
         
         {/* Header */}
         <div className="p-4 sm:p-5 bg-zinc-900 text-white flex items-center justify-between border-b border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600/30 text-indigo-400 rounded-2xl border border-indigo-500/30">
+            <div className="p-2.5 bg-indigo-600/30 text-indigo-400 rounded-2xl border border-indigo-500/30">
               <Navigation size={20} className="animate-pulse" />
             </div>
             <div>
@@ -178,15 +178,15 @@ export const RouteModal: React.FC<RouteModalProps> = ({
         </div>
 
         {/* Travel Mode Selector Controls */}
-        <div className="p-3 bg-zinc-900 dark:bg-zinc-850 border-b border-zinc-800 dark:border-zinc-800 flex items-center justify-between gap-2 overflow-x-auto">
+        <div className="p-3 bg-zinc-50 dark:bg-zinc-850 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-2 overflow-x-auto">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setTravelMode('car')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 travelMode === 'car'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
               <Car size={14} /> Carro / Moto
@@ -196,8 +196,8 @@ export const RouteModal: React.FC<RouteModalProps> = ({
               onClick={() => setTravelMode('foot')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 travelMode === 'foot'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
               <Footprints size={14} /> A Pé
@@ -207,8 +207,8 @@ export const RouteModal: React.FC<RouteModalProps> = ({
               onClick={() => setTravelMode('bike')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 travelMode === 'bike'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
               <Bike size={14} /> Bicicleta
@@ -219,7 +219,7 @@ export const RouteModal: React.FC<RouteModalProps> = ({
             href={osmExternalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-1.5 text-xs text-blue-400 dark:text-indigo-400 hover:underline font-semibold bg-blue-900/20 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-blue-800 dark:border-indigo-800/50"
+            className="hidden sm:flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800/50"
           >
             <ExternalLink size={13} />
             <span>Abrir no OpenStreetMap</span>
@@ -227,22 +227,22 @@ export const RouteModal: React.FC<RouteModalProps> = ({
         </div>
 
         {/* Leaflet OpenStreetMap Container */}
-        <div className="flex-1 relative w-full h-full bg-zinc-800 dark:bg-zinc-950 z-0">
+        <div className="flex-1 relative w-full h-full bg-zinc-100 dark:bg-zinc-950 z-0">
           <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
         </div>
 
         {/* Footer info bar */}
-        <div className="p-3 bg-zinc-900 dark:bg-zinc-900 border-t border-zinc-800 dark:border-zinc-800 flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-400">
+        <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400">
           <div className="flex items-center gap-2">
             <MapPin size={14} className="text-rose-500" />
-            <span className="font-semibold text-zinc-200 dark:text-zinc-200 truncate max-w-xs sm:max-w-md">
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate max-w-xs sm:max-w-md">
               Destino: {destinationTitle}
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-200 dark:text-zinc-200 font-bold rounded-xl text-xs transition-colors cursor-pointer"
+            className="px-4 py-1.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold rounded-xl text-xs transition-colors cursor-pointer"
           >
             Voltar ao App
           </button>

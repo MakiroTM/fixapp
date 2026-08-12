@@ -50,7 +50,7 @@ export const QuickChatCard: React.FC<QuickChatCardProps> = ({
   }, [messages, isExpanded]);
 
   return (
-    <div className="bg-zinc-950/80 border border-indigo-500/30 rounded-2xl overflow-hidden shadow-xl transition-all">
+    <div className="bg-zinc-950/80 dark:bg-zinc-900/90 border border-indigo-500/30 rounded-2xl overflow-hidden shadow-xl transition-all">
       {/* Header bar */}
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
@@ -58,7 +58,7 @@ export const QuickChatCard: React.FC<QuickChatCardProps> = ({
       >
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className="p-1.5 bg-blue-600/30 border border-indigo-400/30 rounded-lg text-indigo-300">
+            <div className="p-1.5 bg-indigo-600/30 border border-indigo-400/30 rounded-lg text-indigo-300">
               <MessageCircle size={16} />
             </div>
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-zinc-950 animate-pulse" />
@@ -67,7 +67,7 @@ export const QuickChatCard: React.FC<QuickChatCardProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-black text-white">{recipientName}</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-blue-900/200/20 text-indigo-300 border border-indigo-500/30">
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 {recipientRole}
               </span>
             </div>
@@ -79,7 +79,7 @@ export const QuickChatCard: React.FC<QuickChatCardProps> = ({
 
         <div className="flex items-center gap-2">
           {messages.length > 0 && (
-            <span className="text-[10px] font-extrabold bg-blue-600 text-white px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-extrabold bg-indigo-600 text-white px-2 py-0.5 rounded-full">
               {messages.length} msg{messages.length > 1 ? 's' : ''}
             </span>
           )}
@@ -105,7 +105,7 @@ export const QuickChatCard: React.FC<QuickChatCardProps> = ({
                 key={i}
                 type="button"
                 onClick={() => handlePresetClick(preset)}
-                className="shrink-0 px-2.5 py-1 bg-zinc-800/90 hover:bg-blue-600/30 hover:border-indigo-400/40 border border-zinc-700/60 rounded-full text-zinc-200 hover:text-white transition-all cursor-pointer whitespace-nowrap active:scale-95"
+                className="shrink-0 px-2.5 py-1 bg-zinc-800/90 hover:bg-indigo-600/30 hover:border-indigo-400/40 border border-zinc-700/60 rounded-full text-zinc-200 hover:text-white transition-all cursor-pointer whitespace-nowrap active:scale-95"
               >
                 {preset}
               </button>
@@ -130,7 +130,7 @@ export const QuickChatCard: React.FC<QuickChatCardProps> = ({
                     <div
                       className={`max-w-[85%] rounded-2xl px-3 py-2 text-xs leading-relaxed shadow-sm ${
                         isMe
-                          ? 'bg-blue-600 text-white rounded-br-none'
+                          ? 'bg-indigo-600 text-white rounded-br-none'
                           : 'bg-zinc-800 text-zinc-100 border border-zinc-700/50 rounded-bl-none'
                       }`}
                     >
@@ -161,7 +161,7 @@ export const QuickChatCard: React.FC<QuickChatCardProps> = ({
             <button
               type="submit"
               disabled={!inputText.trim()}
-              className="p-2 bg-blue-600 hover:bg-blue-900/200 disabled:opacity-40 disabled:hover:bg-blue-600 text-white rounded-xl transition-all cursor-pointer shadow-md shadow-blue-900/30 flex items-center justify-center shrink-0"
+              className="p-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white rounded-xl transition-all cursor-pointer shadow-md shadow-indigo-600/30 flex items-center justify-center shrink-0"
               title="Enviar mensagem"
             >
               <Send size={15} />

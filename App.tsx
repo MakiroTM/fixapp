@@ -189,7 +189,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col font-sans transition-colors duration-300">
       <Header 
         user={user} 
         onLogout={handleLogout} 
@@ -244,6 +244,40 @@ const App: React.FC = () => {
                   onBack={() => setCurrentView('dashboard')}
                 />
               ) : currentView === 'nearby' ? (
+                <NearbyWorkshopsScreen
+                  user={user}
+                  location={location}
+                  onBack={() => setCurrentView('dashboard')}
+                  onContact={() => {}}
+                  onSelectWorkshop={handleSelectWorkshop}
+                />
+              ) : currentView === 'workshop-detail' && selectedWorkshop ? (
+                <WorkshopDetailScreen
+                  chunk={selectedWorkshop}
+                  userLocation={location}
+                  onBack={() => setCurrentView('dashboard')}
+                  onContact={(name) => {
+                    // Direct to dashboard chat or handle contact
+                    setCurrentView('dashboard');
+                  }}
+                />
+              ) : currentView === 'favorites' ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
+                  <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
+                    <Heart size={32} />
+                  </div>
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Oficinas Salvas</h2>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Suas oficinas e prestadores favoritos aparecerão aqui para acesso rápido.</p>
+                </div>
+              ) : currentView === 'chat' ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
+                  <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
+                    <MessageCircle size={32} />
+                  </div>
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Mensagens</h2>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Seu histórico de conversas com mecânicos e suporte será listado aqui.</p>
+                </div>
+              ) : (
                 <>
                   {user.role === 'CLIENT' ? (
                     <ClientDashboard 
@@ -259,46 +293,6 @@ const App: React.FC = () => {
                     <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
                   )}
                 </>
-              ) : currentView === 'workshop-detail' && selectedWorkshop ? (
-                <WorkshopDetailScreen
-                  chunk={selectedWorkshop}
-                  userLocation={location}
-                  onBack={() => setCurrentView('dashboard')}
-                  onContact={(name) => {
-                    // Direct to dashboard chat or handle contact
-                    setCurrentView('dashboard');
-                  }}
-                />
-              ) : currentView === 'favorites' ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
-                  <div className="w-16 h-16 bg-blue-900/20 rounded-full flex items-center justify-center text-blue-500 mb-4 border border-blue-900/30">
-                    <Heart size={32} />
-                  </div>
-                  <h2 className="text-xl font-bold text-white mb-2">Oficinas Salvas</h2>
-                  <p className="text-zinc-400 text-sm max-w-xs">Suas oficinas e prestadores favoritos aparecerão aqui para acesso rápido.</p>
-                </div>
-              ) : currentView === 'chat' ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
-                  <div className="w-16 h-16 bg-blue-900/20 rounded-full flex items-center justify-center text-blue-500 mb-4 border border-blue-900/30">
-                    <MessageCircle size={32} />
-                  </div>
-                  <h2 className="text-xl font-bold text-white mb-2">Mensagens</h2>
-                  <p className="text-zinc-400 text-sm max-w-xs">Seu histórico de conversas com mecânicos e suporte será listado aqui.</p>
-                </div>
-              ) : (
-                <>
-                  {user.role === 'CLIENT' ? (
-                    <NearbyWorkshopsScreen
-                      user={user}
-                      location={location}
-                      onBack={() => setCurrentView('dashboard')}
-                      onContact={() => {}}
-                      onSelectWorkshop={handleSelectWorkshop}
-                    />
-                  ) : (
-                    <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
-                  )}
-                </>
               )}
             </motion.div>
           )}
@@ -306,7 +300,7 @@ const App: React.FC = () => {
       </main>
       
       {/* Footer com ajuste para Safe Area do iPhone */}
-      <footer className="mt-auto py-6 sm:py-8 text-center text-zinc-500 text-sm border-t border-zinc-800 bg-zinc-950 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
+      <footer className="mt-auto py-6 sm:py-8 text-center text-zinc-400 dark:text-zinc-600 text-sm border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
           <div className="text-center md:text-left">
             <p className="font-bold text-zinc-800 dark:text-zinc-200">© 2026 FIX App</p>
@@ -314,7 +308,7 @@ const App: React.FC = () => {
           </div>
 
           {/* Location Status in Footer */}
-          <div className="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
+          <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-1.5 rounded-full border border-zinc-100 dark:border-zinc-800">
             {isDetectingLocation ? (
               <div className="flex items-center gap-1.5 text-blue-500 animate-pulse text-[10px] sm:text-xs font-medium">
                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>

@@ -90,20 +90,20 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-zinc-950 w-full max-w-lg rounded-3xl shadow-2xl border border-zinc-800 overflow-hidden animate-pop-in relative">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden animate-pop-in relative">
         
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 text-white p-6 relative overflow-hidden">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-zinc-950/10 rounded-full transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
             title="Fechar"
           >
             <X size={20} />
           </button>
 
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 bg-zinc-950/20 backdrop-blur-md rounded-2xl text-white">
+            <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-2xl text-white">
               <Star className="fill-amber-300 text-amber-300" size={24} />
             </div>
             <div>
@@ -122,22 +122,22 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             
             {/* Mechanic Profile Banner */}
-            <div className="flex items-center gap-3.5 p-3.5 bg-zinc-900 rounded-2xl border border-zinc-800">
-              <div className="w-12 h-12 bg-blue-600 text-white font-bold text-lg rounded-2xl flex items-center justify-center shadow-md shadow-indigo-500/20">
+            <div className="flex items-center gap-3.5 p-3.5 bg-zinc-50 dark:bg-zinc-800/60 rounded-2xl border border-zinc-200/80 dark:border-zinc-700/60">
+              <div className="w-12 h-12 bg-indigo-600 text-white font-bold text-lg rounded-2xl flex items-center justify-center shadow-md shadow-indigo-500/20">
                 {mechanicName.charAt(0)}
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-bold text-white text-base">{mechanicName}</h3>
+                  <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-base">{mechanicName}</h3>
                   <VerifiedBadge rating={4.9} size="sm" />
                 </div>
-                <p className="text-xs text-zinc-400">{serviceType}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{serviceType}</p>
               </div>
             </div>
 
             {/* Interactive Star Rating */}
             <div className="text-center space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+              <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
                 Selecione sua nota de 1 a 5 estrelas
               </label>
 
@@ -157,7 +157,7 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
                       className={`transition-colors duration-200 ${
                         activeRating >= star
                           ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]'
-                          : 'text-zinc-300 dark:text-zinc-300'
+                          : 'text-zinc-300 dark:text-zinc-700'
                       }`}
                     />
                   </button>
@@ -178,7 +178,7 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
 
             {/* Quick Tag Chips */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
+              <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
                 Pontos de Destaque (Opcional)
               </label>
               <div className="flex flex-wrap gap-2">
@@ -191,8 +191,8 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
                       onClick={() => toggleTag(tag)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none ${
                         isSelected
-                          ? 'bg-blue-600 text-white shadow-sm ring-2 ring-indigo-400/50 scale-105'
-                          : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                          ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-400/50 scale-105'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                       }`}
                     >
                       {tag}
@@ -205,8 +205,8 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
             {/* Comment Textarea */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <MessageSquare size={14} className="text-blue-500" /> Comentário
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <MessageSquare size={14} className="text-indigo-500" /> Comentário
                 </label>
                 <span className="text-[10px] text-zinc-400">{comment.length}/300</span>
               </div>
@@ -215,7 +215,7 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
                 onChange={(e) => setComment(e.target.value.slice(0, 300))}
                 rows={3}
                 placeholder="Descreva detalhes sobre a agilidade, comunicação e qualidade do serviço executado..."
-                className="w-full p-3.5 bg-zinc-900 text-white rounded-2xl border border-zinc-800 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs leading-relaxed resize-none"
+                className="w-full p-3.5 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-2xl border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-xs leading-relaxed resize-none"
               />
             </div>
 
@@ -224,14 +224,14 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded-2xl text-xs transition-colors cursor-pointer"
+                className="flex-1 py-3 px-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold rounded-2xl text-xs transition-colors cursor-pointer"
               >
                 Agora não
               </button>
               <button
                 type="submit"
                 disabled={selectedStars === 0}
-                className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl text-xs transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl text-xs transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ThumbsUp size={16} /> Enviar Avaliação
               </button>
@@ -244,11 +244,11 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
               <CheckCircle2 size={36} />
             </div>
 
-            <h3 className="text-xl font-bold text-white">
+            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
               Obrigado pela sua avaliação!
             </h3>
 
-            <p className="text-xs text-zinc-400 max-w-xs mx-auto leading-relaxed">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs mx-auto leading-relaxed">
               Sua nota de <strong className="text-amber-500">{selectedStars} ★</strong> foi registrada com sucesso para <strong>{mechanicName}</strong>.
             </p>
 

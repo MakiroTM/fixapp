@@ -132,9 +132,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   }, [latitude, longitude, viewMode, userLatitude, userLongitude, title]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-zinc-950 rounded-2xl overflow-hidden border border-zinc-800 dark:border-zinc-700 shadow-2xl">
-      <div className="p-3.5 border-b border-zinc-800 dark:border-zinc-800 flex justify-between items-center bg-zinc-900 dark:bg-zinc-900/50">
-        <h3 className="font-bold text-zinc-200 dark:text-zinc-100 text-sm sm:text-base flex items-center gap-2">
+    <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-2xl">
+      <div className="p-3.5 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+        <h3 className="font-bold text-zinc-800 dark:text-zinc-100 text-sm sm:text-base flex items-center gap-2">
           <div className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse"></div>
           {title || 'Localização no Mapa'}
         </h3>
@@ -154,15 +154,15 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
       </div>
 
-      <div className="p-3 bg-zinc-900 dark:bg-zinc-900/90 border-t border-zinc-800 dark:border-zinc-800 flex items-center justify-between gap-2">
+      <div className="p-3 bg-zinc-50 dark:bg-zinc-900/90 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setViewMode('PIN')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
               viewMode === 'PIN' 
-                ? 'bg-blue-600 text-white shadow-sm' 
-                : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-300 dark:text-zinc-300'
+                ? 'bg-indigo-600 text-white shadow-sm' 
+                : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
             }`}
           >
             <MapPin size={13} />
@@ -173,8 +173,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             onClick={() => setViewMode('ROUTE')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
               viewMode === 'ROUTE' 
-                ? 'bg-blue-600 text-white shadow-sm' 
-                : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-300 dark:text-zinc-300'
+                ? 'bg-indigo-600 text-white shadow-sm' 
+                : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
             }`}
           >
             <Navigation size={13} />

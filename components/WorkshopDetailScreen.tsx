@@ -124,14 +124,14 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 24, scale: 0.99 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="min-h-screen bg-zinc-950 text-white flex flex-col pb-16"
+      className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pb-16"
     >
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-40 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-40 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 py-3 flex items-center justify-between">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onBack}
-          className="flex items-center gap-2 text-zinc-300 dark:text-zinc-300 hover:text-blue-400 dark:hover:text-indigo-400 transition-colors font-medium text-sm"
+          className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium text-sm"
         >
           <ArrowLeft size={20} />
           <span>Voltar</span>
@@ -145,7 +145,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleShare}
-            className="p-2 text-zinc-400 dark:text-zinc-400 hover:text-blue-400 rounded-full hover:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors"
+            className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             title="Compartilhar"
           >
             <Share2 size={18} />
@@ -156,7 +156,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             className={`p-2 rounded-full transition-colors ${
               isFavorite 
                 ? 'text-rose-500 bg-rose-50 dark:bg-rose-950/40' 
-                : 'text-zinc-400 dark:text-zinc-400 hover:text-rose-500 hover:bg-zinc-800 dark:hover:bg-zinc-800'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-rose-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}
             title={isFavorite ? 'Remover dos Favoritos' : 'Favoritar'}
           >
@@ -166,7 +166,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
       </div>
 
       {copiedShare && (
-        <div className="bg-blue-600 text-white text-xs text-center py-1.5 font-bold animate-fade-in">
+        <div className="bg-indigo-600 text-white text-xs text-center py-1.5 font-bold animate-fade-in">
           Link copiado para a área de transferência!
         </div>
       )}
@@ -222,7 +222,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onContact(title)}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all text-sm"
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all text-sm"
           >
             <MessageCircle size={18} />
             <span>Iniciar Chat</span>
@@ -255,7 +255,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             className={`flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-xl border transition-all text-sm ${
               isFavorite
                 ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900'
-                : 'bg-zinc-900 text-zinc-300 dark:text-zinc-200 border-zinc-800 hover:bg-zinc-900'
+                : 'bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50'
             }`}
           >
             <Heart size={18} className={isFavorite ? 'fill-rose-500 text-rose-500' : ''} />
@@ -264,18 +264,18 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
         </div>
 
         {/* Tab Selection Navigation */}
-        <div className="flex border-b border-zinc-800 gap-6 text-sm font-bold">
+        <div className="flex border-b border-zinc-200 dark:border-zinc-800 gap-6 text-sm font-bold">
           <button
             onClick={() => setActiveTab('overview')}
             className={`pb-3 relative transition-colors ${
               activeTab === 'overview'
-                ? 'text-blue-400'
-                : 'text-zinc-500 hover:text-zinc-200 dark:hover:text-zinc-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
           >
             Visão Geral
             {activeTab === 'overview' && (
-              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-indigo-400 rounded-full" />
+              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
             )}
           </button>
 
@@ -283,13 +283,13 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             onClick={() => setActiveTab('services')}
             className={`pb-3 relative transition-colors ${
               activeTab === 'services'
-                ? 'text-blue-400'
-                : 'text-zinc-500 hover:text-zinc-200 dark:hover:text-zinc-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
           >
             Serviços & Preços
             {activeTab === 'services' && (
-              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-indigo-400 rounded-full" />
+              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
             )}
           </button>
 
@@ -297,13 +297,13 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             onClick={() => setActiveTab('reviews')}
             className={`pb-3 relative transition-colors ${
               activeTab === 'reviews'
-                ? 'text-blue-400'
-                : 'text-zinc-500 hover:text-zinc-200 dark:hover:text-zinc-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
           >
             Avaliações ({ratingCount})
             {activeTab === 'reviews' && (
-              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-indigo-400 rounded-full" />
+              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
             )}
           </button>
 
@@ -311,13 +311,13 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             onClick={() => setActiveTab('map')}
             className={`pb-3 relative transition-colors ${
               activeTab === 'map'
-                ? 'text-blue-400'
-                : 'text-zinc-500 hover:text-zinc-200 dark:hover:text-zinc-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
           >
             Localização
             {activeTab === 'map' && (
-              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-indigo-400 rounded-full" />
+              <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
             )}
           </button>
         </div>
@@ -335,72 +335,72 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Description Card */}
-                <div className="bg-zinc-950 p-5 rounded-2xl border border-zinc-800 shadow-sm space-y-3">
-                  <h2 className="text-base font-bold text-white flex items-center gap-2">
-                    <ShieldCheck size={18} className="text-blue-400" />
+                <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
+                  <h2 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                    <ShieldCheck size={18} className="text-indigo-600 dark:text-indigo-400" />
                     Sobre este Estabelecimento
                   </h2>
-                  <p className="text-sm text-zinc-300 leading-relaxed italic border-l-4 border-indigo-500 pl-3 py-1 bg-zinc-900 dark:bg-zinc-850/50 rounded-r-lg">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed italic border-l-4 border-indigo-500 pl-3 py-1 bg-zinc-50 dark:bg-zinc-850/50 rounded-r-lg">
                     "{snippet}"
                   </p>
                 </div>
 
                 {/* Features & Badges Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 shadow-sm flex items-start gap-3">
-                    <div className="p-2.5 bg-blue-900/20 dark:bg-indigo-950/50 text-blue-400 rounded-xl">
+                  <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-start gap-3">
+                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
                       <Award size={20} />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-white">Profissionais Certificados</h3>
-                      <p className="text-xs text-zinc-400 mt-0.5">Equipe qualificada com garantia do serviço realizado.</p>
+                      <h3 className="font-bold text-sm text-zinc-900 dark:text-white">Profissionais Certificados</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Equipe qualificada com garantia do serviço realizado.</p>
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 shadow-sm flex items-start gap-3">
+                  <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-start gap-3">
                     <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl">
                       <DollarSign size={20} />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-white">Pagamento Seguro no App</h3>
-                      <p className="text-xs text-zinc-400 mt-0.5">Pix com desconto ou cartão parcelado via plataforma FIX.</p>
+                      <h3 className="font-bold text-sm text-zinc-900 dark:text-white">Pagamento Seguro no App</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Pix com desconto ou cartão parcelado via plataforma FIX.</p>
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 shadow-sm flex items-start gap-3">
+                  <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-start gap-3">
                     <div className="p-2.5 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
                       <Clock size={20} />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-white">Atendimento Rápido</h3>
-                      <p className="text-xs text-zinc-400 mt-0.5">Resposta em minutos pelo chat direto da plataforma.</p>
+                      <h3 className="font-bold text-sm text-zinc-900 dark:text-white">Atendimento Rápido</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Resposta em minutos pelo chat direto da plataforma.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Opening Hours & Location Info */}
-                <div className="bg-zinc-950 p-5 rounded-2xl border border-zinc-800 shadow-sm space-y-4">
-                  <h3 className="font-bold text-base text-white flex items-center gap-2">
-                    <Clock size={18} className="text-blue-400" />
+                <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
+                  <h3 className="font-bold text-base text-zinc-900 dark:text-white flex items-center gap-2">
+                    <Clock size={18} className="text-indigo-600 dark:text-indigo-400" />
                     Horário de Funcionamento
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    <div className="flex justify-between p-2.5 bg-zinc-900 dark:bg-zinc-800/50 rounded-xl">
-                      <span className="text-zinc-400 dark:text-zinc-400 font-medium">Segunda a Sexta</span>
-                      <span className="font-bold text-white">08:00 - 18:00</span>
+                    <div className="flex justify-between p-2.5 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                      <span className="text-zinc-600 dark:text-zinc-400 font-medium">Segunda a Sexta</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">08:00 - 18:00</span>
                     </div>
-                    <div className="flex justify-between p-2.5 bg-zinc-900 dark:bg-zinc-800/50 rounded-xl">
-                      <span className="text-zinc-400 dark:text-zinc-400 font-medium">Sábado</span>
-                      <span className="font-bold text-white">08:00 - 13:00</span>
+                    <div className="flex justify-between p-2.5 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                      <span className="text-zinc-600 dark:text-zinc-400 font-medium">Sábado</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">08:00 - 13:00</span>
                     </div>
-                    <div className="flex justify-between p-2.5 bg-zinc-900 dark:bg-zinc-800/50 rounded-xl">
-                      <span className="text-zinc-400 dark:text-zinc-400 font-medium">Domingo</span>
+                    <div className="flex justify-between p-2.5 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                      <span className="text-zinc-600 dark:text-zinc-400 font-medium">Domingo</span>
                       <span className="font-bold text-rose-500">Fechado (Atendimento Socorro 24h)</span>
                     </div>
-                    <div className="flex justify-between p-2.5 bg-zinc-900 dark:bg-zinc-800/50 rounded-xl">
-                      <span className="text-zinc-400 dark:text-zinc-400 font-medium">Feriados</span>
-                      <span className="font-bold text-white">Sob consulta</span>
+                    <div className="flex justify-between p-2.5 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                      <span className="text-zinc-600 dark:text-zinc-400 font-medium">Feriados</span>
+                      <span className="font-bold text-zinc-900 dark:text-white">Sob consulta</span>
                     </div>
                   </div>
                 </div>
@@ -410,16 +410,16 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             {/* TAB 2: SERVICES */}
             {activeTab === 'services' && (
               <div className="space-y-4">
-                <h2 className="text-base font-bold text-white">
+                <h2 className="text-base font-bold text-zinc-900 dark:text-white">
                   Serviços Mais Solicitados
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {servicesList.map((service, i) => (
-                    <div key={i} className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 shadow-sm flex justify-between items-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                    <div key={i} className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex justify-between items-center hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
                       <div className="space-y-1">
-                        <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
-                          <Wrench size={14} className="text-blue-400" />
+                        <h3 className="font-bold text-sm text-zinc-900 dark:text-white flex items-center gap-1.5">
+                          <Wrench size={14} className="text-indigo-600 dark:text-indigo-400" />
                           {service.name}
                         </h3>
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{service.price}</p>
@@ -427,7 +427,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
                       </div>
                       <button
                         onClick={() => onContact(title)}
-                        className="p-2 bg-blue-900/20 dark:bg-indigo-950 text-blue-400 hover:bg-blue-600 hover:text-white rounded-xl transition-colors"
+                        className="p-2 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-colors"
                         title="Orçamento no Chat"
                       >
                         <ChevronRight size={18} />
@@ -442,13 +442,13 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             {activeTab === 'reviews' && (
               <div className="space-y-6">
                 {/* Rating Interactive Section */}
-                <div className="bg-zinc-950 p-5 rounded-2xl border border-zinc-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-bold text-base text-white">Sua Avaliação</h3>
-                    <p className="text-xs text-zinc-400 mt-0.5">Já utilizou os serviços desta oficina? Deixe sua nota abaixo!</p>
+                    <h3 className="font-bold text-base text-zinc-900 dark:text-white">Sua Avaliação</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Já utilizou os serviços desta oficina? Deixe sua nota abaixo!</p>
                   </div>
 
-                  <div className="flex items-center gap-1.5 bg-zinc-900 dark:bg-zinc-800 p-2.5 rounded-xl border border-zinc-800">
+                  <div className="flex items-center gap-1.5 bg-zinc-50 dark:bg-zinc-800 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
@@ -460,7 +460,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
                           className={
                             (userRatingInput && userRatingInput >= star)
                               ? 'fill-amber-400 text-amber-400'
-                              : 'text-zinc-300 dark:text-zinc-400 hover:text-amber-400'
+                              : 'text-zinc-300 dark:text-zinc-600 hover:text-amber-400'
                           }
                         />
                       </button>
@@ -471,14 +471,14 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
                 {/* List of customer reviews */}
                 <div className="space-y-3">
                   {reviewsList.map((rev, idx) => (
-                    <div key={idx} className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 shadow-sm space-y-2">
+                    <div key={idx} className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-2">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-blue-300 font-bold text-xs flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center">
                             {rev.name[0]}
                           </div>
                           <div>
-                            <h4 className="font-bold text-xs sm:text-sm text-white">{rev.name}</h4>
+                            <h4 className="font-bold text-xs sm:text-sm text-zinc-900 dark:text-white">{rev.name}</h4>
                             <p className="text-[10px] text-zinc-400">{rev.date}</p>
                           </div>
                         </div>
@@ -488,7 +488,7 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
                           ))}
                         </div>
                       </div>
-                      <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
                         {rev.comment}
                       </p>
                     </div>
@@ -500,13 +500,13 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
             {/* TAB 4: MAP */}
             {activeTab === 'map' && (
               <div className="space-y-4">
-                <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 shadow-sm space-y-3">
-                  <h3 className="font-bold text-base text-white flex items-center gap-2">
-                    <MapPin size={18} className="text-blue-400" />
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
+                  <h3 className="font-bold text-base text-zinc-900 dark:text-white flex items-center gap-2">
+                    <MapPin size={18} className="text-indigo-600 dark:text-indigo-400" />
                     Localização e Rotas
                   </h3>
                   
-                  <div className="h-72 w-full rounded-xl overflow-hidden border border-zinc-800">
+                  <div className="h-72 w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
                     <MapComponent
                       latitude={userLocation?.latitude || -23.5505}
                       longitude={userLocation?.longitude || -46.6333}
@@ -517,12 +517,12 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
                   </div>
 
                   <div className="flex justify-between items-center pt-2">
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {title} • Atendimento na região
                     </p>
                     <button
                       onClick={() => setIsRouteOpen(true)}
-                      className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center gap-1.5"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center gap-1.5"
                     >
                       <Navigation size={14} />
                       Navegar no Mapa

@@ -96,7 +96,7 @@ export const SosEmergencyScreen: React.FC<SosEmergencyScreenProps> = ({
       title: 'Chaveiro Automotivo',
       subtitle: 'Chave trancada dentro do carro ou perdida',
       icon: KeyRound,
-      color: 'bg-blue-600 border-indigo-500 text-white',
+      color: 'bg-indigo-600 border-indigo-500 text-white',
       badge: 'CHAVEIRO 24H',
       prompt: 'Chave trancada dentro do veículo ou perdida na rua. Preciso de chaveiro automotivo 24h.'
     },
@@ -337,7 +337,7 @@ export const SosEmergencyScreen: React.FC<SosEmergencyScreenProps> = ({
               ) : (
                 <>
                   <div className="relative flex items-center justify-center">
-                    <span className="absolute w-7 h-7 rounded-full bg-zinc-950/40 animate-ping"></span>
+                    <span className="absolute w-7 h-7 rounded-full bg-white/40 animate-ping"></span>
                     <ShieldAlert size={28} className="text-white relative z-10 animate-pulse" />
                   </div>
                   <span className="tracking-wide">ACIONAR SOCORRO IMEDIATO 24H</span>

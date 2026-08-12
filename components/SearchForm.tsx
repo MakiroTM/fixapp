@@ -91,17 +91,17 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-zinc-950 rounded-3xl p-5 sm:p-7 shadow-xl shadow-2xl shadow-blue-900/10 border border-zinc-800 relative z-20 max-w-4xl mx-auto transition-all">
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-850 rounded-3xl p-5 sm:p-7 shadow-xl shadow-zinc-200/40 dark:shadow-none border border-zinc-200/80 dark:border-zinc-700/80 relative z-20 max-w-4xl mx-auto transition-all">
       
       {/* Segmented Pill Tabs */}
-      <div className="flex p-1 bg-zinc-900 rounded-2xl mb-5 sm:mb-6 border border-zinc-800">
+      <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-2xl mb-5 sm:mb-6 border border-zinc-200/60 dark:border-zinc-700/60">
         <button
           type="button"
           onClick={() => setActiveTab('services')}
           className={`flex-1 py-2 sm:py-2.5 text-center font-bold text-xs sm:text-sm flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer ${
             activeTab === 'services' 
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30 border-blue-500' 
-              : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
+              ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-300 shadow-sm' 
+              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
           }`}
         >
           <Wrench size={15} />
@@ -112,8 +112,8 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
           onClick={() => setActiveTab('parts')}
           className={`flex-1 py-2 sm:py-2.5 text-center font-bold text-xs sm:text-sm flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer ${
             activeTab === 'parts' 
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30 border-blue-500' 
-              : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
+              ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-300 shadow-sm' 
+              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
           }`}
         >
           <ShoppingBag size={15} />
@@ -125,14 +125,14 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
         {/* Veículo (Comum a ambos) */}
         <div className="space-y-3.5">
           <div>
-            <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-zinc-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wider">
               Para qual veículo?
             </label>
             <div className="relative">
               <select 
                 value={vehicle}
                 onChange={(e) => setVehicle(e.target.value as VehicleType)}
-                className="w-full p-3 pl-3.5 rounded-2xl border border-zinc-800 dark:border-zinc-700 bg-zinc-900 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none text-zinc-200 dark:text-zinc-100 font-semibold text-sm cursor-pointer"
+                className="w-full p-3 pl-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none text-zinc-800 dark:text-zinc-100 font-semibold text-sm cursor-pointer"
               >
                 {Object.values(VehicleType).map((v) => (
                   <option key={v} value={v}>{v}</option>
@@ -145,7 +145,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
           </div>
 
           <div>
-             <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+             <label className="block text-xs font-bold text-zinc-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wider">
                Modelo (Opcional)
              </label>
              <div className="relative">
@@ -157,7 +157,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
                   value={carModel}
                   onChange={(e) => setCarModel(e.target.value)}
                   placeholder="Ex: Fiat Uno, Honda Civic..." 
-                  className="w-full p-3 pl-10 rounded-2xl border border-zinc-800 dark:border-zinc-700 bg-zinc-900 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-400 text-zinc-200 dark:text-zinc-100 text-sm font-medium"
+                  className="w-full p-3 pl-10 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-400 text-zinc-800 dark:text-zinc-100 text-sm font-medium"
                 />
              </div>
           </div>
@@ -168,14 +168,14 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
           {activeTab === 'services' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-zinc-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wider">
                   Tipo de Serviço
                 </label>
                 <div className="relative">
                   <select 
                     value={service}
                     onChange={(e) => setService(e.target.value as ServiceType)}
-                    className="w-full p-3 pl-3.5 rounded-2xl border border-zinc-800 dark:border-zinc-700 bg-zinc-900 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none text-zinc-200 dark:text-zinc-100 font-semibold text-sm cursor-pointer"
+                    className="w-full p-3 pl-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none text-zinc-800 dark:text-zinc-100 font-semibold text-sm cursor-pointer"
                   >
                     {Object.values(ServiceType)
                       .filter(s => s !== ServiceType.PARTS)
@@ -189,14 +189,14 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-zinc-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wider">
                   Problema Comum
                 </label>
                 <div className="relative">
                   <select 
                     value={problemCategory}
                     onChange={(e) => handleChipSelect(e.target.value)}
-                    className="w-full p-3 pl-3.5 rounded-2xl border border-zinc-800 dark:border-zinc-700 bg-zinc-900 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none text-zinc-200 dark:text-zinc-100 font-semibold text-sm cursor-pointer"
+                    className="w-full p-3 pl-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none text-zinc-800 dark:text-zinc-100 font-semibold text-sm cursor-pointer"
                   >
                     <option value="">Selecione um problema...</option>
                     {COMMON_PROBLEMS.map((p) => (
@@ -211,18 +211,18 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
             </div>
           ) : (
             <div>
-               <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+               <label className="block text-xs font-bold text-zinc-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wider">
                  Categoria da Peça
                </label>
-               <div className="bg-zinc-900 dark:bg-zinc-900 p-3 rounded-2xl text-zinc-500 dark:text-zinc-400 text-xs border border-zinc-800 dark:border-zinc-700 flex items-center gap-2 font-medium">
-                 <ShoppingBag size={15} className="text-blue-500" />
+               <div className="bg-zinc-50 dark:bg-zinc-900 p-3 rounded-2xl text-zinc-500 dark:text-zinc-400 text-xs border border-zinc-200 dark:border-zinc-700 flex items-center gap-2 font-medium">
+                 <ShoppingBag size={15} className="text-indigo-500" />
                  <span>Buscando em lojas e fornecedores de autopeças</span>
                </div>
             </div>
           )}
           
            <div>
-             <label className="block text-xs font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">
+             <label className="block text-xs font-bold text-zinc-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wider">
                {activeTab === 'services' ? 'Detalhar problema (Opcional)' : 'Qual peça você precisa?'}
              </label>
              <div className="relative">
@@ -234,7 +234,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={activeTab === 'services' ? "Ex: Barulho ao frear, fumaça escura..." : "Ex: Pneu 175/70 R13, Bateria Moura 60Ah..."}
-                  className="w-full p-3 pl-10 rounded-2xl border border-zinc-800 dark:border-zinc-700 bg-zinc-900 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-zinc-400 text-zinc-200 dark:text-zinc-100 text-sm font-medium"
+                  className="w-full p-3 pl-10 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-400 text-zinc-800 dark:text-zinc-100 text-sm font-medium"
                 />
              </div>
           </div>
@@ -254,8 +254,8 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
               onClick={() => handleChipSelect(item)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 (activeTab === 'services' ? problemCategory === item : query === item)
-                  ? 'bg-blue-600 text-white shadow-sm ring-2 ring-indigo-400/50'
-                  : 'bg-zinc-900 text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-400/50'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
               {item}
@@ -267,7 +267,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, ini
       <button 
         type="submit" 
         disabled={isLoading}
-        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-70 disabled:cursor-not-allowed text-sm cursor-pointer"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-600/25 disabled:opacity-70 disabled:cursor-not-allowed text-sm cursor-pointer"
       >
         {isLoading ? (
           <>

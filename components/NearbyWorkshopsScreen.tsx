@@ -111,7 +111,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
       if (location) {
         const userIcon = L.divIcon({
           className: 'custom-user-marker',
-          html: `<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><div class="w-3 h-3 bg-zinc-950 rounded-full"></div></div>`,
+          html: `<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><div class="w-3 h-3 bg-white rounded-full"></div></div>`,
           iconSize: [32, 32],
           iconAnchor: [16, 16],
         });
@@ -152,8 +152,8 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
       
       const activeHtml = `
         <div class="relative w-10 h-10 animate-bounce">
-          ${isOpen ? '<div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-75"></div>' : ''}
-          <div class="relative w-10 h-10 bg-blue-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          ${isOpen ? '<div class="absolute inset-0 bg-indigo-600 rounded-full animate-ping opacity-75"></div>' : ''}
+          <div class="relative w-10 h-10 bg-indigo-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
         </div>
       `;
 
@@ -187,14 +187,14 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
   }, [filteredChunks, location, selectedWorkshop]);
 
   return (
-    <div className="flex-1 flex flex-col relative w-full h-full overflow-hidden bg-zinc-950">
+    <div className="fixed inset-0 bg-white dark:bg-zinc-950 z-[100] flex flex-col overflow-hidden">
       {/* Top Search Bar & Filters (Floating over map) */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] p-4 bg-gradient-to-b from-zinc-950/90 to-transparent pt-[env(safe-area-inset-top,1rem)]">
+      <div className="absolute top-0 left-0 right-0 z-[1000] p-4 bg-gradient-to-b from-white/90 dark:from-zinc-950/90 to-transparent pt-[env(safe-area-inset-top,1rem)]">
         <div className="max-w-md mx-auto space-y-3">
           <div className="flex items-center gap-2">
             <button 
               onClick={onBack}
-              className="p-2.5 bg-zinc-900 rounded-xl shadow-lg border border-zinc-800 text-zinc-300 hover:bg-zinc-800 transition-colors"
+              className="p-2.5 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300"
             >
               <X size={20} />
             </button>
@@ -205,7 +205,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch(query, activeFilter, vehicleFilter)}
-                className="w-full bg-zinc-900 rounded-xl shadow-lg border border-zinc-800 py-2.5 pl-10 pr-4 text-sm text-white outline-none focus:border-blue-500 transition-colors placeholder:text-zinc-500"
+                className="w-full bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-indigo-500"
               />
               <Search className="absolute left-3 top-3 text-zinc-400" size={16} />
             </div>
@@ -218,8 +218,8 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 onClick={() => handleSearch(query, filter, vehicleFilter)}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md transition-colors ${
                   activeFilter === filter
-                    ? 'bg-blue-600 text-white border border-blue-500'
-                    : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800'
+                    ? 'bg-indigo-600 text-white border border-indigo-500'
+                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800'
                 }`}
               >
                 {filter === 'ALL' ? 'Todos os Serviços' : filter === 'MECANICA' ? 'Mecânica' : filter === 'GUINCHO' ? 'Guincho' : filter === 'ELETRICA' ? 'Elétrica' : 'Borracharia'}
@@ -234,8 +234,8 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 onClick={() => handleSearch(query, activeFilter, vehicle)}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md transition-colors ${
                   vehicleFilter === vehicle
-                    ? 'bg-blue-600 text-white border border-blue-500'
-                    : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800'
+                    ? 'bg-emerald-600 text-white border border-emerald-500'
+                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800'
                 }`}
               >
                 {vehicle === 'CARROS' ? 'Carros' : vehicle === 'MOTOS' ? 'Motos' : vehicle === 'CAMINHÕES' ? 'Caminhões' : 'Elétricos'}
@@ -252,8 +252,8 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
 
       {/* Bottom Sheet */}
       <div 
-        className={`absolute bottom-[env(safe-area-inset-bottom,4rem)] left-0 right-0 z-[1000] bg-zinc-950 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out border-t border-zinc-800 flex flex-col pb-20 ${
-          isSheetOpen ? (selectedWorkshop ? 'h-[65vh]' : 'h-[45vh]') : 'h-24'
+        className={`absolute bottom-0 left-0 right-0 z-[1000] bg-white dark:bg-zinc-900 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out border-t border-zinc-200 dark:border-zinc-800 flex flex-col ${
+          isSheetOpen ? (selectedWorkshop ? 'h-[65vh]' : 'h-[40vh]') : 'h-16'
         }`}
       >
         {/* Drag Handle */}
@@ -261,7 +261,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
           className="w-full flex items-center justify-center p-3 cursor-pointer"
           onClick={() => setIsSheetOpen(!isSheetOpen)}
         >
-          <div className="w-12 h-1.5 bg-zinc-700 rounded-full" />
+          <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full" />
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6 scrollbar-none">
@@ -271,7 +271,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
             <div className="space-y-5 animate-fade-in">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-xl font-bold text-white leading-tight">
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white leading-tight">
                     {selectedWorkshop.maps?.title}
                   </h2>
                   <div className="flex items-center gap-3 mt-1.5">
@@ -279,7 +279,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                       <Star size={14} className="fill-amber-500" />
                       4.8
                     </div>
-                    <span className="text-xs text-zinc-400 flex items-center gap-1">
+                    <span className="text-xs text-zinc-500 flex items-center gap-1">
                       <MapPin size={12} /> 1.2 km
                     </span>
                     <span className={`text-xs font-medium ${getWorkshopStatus(selectedWorkshop.maps?.title).color}`}>{getWorkshopStatus(selectedWorkshop.maps?.title).label}</span>
@@ -287,7 +287,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 </div>
                 <button 
                   onClick={() => setSelectedWorkshop(null)}
-                  className="bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white"
+                  className="bg-zinc-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-zinc-800 dark:hover:text-white"
                 >
                   <X size={16} />
                 </button>
@@ -297,64 +297,56 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 {onSelectWorkshop && (
                   <button 
                     onClick={() => onSelectWorkshop(selectedWorkshop)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-md"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-md"
                   >
                     <Store size={16} /> Ver Página
                   </button>
                 )}
                 <button 
                   onClick={() => onContact(selectedWorkshop.maps?.title || 'Oficina')}
-                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors border border-zinc-700"
+                  className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
                 >
                   <MessageCircle size={16} /> Negociar
                 </button>
               </div>
 
-              <div className="flex justify-around py-4 border-y border-zinc-800/60">
-                <button className="flex flex-col items-center gap-1.5 text-zinc-400 hover:text-blue-500 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                    <Phone size={18} />
-                  </div>
+              <div className="flex justify-around py-2 border-y border-zinc-100 dark:border-zinc-800">
+                <button className="flex flex-col items-center gap-1 text-zinc-500 hover:text-indigo-600 transition-colors">
+                  <Phone size={20} />
                   <span className="text-[10px] font-medium">Ligar</span>
                 </button>
-                <button className="flex flex-col items-center gap-1.5 text-zinc-400 hover:text-emerald-500 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                    <MessageCircle size={18} />
-                  </div>
+                <button className="flex flex-col items-center gap-1 text-zinc-500 hover:text-emerald-500 transition-colors">
+                  <MessageCircle size={20} />
                   <span className="text-[10px] font-medium">WhatsApp</span>
                 </button>
-                <button className="flex flex-col items-center gap-1.5 text-zinc-400 hover:text-rose-500 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                    <Heart size={18} />
-                  </div>
+                <button className="flex flex-col items-center gap-1 text-zinc-500 hover:text-rose-500 transition-colors">
+                  <Heart size={20} />
                   <span className="text-[10px] font-medium">Favoritar</span>
                 </button>
-                <button className="flex flex-col items-center gap-1.5 text-zinc-400 hover:text-amber-500 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                    <Handshake size={18} />
-                  </div>
-                  <span className="text-[10px] font-medium">Parceiro</span>
+                <button className="flex flex-col items-center gap-1 text-zinc-500 hover:text-amber-500 transition-colors">
+                  <Handshake size={20} />
+                  <span className="text-[10px] font-medium">Parceiro FIX</span>
                 </button>
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-white mb-2">Sobre</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">
+                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Sobre</h3>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                   {selectedWorkshop.maps?.placeAnswerSources?.reviewSnippets?.[0]?.snippet || 
                    'Oficina especializada com anos de experiência no mercado. Atendimento rápido e garantido.'}
                 </p>
               </div>
               
-              <div className="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
-                <div className="flex items-start gap-2 text-sm text-zinc-400">
-                  <Info size={16} className="mt-0.5 text-blue-500" />
+              <div className="bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                  <Info size={16} className="mt-0.5 text-indigo-500" />
                   <p>Aceita pagamentos pelo app via Pix e Cartão. Possui scanner automotivo e ferramentas modernas.</p>
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-white px-1">
+              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 px-1">
                 {filteredChunks.length} locais encontrados
               </h3>
               {filteredChunks.length === 0 && !loading && (
@@ -366,23 +358,23 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 <div 
                   key={idx}
                   onClick={() => setSelectedWorkshop(chunk)}
-                  className="flex items-start gap-3 p-3 bg-zinc-900 hover:bg-zinc-800 rounded-2xl cursor-pointer transition-colors border border-transparent hover:border-zinc-700 relative group"
+                  className="flex items-start gap-3 p-3 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl cursor-pointer transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 relative group"
                 >
-                  <div className="w-16 h-16 bg-zinc-800 rounded-xl flex-shrink-0 flex items-center justify-center text-zinc-400">
+                  <div className="w-16 h-16 bg-zinc-200 dark:bg-zinc-700 rounded-xl flex-shrink-0 flex items-center justify-center text-zinc-400">
                     <Store size={24} />
                   </div>
                   <div className="flex-1 min-w-0 pr-12">
-                    <h4 className="font-bold text-white text-sm truncate">
+                    <h4 className="font-bold text-zinc-900 dark:text-white text-sm truncate">
                       {chunk.maps?.title}
                     </h4>
-                    <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
                       {chunk.maps?.placeAnswerSources?.reviewSnippets?.[0]?.snippet}
                     </p>
                     <div className="flex items-center gap-2 mt-1.5 text-[10px] font-medium">
                       <span className="flex items-center gap-0.5 text-amber-500"><Star size={10} className="fill-amber-500"/> 4.8</span>
-                      <span className="text-zinc-400">•</span>
-                      <span className="text-zinc-400 flex items-center gap-0.5"><MapPin size={10}/> 1.2 km</span>
-                      <span className="text-zinc-400">•</span>
+                      <span className="text-zinc-300 dark:text-zinc-600">•</span>
+                      <span className="text-zinc-500 flex items-center gap-0.5"><MapPin size={10}/> 1.2 km</span>
+                      <span className="text-zinc-300 dark:text-zinc-600">•</span>
                       <span className={getWorkshopStatus(chunk.maps?.title).color}>{getWorkshopStatus(chunk.maps?.title).label}</span>
                     </div>
                   </div>

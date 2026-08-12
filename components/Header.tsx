@@ -28,15 +28,15 @@ export const Header: React.FC<HeaderProps> = ({
   const isPremium = user?.plan === 'PRO' || user?.plan === 'PRIME';
 
   return (
-    <header className="bg-zinc-950 border-b border-zinc-900 sticky top-0 z-50 transition-colors duration-300 pt-[env(safe-area-inset-top)]">
+    <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-50 transition-colors duration-300 pt-[env(safe-area-inset-top)]">
       <div className="max-w-5xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
         <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onClick={onHomeClick ? onHomeClick : () => window.location.href = "/"}>
-          <div className="bg-blue-600 p-1.5 sm:p-2 rounded-lg text-white shadow-md shadow-blue-900/30">
+          <div className="bg-indigo-600 p-1.5 sm:p-2 rounded-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
             <Wrench size={18} className="sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h1 className="text-base sm:text-xl font-bold text-white leading-tight">FIX</h1>
-            <p className="text-[9px] sm:text-xs text-zinc-400 hidden sm:block">
+            <h1 className="text-base sm:text-xl font-bold text-zinc-800 dark:text-zinc-100 leading-tight">FIX</h1>
+            <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
               {user?.role === 'MECHANIC' ? 'Área do Parceiro' : 'Socorro em Cidades e Rodovias'}
             </p>
           </div>
@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
           {user && user.role === 'CLIENT' && onMapClick && (
             <button
               onClick={onMapClick}
-              className="p-1.5 sm:p-2 bg-blue-900/20 text-blue-400 hover:bg-blue-900/40 rounded-full transition-colors flex items-center gap-1.5"
+              className="p-1.5 sm:p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-full transition-colors flex items-center gap-1.5"
               title="Oficinas Próximas"
             >
               <MapIcon size={16} className="sm:w-5 sm:h-5" />
@@ -64,14 +64,20 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="relative z-10 flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-950"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                 </span>
                 <span className="tracking-wider">SOS</span>
               </span>
             </button>
           )}
 
-          
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 sm:p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+            title={isDarkMode ? "Modo Claro" : "Modo Escuro"}
+          >
+            {isDarkMode ? <Sun size={16} className="sm:w-5 sm:h-5" /> : <Moon size={16} className="sm:w-5 sm:h-5" />}
+          </button>
 
           {user ? (
             <div className="flex items-center gap-1.5 sm:gap-3">
@@ -82,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-bold transition-all shadow-sm ${
                   isPremium 
                     ? 'bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:shadow-amber-500/30' 
-                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                 }`}
               >
                 {isPremium ? <Crown size={9} className="sm:w-3 sm:h-3" fill="currentColor" /> : <Crown size={9} className="sm:w-3 sm:h-3" />}
@@ -92,36 +98,36 @@ export const Header: React.FC<HeaderProps> = ({
 
               <button 
                 onClick={onProfileClick}
-                className="hidden sm:flex flex-col items-end mr-2 hover:bg-zinc-900 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg transition-colors text-right"
+                className="hidden sm:flex flex-col items-end mr-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg transition-colors text-right"
               >
-                <span className="text-sm font-semibold text-zinc-200">
+                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
                   {user.role === 'MECHANIC' ? user.shopName : user.name}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider text-blue-400 font-bold bg-blue-900/20 px-2 rounded-full mt-0.5">
+                <span className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 px-2 rounded-full mt-0.5">
                   {user.role === 'MECHANIC' ? 'Parceiro' : 'Cliente'}
                 </span>
               </button>
               
               <button 
                 onClick={onProfileClick}
-                className="w-7 h-7 sm:w-9 sm:h-9 bg-zinc-900 rounded-full flex items-center justify-center text-zinc-400 border border-zinc-800 hover:border-blue-700 hover:text-blue-400 dark:hover:text-indigo-400 transition-all cursor-pointer"
+                className="w-7 h-7 sm:w-9 sm:h-9 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:border-indigo-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all cursor-pointer"
                 title="Meu Perfil"
               >
                 {user.role === 'MECHANIC' ? <Store size={14} className="sm:w-4.5 sm:h-4.5" /> : <UserIcon size={14} className="sm:w-4.5 sm:h-4.5" />}
               </button>
 
-              <div className="w-px h-5 sm:h-8 bg-zinc-800 mx-0.5 sm:mx-1"></div>
+              <div className="w-px h-5 sm:h-8 bg-zinc-200 dark:bg-zinc-700 mx-0.5 sm:mx-1"></div>
 
               <button 
                 onClick={onLogout}
-                className="p-1 sm:p-2 text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors"
+                className="p-1 sm:p-2 text-zinc-400 dark:text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors"
                 title="Sair"
               >
                 <LogOut size={14} className="sm:w-4.5 sm:h-4.5" />
               </button>
             </div>
           ) : (
-            <div className="text-xs sm:text-sm text-zinc-400 font-medium">
+            <div className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium">
               Bem-vindo
             </div>
           )}
