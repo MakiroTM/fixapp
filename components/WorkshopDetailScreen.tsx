@@ -17,6 +17,13 @@ interface WorkshopDetailScreenProps {
   onContact: (name: string) => void;
 }
 
+const getWorkshopStatus = (name: string = '') => {
+  const hash = name.length;
+  if (hash % 5 === 0) return { label: 'Fechado', color: 'text-red-400', bg: 'bg-red-500/20', border: 'border-red-500/30', dot: 'bg-red-400' };
+  if (hash % 3 === 0) return { label: 'Ocupado', color: 'text-amber-400', bg: 'bg-amber-500/20', border: 'border-amber-500/30', dot: 'bg-amber-400' };
+  return { label: 'Aberto Agora', color: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', dot: 'bg-emerald-400' };
+};
+
 export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
   chunk,
   userLocation,
@@ -172,9 +179,9 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
         <div className="relative z-10 p-4 sm:p-6 w-full max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Aberto Agora
+              <span className={`${getWorkshopStatus(title).bg} ${getWorkshopStatus(title).color} text-xs font-bold px-2.5 py-0.5 rounded-full border ${getWorkshopStatus(title).border} flex items-center gap-1`}>
+                <span className={`w-2 h-2 rounded-full ${getWorkshopStatus(title).dot} ${getWorkshopStatus(title).label.includes('Aberto') ? 'animate-pulse' : ''}`}></span>
+                {getWorkshopStatus(title).label}
               </span>
               <VerifiedBadge rating={rating} size="sm" />
             </div>

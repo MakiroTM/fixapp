@@ -13,9 +13,17 @@ interface NearbyWorkshopsScreenProps {
   onSelectWorkshop?: (chunk: GroundingChunk) => void;
 }
 
+const getWorkshopStatus = (name: string = '') => {
+  const hash = name.length;
+  if (hash % 5 === 0) return { label: 'Fechado', color: 'text-red-500' };
+  if (hash % 3 === 0) return { label: 'Ocupado', color: 'text-amber-500' };
+  return { label: 'Aberto', color: 'text-emerald-500' };
+};
+
 export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ user, location, onBack, onContact, onSelectWorkshop }) => {
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('ALL');
+  const [vehicleFilter, setVehicleFilter] = useState('CARROS');
   const [mechanics, setMechanics] = useState<SearchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedWorkshop, setSelectedWorkshop] = useState<GroundingChunk | null>(null);
@@ -28,22 +36,33 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
   // Fetch initial data
   useEffect(() => {
     if (location) {
-      handleSearch('Oficinas mecânicas próximas', 'ALL');
+      handleSearch('Oficinas mecânicas próximas', 'ALL', 'CARROS');
     }
   }, [location]);
 
-  const handleSearch = async (searchQuery: string, filter: string) => {
+  const handleSearch = async (searchQuery: string, filter: string, vehicle: string) => {
     if (!location) return;
     setLoading(true);
     setActiveFilter(filter);
+    setVehicleFilter(vehicle);
     
     let effectiveQuery = searchQuery;
+    
+    // Append vehicle type for better grounding context
+    if (vehicle !== 'CARROS' && vehicle !== 'TODOS') {
+      effectiveQuery += ` para ${vehicle.toLowerCase()}`;
+    }
+    
     if (filter !== 'ALL') {
       effectiveQuery += ` ${filter}`;
     }
 
     try {
-      const result = await findMechanics(effectiveQuery, 'CAR' as any, 'MAINTENANCE' as any, location);
+      let vType = 'CAR';
+      if (vehicle === 'MOTOS') vType = 'MOTORCYCLE';
+      if (vehicle === 'CAMINHÕES') vType = 'TRUCK';
+      
+      const result = await findMechanics(effectiveQuery, vType as any, 'MAINTENANCE' as any, location);
       setMechanics(result);
       setSelectedWorkshop(null);
       setIsSheetOpen(true);
@@ -185,25 +204,41 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 placeholder="Buscar oficinas, borracharias..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch(query, activeFilter)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(query, activeFilter, vehicleFilter)}
                 className="w-full bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-indigo-500"
               />
               <Search className="absolute left-3 top-3 text-zinc-400" size={16} />
             </div>
           </div>
           
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {['ALL', 'MECANICA', 'GUINCHO', 'ELETRICA', 'PNEU'].map((filter) => (
               <button
                 key={filter}
-                onClick={() => handleSearch(query, filter)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md ${
+                onClick={() => handleSearch(query, filter, vehicleFilter)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md transition-colors ${
                   activeFilter === filter
                     ? 'bg-indigo-600 text-white border border-indigo-500'
                     : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800'
                 }`}
               >
-                {filter === 'ALL' ? 'Todos' : filter === 'MECANICA' ? 'Mecânica' : filter === 'GUINCHO' ? 'Guincho' : filter === 'ELETRICA' ? 'Elétrica' : 'Borracharia'}
+                {filter === 'ALL' ? 'Todos os Serviços' : filter === 'MECANICA' ? 'Mecânica' : filter === 'GUINCHO' ? 'Guincho' : filter === 'ELETRICA' ? 'Elétrica' : 'Borracharia'}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {['CARROS', 'MOTOS', 'CAMINHÕES', 'ELÉTRICOS'].map((vehicle) => (
+              <button
+                key={vehicle}
+                onClick={() => handleSearch(query, activeFilter, vehicle)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md transition-colors ${
+                  vehicleFilter === vehicle
+                    ? 'bg-emerald-600 text-white border border-emerald-500'
+                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800'
+                }`}
+              >
+                {vehicle === 'CARROS' ? 'Carros' : vehicle === 'MOTOS' ? 'Motos' : vehicle === 'CAMINHÕES' ? 'Caminhões' : 'Elétricos'}
               </button>
             ))}
           </div>
@@ -247,7 +282,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                     <span className="text-xs text-zinc-500 flex items-center gap-1">
                       <MapPin size={12} /> 1.2 km
                     </span>
-                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Aberto agora</span>
+                    <span className={`text-xs font-medium ${getWorkshopStatus(selectedWorkshop.maps?.title).color}`}>{getWorkshopStatus(selectedWorkshop.maps?.title).label}</span>
                   </div>
                 </div>
                 <button 
@@ -323,12 +358,12 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 <div 
                   key={idx}
                   onClick={() => setSelectedWorkshop(chunk)}
-                  className="flex items-start gap-3 p-3 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl cursor-pointer transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
+                  className="flex items-start gap-3 p-3 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl cursor-pointer transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 relative group"
                 >
                   <div className="w-16 h-16 bg-zinc-200 dark:bg-zinc-700 rounded-xl flex-shrink-0 flex items-center justify-center text-zinc-400">
                     <Store size={24} />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 pr-12">
                     <h4 className="font-bold text-zinc-900 dark:text-white text-sm truncate">
                       {chunk.maps?.title}
                     </h4>
@@ -340,9 +375,17 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                       <span className="text-zinc-300 dark:text-zinc-600">•</span>
                       <span className="text-zinc-500 flex items-center gap-0.5"><MapPin size={10}/> 1.2 km</span>
                       <span className="text-zinc-300 dark:text-zinc-600">•</span>
-                      <span className="text-emerald-500">Aberto</span>
+                      <span className={getWorkshopStatus(chunk.maps?.title).color}>{getWorkshopStatus(chunk.maps?.title).label}</span>
                     </div>
                   </div>
+                  <a
+                    href="tel:0800000000"
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-200 dark:hover:bg-emerald-500/30 transition-colors shadow-sm"
+                    title="Ligar agora"
+                  >
+                    <Phone size={18} fill="currentColor" />
+                  </a>
                 </div>
               ))}
             </div>
