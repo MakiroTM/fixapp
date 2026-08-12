@@ -111,7 +111,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
       if (location) {
         const userIcon = L.divIcon({
           className: 'custom-user-marker',
-          html: `<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><div class="w-3 h-3 bg-white rounded-full"></div></div>`,
+          html: `<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><div class="w-3 h-3 bg-zinc-950 rounded-full"></div></div>`,
           iconSize: [32, 32],
           iconAnchor: [16, 16],
         });
@@ -152,8 +152,8 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
       
       const activeHtml = `
         <div class="relative w-10 h-10 animate-bounce">
-          ${isOpen ? '<div class="absolute inset-0 bg-indigo-600 rounded-full animate-ping opacity-75"></div>' : ''}
-          <div class="relative w-10 h-10 bg-indigo-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          ${isOpen ? '<div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-75"></div>' : ''}
+          <div class="relative w-10 h-10 bg-blue-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
         </div>
       `;
 
@@ -279,7 +279,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                       <Star size={14} className="fill-amber-500" />
                       4.8
                     </div>
-                    <span className="text-xs text-zinc-500 flex items-center gap-1">
+                    <span className="text-xs text-zinc-400 flex items-center gap-1">
                       <MapPin size={12} /> 1.2 km
                     </span>
                     <span className={`text-xs font-medium ${getWorkshopStatus(selectedWorkshop.maps?.title).color}`}>{getWorkshopStatus(selectedWorkshop.maps?.title).label}</span>
@@ -323,34 +323,38 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                   </div>
                   <span className="text-[10px] font-medium">WhatsApp</span>
                 </button>
-                <button className="flex flex-col items-center gap-1 text-zinc-500 hover:text-rose-500 transition-colors">
-                  <Heart size={20} />
+                <button className="flex flex-col items-center gap-1.5 text-zinc-400 hover:text-rose-500 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <Heart size={18} />
+                  </div>
                   <span className="text-[10px] font-medium">Favoritar</span>
                 </button>
-                <button className="flex flex-col items-center gap-1 text-zinc-500 hover:text-amber-500 transition-colors">
-                  <Handshake size={20} />
-                  <span className="text-[10px] font-medium">Parceiro FIX</span>
+                <button className="flex flex-col items-center gap-1.5 text-zinc-400 hover:text-amber-500 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <Handshake size={18} />
+                  </div>
+                  <span className="text-[10px] font-medium">Parceiro</span>
                 </button>
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Sobre</h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <h3 className="text-sm font-bold text-white mb-2">Sobre</h3>
+                <p className="text-sm text-zinc-400 leading-relaxed">
                   {selectedWorkshop.maps?.placeAnswerSources?.reviewSnippets?.[0]?.snippet || 
                    'Oficina especializada com anos de experiência no mercado. Atendimento rápido e garantido.'}
                 </p>
               </div>
               
-              <div className="bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <Info size={16} className="mt-0.5 text-indigo-500" />
+              <div className="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                <div className="flex items-start gap-2 text-sm text-zinc-400">
+                  <Info size={16} className="mt-0.5 text-blue-500" />
                   <p>Aceita pagamentos pelo app via Pix e Cartão. Possui scanner automotivo e ferramentas modernas.</p>
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 px-1">
+              <h3 className="text-sm font-bold text-white px-1">
                 {filteredChunks.length} locais encontrados
               </h3>
               {filteredChunks.length === 0 && !loading && (
@@ -362,23 +366,23 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 <div 
                   key={idx}
                   onClick={() => setSelectedWorkshop(chunk)}
-                  className="flex items-start gap-3 p-3 bg-zinc-50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl cursor-pointer transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 relative group"
+                  className="flex items-start gap-3 p-3 bg-zinc-900 hover:bg-zinc-800 rounded-2xl cursor-pointer transition-colors border border-transparent hover:border-zinc-700 relative group"
                 >
-                  <div className="w-16 h-16 bg-zinc-200 dark:bg-zinc-700 rounded-xl flex-shrink-0 flex items-center justify-center text-zinc-400">
+                  <div className="w-16 h-16 bg-zinc-800 rounded-xl flex-shrink-0 flex items-center justify-center text-zinc-400">
                     <Store size={24} />
                   </div>
                   <div className="flex-1 min-w-0 pr-12">
-                    <h4 className="font-bold text-zinc-900 dark:text-white text-sm truncate">
+                    <h4 className="font-bold text-white text-sm truncate">
                       {chunk.maps?.title}
                     </h4>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
                       {chunk.maps?.placeAnswerSources?.reviewSnippets?.[0]?.snippet}
                     </p>
                     <div className="flex items-center gap-2 mt-1.5 text-[10px] font-medium">
                       <span className="flex items-center gap-0.5 text-amber-500"><Star size={10} className="fill-amber-500"/> 4.8</span>
-                      <span className="text-zinc-300 dark:text-zinc-600">•</span>
-                      <span className="text-zinc-500 flex items-center gap-0.5"><MapPin size={10}/> 1.2 km</span>
-                      <span className="text-zinc-300 dark:text-zinc-600">•</span>
+                      <span className="text-zinc-400">•</span>
+                      <span className="text-zinc-400 flex items-center gap-0.5"><MapPin size={10}/> 1.2 km</span>
+                      <span className="text-zinc-400">•</span>
                       <span className={getWorkshopStatus(chunk.maps?.title).color}>{getWorkshopStatus(chunk.maps?.title).label}</span>
                     </div>
                   </div>

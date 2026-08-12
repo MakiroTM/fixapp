@@ -91,7 +91,7 @@ export const EtaWidget: React.FC<EtaWidgetProps> = ({
       <div className="inline-flex items-center gap-2 bg-indigo-950/80 border border-indigo-500/40 px-2.5 py-1 rounded-full text-xs font-semibold text-indigo-200">
         <Navigation size={12} className="text-indigo-400 animate-pulse" />
         <span>{etaData.distanceKm} km</span>
-        <span className="text-indigo-500">•</span>
+        <span className="text-blue-500">•</span>
         <Clock size={12} className="text-amber-400" />
         <span className="font-bold text-amber-300">
           {status === 'EN_ROUTE' ? `${displayMinutes} min` : etaData.formattedEta}
@@ -106,7 +106,7 @@ export const EtaWidget: React.FC<EtaWidgetProps> = ({
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-indigo-600/30 border border-indigo-500/50 rounded-lg text-indigo-300">
+          <div className="p-2 bg-blue-600/30 border border-indigo-500/50 rounded-lg text-indigo-300">
             <Clock size={18} className={status === 'EN_ROUTE' ? 'animate-spin' : ''} />
           </div>
           <div>

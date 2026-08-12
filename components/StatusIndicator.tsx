@@ -46,9 +46,9 @@ export const STATUS_CONFIG: Record<ServiceStatus, {
     label: 'Em Atendimento',
     shortLabel: 'Em Atendimento',
     description: 'Profissional no local trabalhando no reparo do veículo.',
-    color: 'bg-indigo-500',
-    bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
-    borderColor: 'border-indigo-200 dark:border-indigo-800',
+    color: 'bg-blue-900/200',
+    bgColor: 'bg-blue-900/20 dark:bg-indigo-900/20',
+    borderColor: 'border-blue-800 dark:border-indigo-800',
     textColor: 'text-indigo-700 dark:text-indigo-300',
     icon: Wrench,
     step: 3
@@ -69,9 +69,9 @@ export const STATUS_CONFIG: Record<ServiceStatus, {
     shortLabel: 'Cancelado',
     description: 'Chamado cancelado pelo cliente ou profissional.',
     color: 'bg-zinc-500',
-    bgColor: 'bg-zinc-100 dark:bg-zinc-800',
+    bgColor: 'bg-zinc-800 dark:bg-zinc-800',
     borderColor: 'border-zinc-300 dark:border-zinc-700',
-    textColor: 'text-zinc-600 dark:text-zinc-400',
+    textColor: 'text-zinc-400 dark:text-zinc-400',
     icon: XCircle,
     step: 0
   }
@@ -123,7 +123,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
             {status === 'EN_ROUTE' && (
               <button
                 onClick={() => onStatusChange('IN_PROGRESS')}
-                className="px-2 py-1 text-[10px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all flex items-center gap-1 shadow-xs"
+                className="px-2 py-1 text-[10px] font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all flex items-center gap-1 shadow-xs"
               >
                 <span>Iniciar Reparo</span>
                 <ArrowRight size={10} />
@@ -149,7 +149,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   const currentStepNum = config.step;
 
   return (
-    <div className="bg-white dark:bg-zinc-800/90 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-4 shadow-sm space-y-4">
+    <div className="bg-zinc-950 dark:bg-zinc-800/90 border border-zinc-800 dark:border-zinc-700 rounded-2xl p-4 shadow-sm space-y-4">
       {/* Header Info */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
             <select
               value={status}
               onChange={(e) => onStatusChange(e.target.value as ServiceStatus)}
-              className="bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100 text-xs font-bold px-2 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-600 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="bg-zinc-800 dark:bg-zinc-700 text-zinc-200 dark:text-zinc-100 text-xs font-bold px-2 py-1.5 rounded-lg border border-zinc-800 dark:border-zinc-600 focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="PENDING">1. Pendente</option>
               <option value="EN_ROUTE">2. A Caminho</option>
@@ -179,7 +179,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         )}
       </div>
 
-      <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-100 dark:border-zinc-800">
+      <p className="text-xs text-zinc-400 dark:text-zinc-300 leading-relaxed bg-zinc-900 dark:bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800 dark:border-zinc-800">
         {config.description}
       </p>
 

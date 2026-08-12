@@ -86,7 +86,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
     <div className="max-w-5xl mx-auto px-4 py-4 sm:py-8 animate-fade-in-up pb-24">
       {/* Welcome Section */}
       <div className="bg-slate-800 dark:bg-zinc-900 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 mb-6 sm:mb-8 relative overflow-hidden shadow-xl shadow-slate-200 dark:shadow-none">
-        <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-indigo-500 opacity-20 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16 blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-blue-900/200 opacity-20 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16 blur-3xl"></div>
         
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
           <div className="w-full md:w-auto">
@@ -102,7 +102,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                >
                  {isOnline ? (
                    <>
-                     <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+                     <span className="w-2 h-2 bg-zinc-950 rounded-full animate-ping"></span>
                      <Wifi size={13} />
                      <span>ONLINE • Recebendo Chamados</span>
                    </>
@@ -127,7 +127,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                )}
 
                {isOnline && isBgTrackingActive && (
-                 <span className="bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-pulse" title="Sua localização continua sendo atualizada mesmo com a tela bloqueada ou app em segundo plano">
+                 <span className="bg-blue-900/200/30 text-indigo-200 border border-indigo-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1 animate-pulse" title="Sua localização continua sendo atualizada mesmo com a tela bloqueada ou app em segundo plano">
                    <Navigation size={10} className="text-indigo-300" />
                    GPS 2º PLANO ATIVO
                  </span>
@@ -154,13 +154,13 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
           </div>
           
           <div className="flex gap-2 sm:gap-3 w-full md:w-auto">
-             <div className="flex-1 md:flex-none bg-white/10 backdrop-blur-md p-2.5 sm:p-3 rounded-xl text-center min-w-[80px] sm:min-w-[100px]">
+             <div className="flex-1 md:flex-none bg-zinc-950/10 backdrop-blur-md p-2.5 sm:p-3 rounded-xl text-center min-w-[80px] sm:min-w-[100px]">
                 <div className="text-xl sm:text-2xl font-bold text-white">4.8</div>
                 <div className="text-[10px] sm:text-xs text-slate-300 dark:text-zinc-400 flex items-center justify-center gap-1">
                    <Star size={10} className="fill-yellow-400 text-yellow-400" /> Avaliação
                 </div>
              </div>
-             <div className="flex-1 md:flex-none bg-white/10 backdrop-blur-md p-2.5 sm:p-3 rounded-xl text-center min-w-[80px] sm:min-w-[100px]">
+             <div className="flex-1 md:flex-none bg-zinc-950/10 backdrop-blur-md p-2.5 sm:p-3 rounded-xl text-center min-w-[80px] sm:min-w-[100px]">
                 <div className="text-xl sm:text-2xl font-bold text-white">12</div>
                 <div className="text-[10px] sm:text-xs text-slate-300 dark:text-zinc-400">Chamados Hoje</div>
              </div>
@@ -183,7 +183,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                </div>
                <button 
                  onClick={onUpgrade}
-                 className="w-full sm:w-auto bg-white text-indigo-600 px-4 py-2 rounded-lg font-bold text-xs sm:text-sm hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                 className="w-full sm:w-auto bg-zinc-950 text-blue-400 px-4 py-2 rounded-lg font-bold text-xs sm:text-sm hover:bg-blue-900/20 transition-colors whitespace-nowrap"
                >
                  Ver Planos
                </button>
@@ -191,7 +191,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
           )}
 
           <div className="flex justify-between items-center px-1">
-             <h3 className="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
+             <h3 className="text-base sm:text-lg font-bold text-zinc-200 dark:text-zinc-100 flex items-center gap-2">
                {!isOnline ? (
                  <>
                    <WifiOff size={18} className="text-zinc-400" />
@@ -203,7 +203,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                  'Solicitações Próximas'
                )}
              </h3>
-             <button className="text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline">Ver mapa</button>
+             <button className="text-xs sm:text-sm text-blue-400 dark:text-indigo-400 font-medium hover:underline">Ver mapa</button>
           </div>
 
           {!isOnline ? (
@@ -226,14 +226,14 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
               </button>
             </div>
           ) : activeJob ? (
-             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-indigo-500 dark:border-indigo-500/50 shadow-lg relative overflow-hidden animate-pop-in space-y-4">
+             <div className="bg-blue-900/20 dark:bg-indigo-900/20 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-indigo-500 dark:border-indigo-500/50 shadow-lg relative overflow-hidden animate-pop-in space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-lg sm:text-xl font-bold text-zinc-800 dark:text-zinc-100">{activeJob.clientName}</h4>
+                  <h4 className="text-lg sm:text-xl font-bold text-zinc-200 dark:text-zinc-100">{activeJob.clientName}</h4>
                   <StatusIndicator status={activeJobStatus} variant="badge" />
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-zinc-700 dark:text-zinc-300 text-xs sm:text-sm font-medium">{activeJob.carInfo}</p>
+                  <p className="text-zinc-300 dark:text-zinc-300 text-xs sm:text-sm font-medium">{activeJob.carInfo}</p>
                   <p className="text-zinc-500 dark:text-zinc-400 text-[10px] sm:text-xs flex items-center gap-1">
                     <MapPin size={12} /> {activeJob.distanceInfo}
                   </p>
@@ -253,7 +253,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                 />
 
                 {/* Service Payment Status Summary for Mechanic */}
-                <div className="bg-white/80 dark:bg-zinc-900/80 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs">
+                <div className="bg-zinc-950/80 dark:bg-zinc-900/80 p-3 rounded-xl border border-zinc-800 dark:border-zinc-800 flex items-center justify-between text-xs">
                   <div>
                     <span className="text-zinc-500 text-[10px] uppercase font-extrabold tracking-wider block">Valor do Atendimento</span>
                     <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">R$ 180,00</span>
@@ -270,14 +270,14 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                         setChatRecipient(activeJob.clientName);
                         setIsChatOpen(true);
                      }}
-                     className="flex-1 bg-indigo-600 text-white py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20 text-sm sm:text-base"
+                     className="flex-1 bg-blue-600 text-white py-2.5 sm:py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-500 transition-colors shadow-lg shadow-indigo-500/20 text-sm sm:text-base"
                    >
                      <MessageCircle size={18} className="sm:w-5 sm:h-5" />
                      Abrir Chat
                    </button>
                    <button 
                      onClick={() => setShowMap(!showMap)}
-                     className="flex-1 bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 py-2.5 sm:py-3 rounded-xl font-bold border border-indigo-100 dark:border-indigo-800 flex items-center justify-center gap-2 hover:bg-indigo-50 dark:hover:bg-zinc-700 transition-colors text-sm sm:text-base"
+                     className="flex-1 bg-zinc-950 dark:bg-zinc-800 text-blue-400 dark:text-indigo-400 py-2.5 sm:py-3 rounded-xl font-bold border border-blue-900/20 dark:border-indigo-800 flex items-center justify-center gap-2 hover:bg-blue-900/20 dark:hover:bg-zinc-700 transition-colors text-sm sm:text-base"
                    >
                      <MapIcon size={18} className="sm:w-5 sm:h-5" />
                      {showMap ? 'Ocultar Mapa' : 'Ver Mapa'}
@@ -287,14 +287,14 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                        setActiveJobStatus('COMPLETED');
                        setTimeout(() => setActiveJob(null), 1000);
                      }}
-                     className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl font-bold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors text-sm sm:text-base"
+                     className="bg-zinc-950 dark:bg-zinc-800 text-zinc-300 dark:text-zinc-300 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl font-bold border border-zinc-800 dark:border-zinc-700 hover:bg-zinc-900 dark:hover:bg-zinc-700 transition-colors text-sm sm:text-base"
                    >
                      Finalizar
                    </button>
                 </div>
 
                 {showMap && (
-                  <div className="mt-4 sm:mt-6 h-[250px] sm:h-[300px] animate-fade-in rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                  <div className="mt-4 sm:mt-6 h-[250px] sm:h-[300px] animate-fade-in rounded-xl overflow-hidden border border-zinc-800 dark:border-zinc-700">
                     <MapComponent 
                       latitude={activeJobCoords.lat} 
                       longitude={activeJobCoords.lng} 
@@ -306,14 +306,14 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
           ) : (
             <>
               {/* Request Card 1 */}
-              <div className="bg-white dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-zinc-950 dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-800 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3 sm:mb-4">
                   <div className="flex gap-2.5 sm:gap-3">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center text-rose-600 dark:text-rose-400 flex-shrink-0">
                       <Wrench size={18} className="sm:w-5 sm:h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm sm:text-base text-zinc-800 dark:text-zinc-100 leading-tight">Honda Civic - Pneu Furado</h4>
+                      <h4 className="font-bold text-sm sm:text-base text-zinc-200 dark:text-zinc-100 leading-tight">Honda Civic - Pneu Furado</h4>
                       <p className="text-[10px] sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Rodovia BR-116, Km 45 (A 5km de distância)</p>
                     </div>
                   </div>
@@ -321,7 +321,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                     EMERGÊNCIA
                   </span>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-4 border-t border-zinc-100 dark:border-zinc-700 pt-3 sm:pt-4 mt-1 sm:mt-2">
+                <div className="flex items-center gap-2 sm:gap-4 border-t border-zinc-800 dark:border-zinc-700 pt-3 sm:pt-4 mt-1 sm:mt-2">
                     <button 
                       onClick={() => handleAcceptJob('João da Silva', 'Honda Civic - Pneu Furado', 'Rodovia BR-116, Km 45 (A 5km de distância)')}
                       disabled={isAccepting}
@@ -338,7 +338,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                     </button>
                     <button 
                       disabled={isAccepting}
-                      className="px-3 sm:px-4 py-2 text-zinc-500 dark:text-zinc-400 font-medium text-xs sm:text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-lg disabled:opacity-50"
+                      className="px-3 sm:px-4 py-2 text-zinc-500 dark:text-zinc-400 font-medium text-xs sm:text-sm hover:bg-zinc-900 dark:hover:bg-zinc-700 rounded-lg disabled:opacity-50"
                     >
                       Ignorar
                     </button>
@@ -346,22 +346,22 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
               </div>
 
               {/* Request Card 2 */}
-              <div className="bg-white dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow opacity-70">
+              <div className="bg-zinc-950 dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-800 dark:border-zinc-700 shadow-sm hover:shadow-md transition-shadow opacity-70">
                 <div className="flex justify-between items-start mb-3 sm:mb-4">
                   <div className="flex gap-2.5 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-blue-400 dark:text-indigo-400 flex-shrink-0">
                       <Settings size={18} className="sm:w-5 sm:h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm sm:text-base text-zinc-800 dark:text-zinc-100 leading-tight">Revisão Geral - Fiat Toro</h4>
+                      <h4 className="font-bold text-sm sm:text-base text-zinc-200 dark:text-zinc-100 leading-tight">Revisão Geral - Fiat Toro</h4>
                       <p className="text-[10px] sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Centro da Cidade (Agendamento)</p>
                     </div>
                   </div>
-                  <span className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[9px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg flex-shrink-0">
+                  <span className="bg-blue-900/20 dark:bg-indigo-900/20 text-blue-400 dark:text-indigo-400 text-[9px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg flex-shrink-0">
                     MANUTENÇÃO
                   </span>
                 </div>
-                <div className="flex items-center gap-4 border-t border-zinc-100 dark:border-zinc-700 pt-3 sm:pt-4 mt-1 sm:mt-2">
+                <div className="flex items-center gap-4 border-t border-zinc-800 dark:border-zinc-700 pt-3 sm:pt-4 mt-1 sm:mt-2">
                     <button disabled className="flex-1 bg-zinc-200 dark:bg-zinc-700 text-zinc-400 dark:text-zinc-500 py-2 rounded-lg font-medium text-xs sm:text-sm cursor-not-allowed">
                       Aguardando Cliente
                     </button>
@@ -375,7 +375,7 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
         <div className="space-y-4 sm:space-y-6">
            
            {/* Financial Card - LOCKED STATE */}
-           <div className={`bg-white dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-sm relative overflow-hidden ${!isPro ? 'min-h-[140px] sm:min-h-[160px]' : ''}`}>
+           <div className={`bg-zinc-950 dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-800 dark:border-zinc-700 shadow-sm relative overflow-hidden ${!isPro ? 'min-h-[140px] sm:min-h-[160px]' : ''}`}>
              <h3 className="text-[10px] sm:text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 sm:mb-4">Financeiro</h3>
              
              {isPro ? (
@@ -387,23 +387,23 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
                     </div>
                     <div>
                     <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">Ganhos da Semana</p>
-                    <p className="text-xl sm:text-2xl font-bold text-zinc-800 dark:text-zinc-100">R$ 1.250,00</p>
+                    <p className="text-xl sm:text-2xl font-bold text-zinc-200 dark:text-zinc-100">R$ 1.250,00</p>
                     </div>
                 </div>
-                <button className="w-full text-indigo-600 dark:text-indigo-400 font-medium text-xs sm:text-sm border border-indigo-100 dark:border-indigo-800 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-zinc-700 transition-colors">
+                <button className="w-full text-blue-400 dark:text-indigo-400 font-medium text-xs sm:text-sm border border-blue-900/20 dark:border-indigo-800 py-2 rounded-lg hover:bg-blue-900/20 dark:hover:bg-zinc-700 transition-colors">
                 Ver Extrato Completo
                 </button>
                </>
              ) : (
                // Content for FREE users (Locked)
-               <div className="absolute inset-0 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4">
-                 <div className="bg-zinc-100 dark:bg-zinc-800 p-2 sm:p-3 rounded-full mb-2">
+               <div className="absolute inset-0 bg-zinc-950/60 dark:bg-zinc-900/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-4">
+                 <div className="bg-zinc-800 dark:bg-zinc-800 p-2 sm:p-3 rounded-full mb-2">
                    <Lock size={20} className="text-zinc-400 sm:w-6 sm:h-6" />
                  </div>
-                 <p className="text-xs sm:text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-2">Recurso Premium</p>
+                 <p className="text-xs sm:text-sm font-bold text-zinc-200 dark:text-zinc-200 mb-2">Recurso Premium</p>
                  <button 
                   onClick={onUpgrade}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg transition-colors"
+                  className="bg-blue-600 hover:bg-blue-500 text-white text-[10px] sm:text-xs font-bold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg transition-colors"
                  >
                    Desbloquear Financeiro
                  </button>
@@ -411,28 +411,28 @@ export const MechanicDashboard: React.FC<MechanicDashboardProps> = ({ user, onUp
              )}
            </div>
 
-           <div className="bg-white dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-sm">
+           <div className="bg-zinc-950 dark:bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-800 dark:border-zinc-700 shadow-sm">
              <h3 className="text-[10px] sm:text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Acesso Rápido</h3>
              <ul className="space-y-0.5 sm:space-y-1">
                <li>
-                 <button className="w-full flex items-center justify-between p-2.5 sm:p-3 hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-lg transition-colors group">
-                    <span className="flex items-center gap-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                 <button className="w-full flex items-center justify-between p-2.5 sm:p-3 hover:bg-zinc-900 dark:hover:bg-zinc-700 rounded-lg transition-colors group">
+                    <span className="flex items-center gap-2 text-xs sm:text-sm text-zinc-400 dark:text-zinc-300 group-hover:text-blue-400 dark:group-hover:text-indigo-400">
                       <Settings size={16} className="sm:w-4.5 sm:h-4.5" /> Configurar Serviços
                     </span>
-                    <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-600 sm:w-4 sm:h-4" />
+                    <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-400 sm:w-4 sm:h-4" />
                  </button>
                </li>
                <li>
-                 <button className="w-full flex items-center justify-between p-2.5 sm:p-3 hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-lg transition-colors group">
-                    <span className="flex items-center gap-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                 <button className="w-full flex items-center justify-between p-2.5 sm:p-3 hover:bg-zinc-900 dark:hover:bg-zinc-700 rounded-lg transition-colors group">
+                    <span className="flex items-center gap-2 text-xs sm:text-sm text-zinc-400 dark:text-zinc-300 group-hover:text-blue-400 dark:group-hover:text-indigo-400">
                       <Clock size={16} className="sm:w-4.5 sm:h-4.5" /> Horário de Funcionamento
                     </span>
-                    <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-600 sm:w-4 sm:h-4" />
+                    <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-400 sm:w-4 sm:h-4" />
                  </button>
                </li>
                <li>
-                 <button className="w-full flex items-center justify-between p-2.5 sm:p-3 hover:bg-zinc-50 dark:hover:bg-zinc-700 rounded-lg transition-colors group">
-                    <span className="flex items-center gap-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                 <button className="w-full flex items-center justify-between p-2.5 sm:p-3 hover:bg-zinc-900 dark:hover:bg-zinc-700 rounded-lg transition-colors group">
+                    <span className="flex items-center gap-2 text-xs sm:text-sm text-zinc-400 dark:text-zinc-300 group-hover:text-blue-400 dark:group-hover:text-indigo-400">
                       <Bell size={16} className="sm:w-4.5 sm:h-4.5" /> Notificações
                     </span>
                     <div className="bg-rose-500 text-white text-[9px] sm:text-[10px] font-bold px-1 sm:px-1.5 rounded-full">2</div>

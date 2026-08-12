@@ -151,12 +151,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto transition-opacity" onClick={onClose}></div>
       
-      <div className="bg-white dark:bg-zinc-900 w-full sm:w-[400px] sm:h-[600px] h-[90vh] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col pointer-events-auto animate-fly-in-top overflow-hidden border border-zinc-200 dark:border-zinc-800">
+      <div className="bg-zinc-950 w-full sm:w-[400px] sm:h-[600px] h-[90vh] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col pointer-events-auto animate-fly-in-top overflow-hidden border border-zinc-800">
         
         {/* Header */}
-        <div className="p-4 bg-indigo-600 dark:bg-zinc-950 text-white flex items-center justify-between shadow-md z-10">
+        <div className="p-4 bg-blue-600 dark:bg-zinc-950 text-white flex items-center justify-between shadow-md z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg">
+            <div className="w-10 h-10 bg-zinc-950/20 rounded-full flex items-center justify-center font-bold text-lg">
               {recipientName.charAt(0)}
             </div>
             <div>
@@ -174,26 +174,26 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
              <EtaWidget compact={true} status={status} />
              <button 
                onClick={() => setShowStatusDetails(!showStatusDetails)} 
-               className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
+               className="px-2 py-1 bg-zinc-950/10 hover:bg-zinc-950/20 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
                title="Alternar Detalhes do Status"
              >
                <StatusIndicator status={status} variant="badge" />
                {showStatusDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
              </button>
              {userRole === 'CLIENT' && (
-               <button onClick={() => setShowRating(true)} className="p-2 hover:bg-white/10 rounded-full transition-colors flex items-center gap-1 text-xs" title="Concluir Serviço e Avaliar">
+               <button onClick={() => setShowRating(true)} className="p-2 hover:bg-zinc-950/10 rounded-full transition-colors flex items-center gap-1 text-xs" title="Concluir Serviço e Avaliar">
                  <CheckCircle size={18} />
                  <span className="hidden sm:inline font-medium">Concluir</span>
                </button>
              )}
-             <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><Phone size={18} /></button>
-             <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={20} /></button>
+             <button className="p-2 hover:bg-zinc-950/10 rounded-full transition-colors"><Phone size={18} /></button>
+             <button onClick={onClose} className="p-2 hover:bg-zinc-950/10 rounded-full transition-colors"><X size={20} /></button>
           </div>
         </div>
 
         {/* Live Service Status Stepper Tracker */}
         {showStatusDetails && (
-          <div className="p-3 bg-zinc-100 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 animate-fade-in">
+          <div className="p-3 bg-zinc-800 dark:bg-zinc-950 border-b border-zinc-800 animate-fade-in">
             <StatusIndicator 
               status={status} 
               variant="full" 
@@ -204,7 +204,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-900/50 scrollbar-thin relative">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-900 dark:bg-zinc-900/50 scrollbar-thin relative">
           {messages.map((msg) => {
             const coords = extractCoords(msg.text);
             return (
@@ -215,14 +215,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 <div 
                   className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
                     msg.sender === 'me' 
-                      ? 'bg-indigo-600 text-white rounded-br-none' 
-                      : 'bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-none border border-zinc-100 dark:border-zinc-700'
+                      ? 'bg-blue-600 text-white rounded-br-none' 
+                      : 'bg-zinc-950 dark:bg-zinc-800 text-zinc-200 rounded-bl-none border border-zinc-800 dark:border-zinc-700'
                   }`}
                 >
                   <div className={`max-w-none break-words ${
                     msg.sender === 'me' 
                       ? '[&_a]:text-white [&_a]:underline [&_a]:font-medium' 
-                      : '[&_a]:text-indigo-600 dark:[&_a]:text-indigo-400 [&_a]:underline'
+                      : '[&_a]:text-blue-400 dark:[&_a]:text-indigo-400 [&_a]:underline'
                   }`}>
                     <Markdown>{msg.text.replace(/<!-- location:.* -->/, '')}</Markdown>
                   </div>
@@ -232,8 +232,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       onClick={() => setSelectedLocation(coords)}
                       className={`mt-3 w-full py-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
                         msg.sender === 'me'
-                          ? 'bg-white/20 hover:bg-white/30 text-white'
-                          : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100'
+                          ? 'bg-zinc-950/20 hover:bg-zinc-950/30 text-white'
+                          : 'bg-blue-900/20 text-blue-400 hover:bg-indigo-100'
                       }`}
                     >
                       <MapIcon size={16} />
@@ -264,9 +264,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
 
         {/* Input Area */}
-        <form onSubmit={handleSend} className="p-3 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
+        <form onSubmit={handleSend} className="p-3 bg-zinc-950 border-t border-zinc-800 dark:border-zinc-800 flex items-center gap-2">
           <div className="flex items-center">
-            <button type="button" className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors" title="Anexar arquivo">
+            <button type="button" className="p-2 text-zinc-400 hover:text-blue-400 transition-colors" title="Anexar arquivo">
               <Paperclip size={20} />
             </button>
             {userRole === 'CLIENT' && (
@@ -274,7 +274,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 type="button" 
                 onClick={shareLocation}
                 disabled={isLocating}
-                className={`p-2 transition-colors ${isLocating ? 'text-indigo-400 animate-pulse' : 'text-zinc-400 hover:text-indigo-600'}`}
+                className={`p-2 transition-colors ${isLocating ? 'text-indigo-400 animate-pulse' : 'text-zinc-400 hover:text-blue-400'}`}
                 title="Compartilhar localização"
               >
                 <MapPin size={20} />
@@ -286,12 +286,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Digite uma mensagem..."
-            className="flex-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-sm"
+            className="flex-1 bg-zinc-900 text-zinc-200 dark:text-zinc-100 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-sm"
           />
           <button 
             type="submit" 
             disabled={!newMessage.trim()}
-            className="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/20"
+            className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/20"
           >
             <Send size={18} />
           </button>

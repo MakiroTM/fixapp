@@ -36,7 +36,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-indigo-600 dark:bg-zinc-950 transition-all duration-700 ease-in-out ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-blue-600 dark:bg-zinc-950 transition-all duration-700 ease-in-out ${
         isExiting 
           ? 'opacity-0 scale-110 pointer-events-none' 
           : 'opacity-100 scale-100'
@@ -46,7 +46,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         
         {/* Ícone (Wrench) - Aparece depois do texto */}
         <div className={`absolute -top-24 transition-opacity duration-300 ${showIcon ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="bg-white text-indigo-600 p-4 rounded-2xl shadow-xl animate-pop-in">
+          <div className="bg-zinc-950 text-blue-400 p-4 rounded-2xl shadow-xl animate-pop-in">
              <Wrench size={48} strokeWidth={2.5} />
           </div>
         </div>

@@ -189,11 +189,11 @@ export const MaintenanceHistory: React.FC = () => {
       
       {/* Header Banner & Stats Grid */}
       <div className="bg-gradient-to-br from-indigo-900 via-zinc-900 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-indigo-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-900/200/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-400/30 mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/200/20 text-indigo-300 text-xs font-bold border border-indigo-400/30 mb-2">
               <Wrench size={14} className="text-indigo-400" />
               <span>Prontuário Digital do Veículo</span>
             </div>
@@ -208,7 +208,7 @@ export const MaintenanceHistory: React.FC = () => {
           {/* Action Button */}
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="self-start md:self-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl text-xs sm:text-sm flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/30 cursor-pointer"
+            className="self-start md:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-900/200 text-white font-bold rounded-2xl text-xs sm:text-sm flex items-center gap-2 transition-all shadow-lg shadow-blue-900/30 cursor-pointer"
           >
             <Plus size={16} />
             <span>Registrar Manutenção</span>
@@ -217,7 +217,7 @@ export const MaintenanceHistory: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-6 pt-6 border-t border-zinc-800 relative z-10">
-          <div className="p-3.5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
+          <div className="p-3.5 bg-zinc-950/5 backdrop-blur-md rounded-2xl border border-white/10">
             <span className="text-[10px] sm:text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
               Serviços Concluídos
             </span>
@@ -227,7 +227,7 @@ export const MaintenanceHistory: React.FC = () => {
             </span>
           </div>
 
-          <div className="p-3.5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
+          <div className="p-3.5 bg-zinc-950/5 backdrop-blur-md rounded-2xl border border-white/10">
             <span className="text-[10px] sm:text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
               Total Investido
             </span>
@@ -236,7 +236,7 @@ export const MaintenanceHistory: React.FC = () => {
             </span>
           </div>
 
-          <div className="col-span-2 sm:col-span-1 p-3.5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
+          <div className="col-span-2 sm:col-span-1 p-3.5 bg-zinc-950/5 backdrop-blur-md rounded-2xl border border-white/10">
             <span className="text-[10px] sm:text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
               Garantia do Veículo
             </span>
@@ -249,7 +249,7 @@ export const MaintenanceHistory: React.FC = () => {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white dark:bg-zinc-850 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
+      <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search Field */}
           <div className="relative flex-1">
@@ -259,12 +259,12 @@ export const MaintenanceHistory: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar por serviço, oficina ou número do comprovante..."
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs sm:text-sm font-medium"
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-900 text-zinc-200 rounded-xl border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-xs sm:text-sm font-medium"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-xs"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-400:text-zinc-200 text-xs"
               >
                 Limpar
               </button>
@@ -285,8 +285,8 @@ export const MaintenanceHistory: React.FC = () => {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   selectedCategory === cat.id
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800'
                 }`}
               >
                 {cat.label}
@@ -306,46 +306,46 @@ export const MaintenanceHistory: React.FC = () => {
             return (
               <div 
                 key={record.id}
-                className="bg-white dark:bg-zinc-850 rounded-2xl border border-zinc-200/80 dark:border-zinc-700/80 shadow-sm hover:shadow-md transition-all overflow-hidden"
+                className="bg-zinc-950 rounded-2xl border border-zinc-800/80 shadow-sm hover:shadow-md transition-all overflow-hidden"
               >
                 {/* Main Card Summary Header */}
                 <div 
                   onClick={() => toggleExpand(record.id)}
-                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors"
+                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-zinc-900/60:bg-zinc-800/40 transition-colors"
                 >
                   <div className="flex items-start gap-3.5">
                     <div className={`p-3 rounded-2xl flex-shrink-0 ${
                       isEmergency 
-                        ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50' 
-                        : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50'
+                        ? 'bg-rose-100 text-rose-600 border border-rose-200' 
+                        : 'bg-blue-900/20 text-blue-400 border border-blue-900/20'
                     }`}>
                       <Wrench size={22} />
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[11px] font-extrabold text-zinc-400 dark:text-zinc-500 font-mono">
+                        <span className="text-[11px] font-extrabold text-zinc-400 font-mono">
                           #{record.id}
                         </span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                           <CheckCircle2 size={10} /> Concluído
                         </span>
-                        <span className="text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1 ml-auto sm:ml-0">
+                        <span className="text-xs text-zinc-400 flex items-center gap-1 ml-auto sm:ml-0">
                           <Calendar size={12} /> {record.date}
                         </span>
                       </div>
 
-                      <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm sm:text-base leading-snug">
+                      <h3 className="font-bold text-white text-sm sm:text-base leading-snug">
                         {record.serviceType}
                       </h3>
 
-                      <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 flex-wrap">
-                        <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1">
+                      <div className="flex items-center gap-2 text-xs text-zinc-400 flex-wrap">
+                        <span className="font-semibold text-zinc-200 flex items-center gap-1">
                           {record.mechanicName}
                         </span>
                         <VerifiedBadge rating={4.9} size="sm" />
-                        <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                        <span className="text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+                        <span className="text-zinc-300">•</span>
+                        <span className="text-zinc-400 flex items-center gap-1">
                           <Car size={13} /> {record.vehicleInfo}
                         </span>
                       </div>
@@ -353,20 +353,20 @@ export const MaintenanceHistory: React.FC = () => {
                   </div>
 
                   {/* Price & Toggle Arrow */}
-                  <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-zinc-100 dark:border-zinc-800">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-zinc-800">
                     <div className="text-left sm:text-right">
                       <span className="text-[10px] uppercase font-bold text-zinc-400 block">Valor Pago</span>
-                      <span className="text-base sm:text-lg font-black text-zinc-900 dark:text-zinc-100">
+                      <span className="text-base sm:text-lg font-black text-white">
                         R$ {record.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
-                      <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block">
+                      <span className="text-[10px] font-medium text-zinc-400 block">
                         via {record.paymentMethod}
                       </span>
                     </div>
 
                     <button 
                       type="button"
-                      className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
+                      className="p-2 text-zinc-400 hover:text-zinc-400:text-zinc-200 bg-zinc-800/50 rounded-xl transition-colors cursor-pointer"
                     >
                       {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                     </button>
@@ -375,15 +375,15 @@ export const MaintenanceHistory: React.FC = () => {
 
                 {/* Expanded Details Panel */}
                 {isExpanded && (
-                  <div className="px-4 pb-5 pt-2 sm:px-5 bg-zinc-50/80 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 animate-fade-in space-y-4">
+                  <div className="px-4 pb-5 pt-2 sm:px-5 bg-zinc-900/80 border-t border-zinc-800 animate-fade-in space-y-4">
                     
                     {/* Notes Box */}
                     {record.notes && (
-                      <div className="p-3.5 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200/60 dark:border-zinc-700/60 space-y-1">
-                        <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      <div className="p-3.5 bg-zinc-950 rounded-xl border border-zinc-800/60 space-y-1">
+                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
                           Detalhamento do Serviço Executado
                         </span>
-                        <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed font-normal">
+                        <p className="text-xs text-zinc-300 leading-relaxed font-normal">
                           {record.notes}
                         </p>
                       </div>
@@ -393,7 +393,7 @@ export const MaintenanceHistory: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {record.rating && (
-                          <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 px-2.5 py-1 rounded-lg text-xs font-bold border border-amber-200 dark:border-amber-800/40">
+                          <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-2.5 py-1 rounded-lg text-xs font-bold border border-amber-200">
                             <Star size={13} className="fill-amber-400 text-amber-400" />
                             <span>Avaliado com {record.rating}.0 ★</span>
                           </div>
@@ -402,7 +402,7 @@ export const MaintenanceHistory: React.FC = () => {
                         {record.tags?.map((tag) => (
                           <span 
                             key={tag} 
-                            className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold border border-indigo-100 dark:border-indigo-800/40"
+                            className="px-2.5 py-1 rounded-lg bg-blue-900/20 text-indigo-700 text-[11px] font-semibold border border-blue-900/20"
                           >
                             {tag}
                           </span>
@@ -416,7 +416,7 @@ export const MaintenanceHistory: React.FC = () => {
                           e.stopPropagation();
                           setSelectedReceipt(record);
                         }}
-                        className="px-3.5 py-1.5 bg-zinc-900 dark:bg-zinc-700 hover:bg-zinc-800 dark:hover:bg-zinc-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 bg-zinc-900 hover:bg-zinc-800:bg-zinc-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <Receipt size={14} />
                         <span>Ver Comprovante Digital</span>
@@ -431,14 +431,14 @@ export const MaintenanceHistory: React.FC = () => {
         </div>
       ) : (
         /* Empty State */
-        <div className="text-center py-12 px-4 bg-white dark:bg-zinc-850 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 space-y-3">
-          <div className="w-14 h-14 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 rounded-full flex items-center justify-center mx-auto">
+        <div className="text-center py-12 px-4 bg-zinc-950 rounded-3xl border border-zinc-800/80 space-y-3">
+          <div className="w-14 h-14 bg-zinc-800/50 text-zinc-400 rounded-full flex items-center justify-center mx-auto">
             <Wrench size={28} />
           </div>
-          <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+          <h3 className="text-base font-bold text-zinc-200">
             Nenhuma manutenção encontrada
           </h3>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+          <p className="text-xs text-zinc-400 max-w-sm mx-auto">
             Tente mudar o termo de busca ou escolha outra categoria de filtro acima.
           </p>
           <button
@@ -446,7 +446,7 @@ export const MaintenanceHistory: React.FC = () => {
               setSearchQuery('');
               setSelectedCategory('ALL');
             }}
-            className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 transition-colors cursor-pointer"
+            className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
           >
             Limpar Filtros
           </button>
@@ -456,12 +456,12 @@ export const MaintenanceHistory: React.FC = () => {
       {/* MODAL 1: Digital Receipt Modal */}
       {selectedReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden animate-pop-in relative">
+          <div className="bg-zinc-950 w-full max-w-md rounded-3xl shadow-2xl border border-zinc-800 overflow-hidden animate-pop-in relative">
             
             {/* Header */}
             <div className="bg-zinc-900 text-white p-5 flex items-center justify-between border-b border-zinc-800">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-indigo-600 rounded-xl text-white">
+                <div className="p-2 bg-blue-600 rounded-xl text-white">
                   <Receipt size={20} />
                 </div>
                 <div>
@@ -479,18 +479,18 @@ export const MaintenanceHistory: React.FC = () => {
 
             {/* Receipt Body */}
             <div className="p-6 space-y-4 text-xs">
-              <div className="border-b border-dashed border-zinc-200 dark:border-zinc-800 pb-4 space-y-2">
+              <div className="border-b border-dashed border-zinc-800 pb-4 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-zinc-500 font-semibold">Oficina Prestadora:</span>
-                  <span className="font-bold text-zinc-800 dark:text-zinc-100">{selectedReceipt.mechanicName}</span>
+                  <span className="font-bold text-zinc-200">{selectedReceipt.mechanicName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-500 font-semibold">Veículo Atendido:</span>
-                  <span className="font-bold text-zinc-800 dark:text-zinc-100">{selectedReceipt.vehicleInfo}</span>
+                  <span className="font-bold text-zinc-200">{selectedReceipt.vehicleInfo}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-500 font-semibold">Data da Conclusão:</span>
-                  <span className="font-bold text-zinc-800 dark:text-zinc-100">{selectedReceipt.date}</span>
+                  <span className="font-bold text-zinc-200">{selectedReceipt.date}</span>
                 </div>
               </div>
 
@@ -498,44 +498,44 @@ export const MaintenanceHistory: React.FC = () => {
                 <span className="text-zinc-500 font-semibold uppercase text-[10px] tracking-wider block">
                   Descrição dos Serviços / Peças
                 </span>
-                <p className="p-3 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed">
+                <p className="p-3 bg-zinc-900 rounded-xl text-zinc-300 font-medium leading-relaxed">
                   {selectedReceipt.serviceType}
                 </p>
               </div>
 
-              <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 flex items-center justify-between">
+              <div className="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-emerald-800 dark:text-emerald-300 block">
+                  <span className="text-[10px] font-bold uppercase text-emerald-800 block">
                     Pagamento Aprovado
                   </span>
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400">
+                  <span className="text-xs text-emerald-600">
                     Forma: {selectedReceipt.paymentMethod}
                   </span>
                 </div>
-                <span className="text-lg font-black text-emerald-700 dark:text-emerald-300">
+                <span className="text-lg font-black text-emerald-700">
                   R$ {selectedReceipt.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </span>
               </div>
 
               <div className="text-[11px] text-zinc-400 text-center pt-2">
-                <ShieldCheck size={16} className="inline text-indigo-500 mr-1" />
+                <ShieldCheck size={16} className="inline text-blue-500 mr-1" />
                 Documento verificado e autenticado pela Plataforma FIX.
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-850 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
+            <div className="p-4 bg-zinc-900 border-t border-zinc-800 flex gap-2">
               <button
                 onClick={() => {
                   window.print();
                 }}
-                className="flex-1 py-2.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="flex-1 py-2.5 bg-zinc-200 hover:bg-zinc-300:bg-zinc-700 text-zinc-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Printer size={14} /> Imprimir / PDF
               </button>
               <button
                 onClick={() => setSelectedReceipt(null)}
-                className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
               >
                 Fechar
               </button>
@@ -548,9 +548,9 @@ export const MaintenanceHistory: React.FC = () => {
       {/* MODAL 2: Manual Registration Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden animate-pop-in relative">
+          <div className="bg-zinc-950 w-full max-w-lg rounded-3xl shadow-2xl border border-zinc-800 overflow-hidden animate-pop-in relative">
             
-            <div className="bg-indigo-600 text-white p-5 flex items-center justify-between">
+            <div className="bg-blue-600 text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Wrench size={20} />
                 <h3 className="font-extrabold text-base">Registrar Manutenção Externa</h3>
@@ -565,7 +565,7 @@ export const MaintenanceHistory: React.FC = () => {
 
             <form onSubmit={handleAddManualRecord} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block font-bold text-zinc-300 mb-1">
                   Tipo de Serviço / Peça *
                 </label>
                 <input
@@ -574,12 +574,12 @@ export const MaintenanceHistory: React.FC = () => {
                   value={newServiceType}
                   onChange={(e) => setNewServiceType(e.target.value)}
                   placeholder="Ex: Troca de pastilhas de freio dianteiras"
-                  className="w-full p-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full p-3 bg-zinc-900 text-white rounded-xl border border-zinc-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block font-bold text-zinc-300 mb-1">
                   Nome da Oficina ou Mecânico *
                 </label>
                 <input
@@ -588,13 +588,13 @@ export const MaintenanceHistory: React.FC = () => {
                   value={newMechanicName}
                   onChange={(e) => setNewMechanicName(e.target.value)}
                   placeholder="Ex: Auto Center Express"
-                  className="w-full p-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full p-3 bg-zinc-900 text-white rounded-xl border border-zinc-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block font-bold text-zinc-300 mb-1">
                     Veículo
                   </label>
                   <input
@@ -602,12 +602,12 @@ export const MaintenanceHistory: React.FC = () => {
                     value={newVehicleInfo}
                     onChange={(e) => setNewVehicleInfo(e.target.value)}
                     placeholder="Ex: Fiat Uno 2013"
-                    className="w-full p-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full p-3 bg-zinc-900 text-white rounded-xl border border-zinc-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block font-bold text-zinc-300 mb-1">
                     Valor Total (R$)
                   </label>
                   <input
@@ -616,13 +616,13 @@ export const MaintenanceHistory: React.FC = () => {
                     value={newPrice}
                     onChange={(e) => setNewPrice(e.target.value)}
                     placeholder="180.00"
-                    className="w-full p-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full p-3 bg-zinc-900 text-white rounded-xl border border-zinc-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block font-bold text-zinc-300 mb-1">
                   Observações / Peças Utilizadas
                 </label>
                 <textarea
@@ -630,7 +630,7 @@ export const MaintenanceHistory: React.FC = () => {
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
                   placeholder="Ex: Marca das pastilhas Cobreq. KM do carro: 85.000"
-                  className="w-full p-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
+                  className="w-full p-3 bg-zinc-900 text-white rounded-xl border border-zinc-800 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
                 />
               </div>
 
@@ -638,13 +638,13 @@ export const MaintenanceHistory: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="flex-1 py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 font-bold rounded-xl transition-colors cursor-pointer"
+                  className="flex-1 py-3 bg-zinc-800/50 hover:bg-zinc-200 text-zinc-300 font-bold rounded-xl transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-indigo-600/30 cursor-pointer"
+                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-900/30 cursor-pointer"
                 >
                   Salvar Registro
                 </button>

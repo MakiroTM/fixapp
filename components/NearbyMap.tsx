@@ -131,18 +131,18 @@ export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = 
   }, [userLocation?.latitude, userLocation?.longitude, mechanics]);
 
   return (
-    <div className="w-full h-[300px] sm:h-[400px] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-lg relative z-0">
+    <div className="w-full h-[300px] sm:h-[400px] rounded-2xl overflow-hidden border border-zinc-800 shadow-lg relative z-0">
       <div ref={mapContainerRef} className="w-full h-full z-0" />
       
       {/* Legend Overlay */}
-      <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-md text-[10px] sm:text-xs z-[1000] flex flex-col gap-1.5 pointer-events-none">
+      <div className="absolute bottom-4 right-4 bg-zinc-900/90 backdrop-blur-sm p-2.5 rounded-xl border border-zinc-800 shadow-md text-[10px] sm:text-xs z-[1000] flex flex-col gap-1.5 pointer-events-none">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm border border-white"></div>
-          <span className="text-zinc-700 dark:text-zinc-300 font-medium">Sua Localização</span>
+          <span className="text-zinc-300 font-medium">Sua Localização</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-rose-500 shadow-sm border border-white"></div>
-          <span className="text-zinc-700 dark:text-zinc-300 font-medium">Oficinas / Guinchos (OpenStreetMap)</span>
+          <span className="text-zinc-300 font-medium">Oficinas / Guinchos (OpenStreetMap)</span>
         </div>
       </div>
     </div>

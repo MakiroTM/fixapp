@@ -123,7 +123,7 @@ export const PaymentSimulation: React.FC<PaymentSimulationProps> = ({
         className="w-full p-4 flex items-center justify-between bg-gradient-to-r from-zinc-900 via-zinc-900 to-indigo-950/40 hover:bg-zinc-800/80 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 rounded-lg">
+          <div className="p-2 bg-blue-600/30 border border-indigo-500/50 text-indigo-300 rounded-lg">
             <Wallet size={18} />
           </div>
           <div>
@@ -201,23 +201,23 @@ export const PaymentSimulation: React.FC<PaymentSimulationProps> = ({
               {/* QR code simulation graphic */}
               <div className="flex flex-col sm:flex-row items-center gap-4 bg-zinc-900/80 p-3 rounded-lg border border-zinc-800">
                 <div className="w-24 h-24 bg-white p-2 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <div className="w-full h-full border-4 border-zinc-950 p-1 grid grid-cols-4 gap-0.5">
-                    <div className="bg-zinc-950"></div>
-                    <div className="bg-zinc-950"></div>
+                  <div className="w-full h-full border-4 border-black p-1 grid grid-cols-4 gap-0.5">
+                    <div className="bg-black"></div>
+                    <div className="bg-black"></div>
                     <div></div>
-                    <div className="bg-zinc-950"></div>
+                    <div className="bg-black"></div>
                     <div></div>
-                    <div className="bg-zinc-950"></div>
-                    <div className="bg-zinc-950"></div>
+                    <div className="bg-black"></div>
+                    <div className="bg-black"></div>
                     <div></div>
-                    <div className="bg-zinc-950"></div>
+                    <div className="bg-black"></div>
                     <div></div>
-                    <div className="bg-zinc-950"></div>
-                    <div className="bg-zinc-950"></div>
-                    <div className="bg-zinc-950"></div>
-                    <div className="bg-zinc-950"></div>
+                    <div className="bg-black"></div>
+                    <div className="bg-black"></div>
+                    <div className="bg-black"></div>
+                    <div className="bg-black"></div>
                     <div></div>
-                    <div className="bg-zinc-950"></div>
+                    <div className="bg-black"></div>
                   </div>
                 </div>
 
@@ -292,7 +292,7 @@ export const PaymentSimulation: React.FC<PaymentSimulationProps> = ({
               <button
                 onClick={handleSimulatePayment}
                 disabled={isProcessing}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl text-sm shadow-lg shadow-indigo-900/40 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full bg-blue-600 hover:bg-blue-900/200 text-white font-black py-3 rounded-xl text-sm shadow-lg shadow-indigo-900/40 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 {isProcessing ? (
                   <>

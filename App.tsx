@@ -306,7 +306,7 @@ const App: React.FC = () => {
       </main>
       
       {/* Footer com ajuste para Safe Area do iPhone */}
-      <footer className="mt-auto py-6 sm:py-8 text-center text-zinc-400 dark:text-zinc-600 text-sm border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
+      <footer className="mt-auto py-6 sm:py-8 text-center text-zinc-500 text-sm border-t border-zinc-800 bg-zinc-950 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
           <div className="text-center md:text-left">
             <p className="font-bold text-zinc-800 dark:text-zinc-200">© 2026 FIX App</p>
@@ -314,7 +314,7 @@ const App: React.FC = () => {
           </div>
 
           {/* Location Status in Footer */}
-          <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-1.5 rounded-full border border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
             {isDetectingLocation ? (
               <div className="flex items-center gap-1.5 text-blue-500 animate-pulse text-[10px] sm:text-xs font-medium">
                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>
