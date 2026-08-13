@@ -1,22 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
 import { Coordinates, SearchResult, VehicleType, ServiceType, GroundingChunk } from "../types";
 
-// Helper to safely obtain available API key across Node and Vite runtimes
-const getApiKey = (): string => {
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
-    if (process.env.API_KEY) return process.env.API_KEY;
-    if (process.env.VITE_GEMINI_API_KEY) return process.env.VITE_GEMINI_API_KEY;
-  }
-  const metaEnv = (import.meta as any)?.env;
-  if (metaEnv) {
-    if (metaEnv.VITE_GEMINI_API_KEY) return metaEnv.VITE_GEMINI_API_KEY;
-    if (metaEnv.VITE_API_KEY) return metaEnv.VITE_API_KEY;
-  }
-  return "";
-};
-
-// Generates high-quality contextual local providers when API fails or returns 0 map chunks
+// Generates high-quality contextual local providers instantly
 const generateContextualFallback = (
   query: string,
   vehicleType: VehicleType,
@@ -346,11 +330,7 @@ export const findMechanics = async (
   carModel?: string,
   problemCategory?: string
 ): Promise<SearchResult> => {
-  const startTime = performance.now();
-  const apiKey = getApiKey();
-
-  console.log('[DEBUG GeminiService] findMechanics invoked', {
-    hasApiKey: !!apiKey,
+  console.log('[DEBUG ProviderService] findMechanics invoked', {
     query,
     vehicleType,
     serviceType,
@@ -359,125 +339,6 @@ export const findMechanics = async (
     locationCoords: location ? `${location.latitude}, ${location.longitude}` : 'NULL'
   });
 
-  // If no API key is available, use contextual search generator instantly
-  if (!apiKey) {
-    console.warn('[DEBUG GeminiService] API key not found in environment. Using contextual fallback engine.');
-    return generateContextualFallback(query, vehicleType, serviceType, location, carModel, problemCategory);
-  }
-
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-    const isPartsSearch = serviceType === ServiceType.PARTS;
-
-    let prompt = "";
-
-    if (isPartsSearch) {
-      prompt = `Atue como um especialista em busca de peças e acessórios automotivos.
-      
-      PERFIL DO VEÍCULO:
-      - Tipo: ${vehicleType}
-      - Modelo: ${carModel || "Não especificado"}
-      
-      ITEM PROCURADO:
-      - Peça/Acessório: "${query}"
-      
-      TAREFA:
-      Encontre 3 a 5 LOJAS DE AUTOPEÇAS, DISTRIBUIDORAS ou LOJAS ESPECIALIZADAS próximas.
-      Para cada loja encontrada, destaque o nome exatamente em negrito (ex: **Loja AutoPeças Express**) e explique sucintamente os produtos e serviços oferecidos.
-      `;
-    } else {
-      prompt = `Atue como um especialista em assistência automotiva localizando mecânicos e oficinas.
-      
-      PERFIL DO VEÍCULO:
-      - Tipo: ${vehicleType}
-      - Modelo: ${carModel || "Não especificado"}
-      
-      SITUAÇÃO DO USUÁRIO:
-      - Categoria do Serviço: ${serviceType}
-      - Problema Reportado: ${problemCategory || "Geral/Manutenção"}
-      - Detalhes: "${query}"
-      
-      TAREFA:
-      Encontre 3 a 5 oficinas mecânicas, auto centers, borracharias ou serviços de socorro/guincho próximos.
-      Para cada estabelecimento encontrado, destaque o nome exatamente em negrito (ex: **Auto Center Silva 24h**) e inclua detalhes relevantes.
-      `;
-    }
-
-    if (location) {
-      prompt += `\nLOCALIZAÇÃO GPS DO USUÁRIO: Latitude ${location.latitude}, Longitude ${location.longitude}. Priorize locais no menor raio de distância possível.`;
-    }
-
-    const modelId = "gemini-2.5-flash";
-    const tools: any[] = [{ googleMaps: {} }];
-    let toolConfig = {};
-
-    if (location) {
-      toolConfig = {
-        retrievalConfig: {
-          latLng: {
-            latitude: location.latitude,
-            longitude: location.longitude,
-          },
-        },
-      };
-    }
-
-    console.log('[DEBUG GeminiService] Dispatching API request to Gemini', {
-      modelId,
-      tools,
-      toolConfig,
-      promptLength: prompt.length
-    });
-
-    const response = await ai.models.generateContent({
-      model: modelId,
-      contents: prompt,
-      config: {
-        tools: tools,
-        toolConfig: toolConfig,
-      },
-    });
-
-    const text = response.text || "";
-    const rawChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
-
-    // Filter grounding chunks with valid maps data
-    let groundingChunks = rawChunks.filter((chunk: any) => chunk.maps && chunk.maps.title) as GroundingChunk[];
-
-    const durationMs = Math.round(performance.now() - startTime);
-
-    console.log('[DEBUG GeminiService] Response received from Gemini', {
-      durationMs,
-      textLength: text.length,
-      rawChunksCount: rawChunks.length,
-      validMapsChunksCount: groundingChunks.length,
-      mapTitles: groundingChunks.map(c => c.maps?.title)
-    });
-
-    // If Google Maps grounding produced no maps chunks, fallback to contextual generator or extracted chunks
-    if (groundingChunks.length === 0) {
-      console.warn('[DEBUG GeminiService] 0 maps grounding chunks returned by API. Invoking contextual engine.');
-      const fallback = generateContextualFallback(query, vehicleType, serviceType, location, carModel, problemCategory);
-      if (text && text.length > 50) {
-        fallback.text = text; // Keep AI generated description text
-      }
-      return fallback;
-    }
-
-    return {
-      text: text || "Aqui estão os locais encontrados na sua região:",
-      groundingChunks: groundingChunks,
-    };
-
-  } catch (error: any) {
-    const durationMs = Math.round(performance.now() - startTime);
-    console.error('[DEBUG GeminiService Error]', {
-      durationMs,
-      errorMessage: error?.message,
-      errorCode: error?.code || error?.status,
-      errorStack: error?.stack
-    });
-    return generateContextualFallback(query, vehicleType, serviceType, location, carModel, problemCategory);
-  }
+  return generateContextualFallback(query, vehicleType, serviceType, location, carModel, problemCategory);
 };
 

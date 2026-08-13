@@ -1,6 +1,6 @@
 {
   "name": "Fix",
-  "description": "Encontre serviços mecânicos para carros e motos em qualquer lugar, incluindo rodovias. Use inteligência artificial para localizar ajuda rapidamente.",
+  "description": "Encontre serviços mecânicos para carros e motos em qualquer lugar, incluindo rodovias. Localize ajuda e oficinas rapidamente.",
   "requestFramePermissions": [
     "geolocation"
   ]
