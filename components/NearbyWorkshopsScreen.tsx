@@ -11,6 +11,7 @@ interface NearbyWorkshopsScreenProps {
   onBack: () => void;
   onContact: (name: string) => void;
   onSelectWorkshop?: (chunk: GroundingChunk) => void;
+  selectedWorkshop?: GroundingChunk | null;
 }
 
 const getWorkshopStatus = (name: string = '') => {
@@ -20,14 +21,35 @@ const getWorkshopStatus = (name: string = '') => {
   return { label: 'Aberto', color: 'text-emerald-500' };
 };
 
-export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ user, location, onBack, onContact, onSelectWorkshop }) => {
+export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ 
+  user, 
+  location, 
+  onBack, 
+  onContact, 
+  onSelectWorkshop,
+  selectedWorkshop: externalSelectedWorkshop 
+}) => {
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [vehicleFilter, setVehicleFilter] = useState('CARROS');
   const [mechanics, setMechanics] = useState<SearchResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedWorkshop, setSelectedWorkshop] = useState<GroundingChunk | null>(null);
+  const [selectedWorkshop, setSelectedWorkshop] = useState<GroundingChunk | null>(externalSelectedWorkshop || null);
   const [isSheetOpen, setIsSheetOpen] = useState(true);
+
+  // Sync externalSelectedWorkshop when prop changes
+  useEffect(() => {
+    if (externalSelectedWorkshop !== undefined) {
+      setSelectedWorkshop(externalSelectedWorkshop);
+    }
+  }, [externalSelectedWorkshop]);
+
+  const handleSelectWorkshopInternal = (chunk: GroundingChunk | null) => {
+    setSelectedWorkshop(chunk);
+    if (chunk && onSelectWorkshop) {
+      onSelectWorkshop(chunk);
+    }
+  };
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -190,7 +212,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
 
       const shopMarker = L.marker([lat, lng], { icon: shopIcon });
       shopMarker.on('click', () => {
-        setSelectedWorkshop(chunk);
+        handleSelectWorkshopInternal(chunk);
         setIsSheetOpen(true);
         map.panTo([lat, lng]);
       });
@@ -289,7 +311,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
             /* Selected Workshop Desktop Details View */
             <div className="space-y-5 animate-fade-in">
               <button 
-                onClick={() => setSelectedWorkshop(null)}
+                onClick={() => handleSelectWorkshopInternal(null)}
                 className="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
               >
                 <ArrowLeft size={16} /> Voltar à Lista de Oficinas
@@ -382,7 +404,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
               {filteredChunks.map((chunk, idx) => (
                 <div 
                   key={idx}
-                  onClick={() => setSelectedWorkshop(chunk)}
+                  onClick={() => handleSelectWorkshopInternal(chunk)}
                   className={`flex items-start gap-3 p-3 rounded-2xl cursor-pointer transition-all border ${
                     selectedWorkshop?.maps?.title === chunk.maps?.title
                       ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-700 shadow-sm'
@@ -471,7 +493,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                     </div>
                   </div>
                   <button 
-                    onClick={() => setSelectedWorkshop(null)}
+                    onClick={() => handleSelectWorkshopInternal(null)}
                     className="bg-zinc-100 dark:bg-zinc-800 p-1.5 rounded-full text-zinc-500"
                   >
                     <X size={16} />
@@ -503,7 +525,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 {filteredChunks.map((chunk, idx) => (
                   <div 
                     key={idx}
-                    onClick={() => setSelectedWorkshop(chunk)}
+                    onClick={() => handleSelectWorkshopInternal(chunk)}
                     className="flex items-start gap-3 p-2.5 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl cursor-pointer border border-zinc-200/50 dark:border-zinc-800"
                   >
                     <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg flex-shrink-0 flex items-center justify-center font-bold">

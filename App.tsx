@@ -11,6 +11,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { NearbyWorkshopsScreen } from './components/NearbyWorkshopsScreen';
 import { WorkshopDetailScreen } from './components/WorkshopDetailScreen';
 import { BottomNav } from './components/BottomNav';
+import { DesktopSidebar } from './components/DesktopSidebar';
 import { Heart, MessageCircle } from 'lucide-react';
 import { User, Coordinates, GroundingChunk } from './types';
 
@@ -204,102 +205,125 @@ const App: React.FC = () => {
         toggleTheme={toggleTheme}
       />
       
-      <main className="flex-grow flex flex-col relative overflow-hidden pb-24 lg:pb-0">
-        <AnimatePresence mode="wait">
-          {!user ? (
-            <motion.div
-              key="auth"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.25 }}
-            >
-              <AuthScreen onLogin={handleLogin} />
-            </motion.div>
-          ) : (
-            <motion.div 
-              key={currentView} 
-              initial={{ opacity: 0, y: 18, scale: 0.99 }} 
-              animate={{ opacity: 1, y: 0, scale: 1 }} 
-              exit={{ opacity: 0, y: -18, scale: 0.99 }} 
-              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="flex-1 flex flex-col"
-            >
-              {currentView === 'profile' ? (
-                <UserProfile 
-                  user={user} 
-                  onSave={handleUpdateUser} 
-                  onBack={() => setCurrentView('dashboard')} 
-                />
-              ) : currentView === 'subscription' ? (
-                <SubscriptionScreen 
-                  user={user}
-                  onSubscribe={handleSubscribe}
-                  onBack={() => setCurrentView('dashboard')}
-                />
-              ) : currentView === 'sos' ? (
-                <SosEmergencyScreen
-                  user={user}
-                  location={location}
-                  locationError={locationError}
-                  isDetectingLocation={isDetectingLocation}
-                  onBack={() => setCurrentView('dashboard')}
-                />
-              ) : currentView === 'nearby' ? (
-                <NearbyWorkshopsScreen
-                  user={user}
-                  location={location}
-                  onBack={() => setCurrentView('dashboard')}
-                  onContact={() => {}}
-                  onSelectWorkshop={handleSelectWorkshop}
-                />
-              ) : currentView === 'workshop-detail' && selectedWorkshop ? (
-                <WorkshopDetailScreen
-                  chunk={selectedWorkshop}
-                  userLocation={location}
-                  onBack={() => setCurrentView('dashboard')}
-                  onContact={(name) => {
-                    // Direct to dashboard chat or handle contact
-                    setCurrentView('dashboard');
-                  }}
-                />
-              ) : currentView === 'favorites' ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
-                  <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
-                    <Heart size={32} />
+      <div className="flex-1 flex flex-col lg:flex-row min-w-0 overflow-hidden relative">
+        {user && (
+          <DesktopSidebar
+            user={user}
+            currentView={currentView}
+            onNavigate={(view) => setCurrentView(view as ViewState)}
+            selectedWorkshop={selectedWorkshop}
+            onClearSelectedWorkshop={() => setSelectedWorkshop(null)}
+            onSelectWorkshop={(chunk) => {
+              setSelectedWorkshop(chunk);
+              setCurrentView('workshop-detail');
+            }}
+            onContactWorkshop={() => {
+              setCurrentView('chat');
+            }}
+            location={location}
+            isDetectingLocation={isDetectingLocation}
+            locationError={locationError}
+          />
+        )}
+
+        <main className="flex-grow flex flex-col relative overflow-hidden pb-24 lg:pb-0 min-w-0">
+          <AnimatePresence mode="wait">
+            {!user ? (
+              <motion.div
+                key="auth"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.25 }}
+              >
+                <AuthScreen onLogin={handleLogin} />
+              </motion.div>
+            ) : (
+              <motion.div 
+                key={currentView} 
+                initial={{ opacity: 0, y: 18, scale: 0.99 }} 
+                animate={{ opacity: 1, y: 0, scale: 1 }} 
+                exit={{ opacity: 0, y: -18, scale: 0.99 }} 
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                className="flex-1 flex flex-col"
+              >
+                {currentView === 'profile' ? (
+                  <UserProfile 
+                    user={user} 
+                    onSave={handleUpdateUser} 
+                    onBack={() => setCurrentView('dashboard')} 
+                  />
+                ) : currentView === 'subscription' ? (
+                  <SubscriptionScreen 
+                    user={user}
+                    onSubscribe={handleSubscribe}
+                    onBack={() => setCurrentView('dashboard')}
+                  />
+                ) : currentView === 'sos' ? (
+                  <SosEmergencyScreen
+                    user={user}
+                    location={location}
+                    locationError={locationError}
+                    isDetectingLocation={isDetectingLocation}
+                    onBack={() => setCurrentView('dashboard')}
+                  />
+                ) : currentView === 'nearby' ? (
+                  <NearbyWorkshopsScreen
+                    user={user}
+                    location={location}
+                    onBack={() => setCurrentView('dashboard')}
+                    onContact={() => {}}
+                    onSelectWorkshop={(chunk) => setSelectedWorkshop(chunk)}
+                    selectedWorkshop={selectedWorkshop}
+                  />
+                ) : currentView === 'workshop-detail' && selectedWorkshop ? (
+                  <WorkshopDetailScreen
+                    chunk={selectedWorkshop}
+                    userLocation={location}
+                    onBack={() => setCurrentView('dashboard')}
+                    onContact={(name) => {
+                      // Direct to dashboard chat or handle contact
+                      setCurrentView('dashboard');
+                    }}
+                  />
+                ) : currentView === 'favorites' ? (
+                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
+                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
+                      <Heart size={32} />
+                    </div>
+                    <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Oficinas Salvas</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Suas oficinas e prestadores favoritos aparecerão aqui para acesso rápido.</p>
                   </div>
-                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Oficinas Salvas</h2>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Suas oficinas e prestadores favoritos aparecerão aqui para acesso rápido.</p>
-                </div>
-              ) : currentView === 'chat' ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
-                  <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
-                    <MessageCircle size={32} />
+                ) : currentView === 'chat' ? (
+                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
+                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
+                      <MessageCircle size={32} />
+                    </div>
+                    <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Mensagens</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Seu histórico de conversas com mecânicos e suporte será listado aqui.</p>
                   </div>
-                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Mensagens</h2>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Seu histórico de conversas com mecânicos e suporte será listado aqui.</p>
-                </div>
-              ) : (
-                <>
-                  {user.role === 'CLIENT' ? (
-                    <ClientDashboard 
-                      user={user} 
-                      onUpgrade={() => setCurrentView('subscription')} 
-                      onSosClick={() => setCurrentView('sos')}
-                      onSelectWorkshop={handleSelectWorkshop}
-                      location={location}
-                      locationError={locationError}
-                      isDetectingLocation={isDetectingLocation}
-                    />
-                  ) : (
-                    <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
-                  )}
-                </>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
+                ) : (
+                  <>
+                    {user.role === 'CLIENT' ? (
+                      <ClientDashboard 
+                        user={user} 
+                        onUpgrade={() => setCurrentView('subscription')} 
+                        onSosClick={() => setCurrentView('sos')}
+                        onSelectWorkshop={(chunk) => setSelectedWorkshop(chunk)}
+                        location={location}
+                        locationError={locationError}
+                        isDetectingLocation={isDetectingLocation}
+                      />
+                    ) : (
+                      <MechanicDashboard user={user} onUpgrade={() => setCurrentView('subscription')} />
+                    )}
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+      </div>
       
       {/* Footer com ajuste para Safe Area do iPhone */}
       <footer className="mt-auto py-6 sm:py-8 text-center text-zinc-400 dark:text-zinc-600 text-sm border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors duration-300 pb-[env(safe-area-inset-bottom)]">
