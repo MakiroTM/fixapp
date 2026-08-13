@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, MapPin, Navigation, Phone, MessageCircle, Heart, Handshake, Star, X, Info, Store } from 'lucide-react';
-import L from 'leaflet';
+import { Search, Filter, MapPin, Navigation, Phone, MessageCircle, Heart, Handshake, Star, X, Info, Store, Key, AlertCircle } from 'lucide-react';
+import { Loader } from '@googlemaps/js-api-loader';
 import { Coordinates, SearchResult, GroundingChunk } from '../types';
 import { findMechanics } from '../services/geminiService';
 import { ServiceSkeleton } from './ServiceSkeleton';
@@ -11,6 +11,25 @@ interface NearbyWorkshopsScreenProps {
   onBack: () => void;
   onContact: (name: string) => void;
   onSelectWorkshop?: (chunk: GroundingChunk) => void;
+}
+
+const GOOGLE_MAPS_KEY =
+  process.env.GOOGLE_MAPS_PLATFORM_KEY ||
+  (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY ||
+  (globalThis as any).GOOGLE_MAPS_PLATFORM_KEY ||
+  '';
+
+let globalLoader: Loader | null = null;
+
+function getMapsLoader(key: string) {
+  if (!globalLoader) {
+    globalLoader = new Loader({
+      apiKey: key || 'YOUR_API_KEY',
+      version: 'weekly',
+      libraries: ['places', 'geometry', 'marker']
+    });
+  }
+  return globalLoader;
 }
 
 const getWorkshopStatus = (name: string = '') => {
@@ -28,10 +47,13 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
   const [loading, setLoading] = useState(false);
   const [selectedWorkshop, setSelectedWorkshop] = useState<GroundingChunk | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Layer[]>([]);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+
+  const hasValidKey = Boolean(GOOGLE_MAPS_KEY) && GOOGLE_MAPS_KEY !== 'YOUR_API_KEY';
 
   // Fetch initial data
   useEffect(() => {
@@ -86,115 +108,161 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
     return true;
   });
 
-  // Map initialization and updates
+  // Google Maps Initialization via @googlemaps/js-api-loader
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    
-    if (!mapInstanceRef.current) {
-      const centerLat = location?.latitude || -23.5505;
-      const centerLng = location?.longitude || -46.6333;
-      
-      const map = L.map(mapContainerRef.current, {
-        center: [centerLat, centerLng],
-        zoom: 13,
-        zoomControl: false, // hide default to place custom
-      });
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
+    let isMounted = true;
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap',
-      }).addTo(map);
+    const loader = getMapsLoader(GOOGLE_MAPS_KEY);
 
-      mapInstanceRef.current = map;
+    (loader as any).load().then(() => {
+      if (!isMounted || !mapContainerRef.current) return;
 
-      if (location) {
-        const userIcon = L.divIcon({
-          className: 'custom-user-marker',
-          html: `<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><div class="w-3 h-3 bg-white rounded-full"></div></div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16],
+      if (!mapInstanceRef.current) {
+        const centerLat = location?.latitude || -23.5505;
+        const centerLng = location?.longitude || -46.6333;
+
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center: { lat: centerLat, lng: centerLng },
+          zoom: 13,
+          mapId: 'DEMO_MAP_ID',
+          zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          gestureHandling: 'greedy', // Seamless touch drag and pinch-zoom on Android / mobile
+          clickableIcons: false,
         });
-        L.marker([location.latitude, location.longitude], { icon: userIcon }).addTo(map).bindPopup('Você está aqui');
-      }
-    }
 
+        mapInstanceRef.current = map;
+        setMapLoaded(true);
+      }
+    }).catch(err => {
+      console.error("Falha ao carregar Google Maps API:", err);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Center map on user location ONCE when location becomes available, without constantly resetting camera while user explores
+  const hasCenteredUserRef = useRef(false);
+  useEffect(() => {
+    if (location && mapInstanceRef.current && !hasCenteredUserRef.current) {
+      mapInstanceRef.current.panTo({ lat: location.latitude, lng: location.longitude });
+      mapInstanceRef.current.setZoom(14);
+      hasCenteredUserRef.current = true;
+    }
+  }, [location, mapLoaded]);
+
+  // Update Markers on Map
+  useEffect(() => {
     const map = mapInstanceRef.current;
-    
+    if (!map || !mapLoaded) return;
+
     // Clear old markers
-    markersRef.current.forEach(m => m.remove());
+    markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = [];
 
-    // We don't have lat/lng directly on chunk.maps, we only have URIs.
-    // For visual simulation on the map, since we can't extract coordinates from the Google Maps URI easily here,
-    // we will generate approximate coordinates around the user's location based on index.
-    
     const baseLat = location?.latitude || -23.5505;
     const baseLng = location?.longitude || -46.6333;
 
+    // Add User Marker
+    if (location) {
+      const userMarker = new google.maps.Marker({
+        position: { lat: location.latitude, lng: location.longitude },
+        map,
+        title: 'Você está aqui',
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 9,
+          fillColor: '#3b82f6',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3,
+        }
+      });
+      const userInfoWindow = new google.maps.InfoWindow({
+        content: '<div style="font-weight:bold;font-family:sans-serif;padding:2px;font-size:12px;">Você está aqui</div>'
+      });
+      userMarker.addListener('click', () => {
+        userInfoWindow.open(map, userMarker);
+      });
+      markersRef.current.push(userMarker);
+    }
+
     filteredChunks.forEach((chunk, index) => {
-      // Simulate slightly different coordinates for each
-      const radius = 0.015; // roughly 1.5km
-      const angle = (index / filteredChunks.length) * Math.PI * 2;
-      const lat = baseLat + Math.cos(angle) * radius * (Math.random() * 0.5 + 0.5);
-      const lng = baseLng + Math.sin(angle) * radius * (Math.random() * 0.5 + 0.5);
-      
+      const radius = 0.015;
+      const angle = (index / Math.max(filteredChunks.length, 1)) * Math.PI * 2;
+      const lat = baseLat + Math.cos(angle) * radius * (Math.random() * 0.4 + 0.6);
+      const lng = baseLng + Math.sin(angle) * radius * (Math.random() * 0.4 + 0.6);
+
       const isSelected = selectedWorkshop?.maps?.title === chunk.maps?.title;
-      // Simulate open status (currently all are treated as open)
-      const isOpen = true;
-      
-      const mechHtml = `
-        <div class="relative w-8 h-8">
-          ${isOpen ? '<div class="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-75"></div>' : ''}
-          <div class="relative w-8 h-8 bg-rose-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-        </div>
-      `;
-      
-      const activeHtml = `
-        <div class="relative w-10 h-10 animate-bounce">
-          ${isOpen ? '<div class="absolute inset-0 bg-indigo-600 rounded-full animate-ping opacity-75"></div>' : ''}
-          <div class="relative w-10 h-10 bg-indigo-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        </div>
-      `;
 
-      const mechIcon = L.divIcon({
-        className: 'custom-mech-marker',
-        html: mechHtml,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map,
+        title: chunk.maps?.title || 'Oficina',
+        icon: {
+          path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+          scale: isSelected ? 8 : 6,
+          fillColor: isSelected ? '#4f46e5' : '#f43f5e',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+        animation: isSelected ? google.maps.Animation.BOUNCE : undefined
       });
 
-      const activeIcon = L.divIcon({
-        className: 'custom-active-marker',
-        html: activeHtml,
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-      });
-      
-      const marker = L.marker([lat, lng], { icon: isSelected ? activeIcon : mechIcon }).addTo(map);
-      marker.on('click', () => {
+      marker.addListener('click', () => {
         setSelectedWorkshop(chunk);
         setIsSheetOpen(true);
-        map.setView([lat, lng], 15, { animate: true });
+        map.panTo({ lat, lng });
+        map.setZoom(15);
       });
+
       markersRef.current.push(marker);
     });
 
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 300);
-
-  }, [filteredChunks, location, selectedWorkshop]);
+  }, [filteredChunks, location, selectedWorkshop, mapLoaded]);
 
   return (
-    <div className="fixed inset-0 bg-white dark:bg-zinc-950 z-[100] flex flex-col overflow-hidden">
-      {/* Top Search Bar & Filters (Floating over map) */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] p-4 bg-gradient-to-b from-white/90 dark:from-zinc-950/90 to-transparent pt-[env(safe-area-inset-top,1rem)]">
-        <div className="max-w-md mx-auto space-y-3">
+    <div className="relative flex-1 flex flex-col w-full h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] overflow-hidden bg-white dark:bg-zinc-950 z-0">
+      
+      {/* API Key Missing Notice Header if no GOOGLE_MAPS_PLATFORM_KEY */}
+      {!hasValidKey && (
+        <div className="bg-amber-500/10 border-b border-amber-500/30 p-2 z-20 text-xs text-amber-700 dark:text-amber-300 flex items-center justify-between gap-2 px-4 shrink-0">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={16} className="text-amber-500 flex-shrink-0" />
+            <span>Chave do Google Maps não configurada (<code>GOOGLE_MAPS_PLATFORM_KEY</code>).</span>
+          </div>
+          <span className="text-[11px] font-semibold bg-amber-500/20 px-2 py-0.5 rounded text-amber-800 dark:text-amber-200">
+            Configurar em Secrets ⚙️
+          </span>
+        </div>
+      )}
+
+      {/* Geolocation Warning Banner if GPS unavailable */}
+      {!location && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 p-2.5 z-20 text-xs text-amber-800 dark:text-amber-200 flex items-center justify-between gap-2 px-4 shrink-0 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={18} className="text-amber-500 flex-shrink-0" />
+            <span>
+              <strong>Localização Indisponível:</strong> Ative o GPS do dispositivo para visualizar sua posição real e oficinas ao seu redor.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Top Search Bar & Filters */}
+      <div className="relative z-20 p-3 sm:p-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 shadow-sm shrink-0">
+        <div className="max-w-md mx-auto space-y-2.5">
           <div className="flex items-center gap-2">
             <button 
               onClick={onBack}
-              className="p-2.5 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300"
+              className="p-2.5 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors cursor-pointer"
+              title="Voltar ao início"
             >
               <X size={20} />
             </button>
@@ -205,9 +273,9 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch(query, activeFilter, vehicleFilter)}
-                className="w-full bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-indigo-500"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 py-2 pl-9 pr-4 text-xs sm:text-sm outline-none focus:border-indigo-500 text-zinc-900 dark:text-white transition-colors"
               />
-              <Search className="absolute left-3 top-3 text-zinc-400" size={16} />
+              <Search className="absolute left-3 top-2.5 text-zinc-400" size={16} />
             </div>
           </div>
           
@@ -216,10 +284,10 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
               <button
                 key={filter}
                 onClick={() => handleSearch(query, filter, vehicleFilter)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md transition-colors ${
+                className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-xs transition-colors cursor-pointer ${
                   activeFilter === filter
                     ? 'bg-indigo-600 text-white border border-indigo-500'
-                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800'
+                    : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800'
                 }`}
               >
                 {filter === 'ALL' ? 'Todos os Serviços' : filter === 'MECANICA' ? 'Mecânica' : filter === 'GUINCHO' ? 'Guincho' : filter === 'ELETRICA' ? 'Elétrica' : 'Borracharia'}
@@ -227,15 +295,15 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
             ))}
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {['CARROS', 'MOTOS', 'CAMINHÕES', 'ELÉTRICOS'].map((vehicle) => (
               <button
                 key={vehicle}
                 onClick={() => handleSearch(query, activeFilter, vehicle)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shadow-md transition-colors ${
+                className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-xs transition-colors cursor-pointer ${
                   vehicleFilter === vehicle
                     ? 'bg-emerald-600 text-white border border-emerald-500'
-                    : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800'
+                    : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800'
                 }`}
               >
                 {vehicle === 'CARROS' ? 'Carros' : vehicle === 'MOTOS' ? 'Motos' : vehicle === 'CAMINHÕES' ? 'Caminhões' : 'Elétricos'}
@@ -245,15 +313,33 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({ us
         </div>
       </div>
 
-      {/* Map Container - 60% height visually, but it takes 100% and bottom sheet covers it */}
-      <div className="flex-1 relative z-0">
-        <div ref={mapContainerRef} className="w-full h-full" />
+      {/* Main Map Canvas Area */}
+      <div className="flex-1 relative z-0 overflow-hidden min-h-[320px]">
+        <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
+
+        {/* Floating Manual Re-Center on GPS Button */}
+        {location && (
+          <button
+            type="button"
+            onClick={() => {
+              if (mapInstanceRef.current && location) {
+                mapInstanceRef.current.panTo({ lat: location.latitude, lng: location.longitude });
+                mapInstanceRef.current.setZoom(15);
+              }
+            }}
+            className="absolute top-3 right-3 z-20 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-zinc-800 dark:text-zinc-100 px-3 py-2 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-700 hover:bg-indigo-50 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+            title="Centralizar no meu GPS"
+          >
+            <Navigation size={14} className="text-indigo-600 dark:text-indigo-400" />
+            <span>Meu GPS</span>
+          </button>
+        )}
       </div>
 
       {/* Bottom Sheet */}
       <div 
-        className={`absolute bottom-0 left-0 right-0 z-[1000] bg-white dark:bg-zinc-900 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out border-t border-zinc-200 dark:border-zinc-800 flex flex-col ${
-          isSheetOpen ? (selectedWorkshop ? 'h-[65vh]' : 'h-[40vh]') : 'h-16'
+        className={`relative z-30 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out border-t border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 ${
+          isSheetOpen ? (selectedWorkshop ? 'h-[50vh] sm:h-[45vh]' : 'h-[35vh] sm:h-[30vh]') : 'h-12'
         }`}
       >
         {/* Drag Handle */}

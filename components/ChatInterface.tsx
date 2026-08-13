@@ -148,7 +148,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pointer-events-none">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto transition-opacity" onClick={onClose}></div>
       
       <div className="bg-white dark:bg-zinc-900 w-full sm:w-[400px] sm:h-[600px] h-[90vh] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col pointer-events-auto animate-fly-in-top overflow-hidden border border-zinc-200 dark:border-zinc-800">

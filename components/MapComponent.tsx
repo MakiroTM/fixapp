@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Navigation, MapPin } from 'lucide-react';
-import L from 'leaflet';
+import { Loader } from '@googlemaps/js-api-loader';
 
 interface MapComponentProps {
   latitude: number;
@@ -9,6 +9,25 @@ interface MapComponentProps {
   onClose?: () => void;
   userLatitude?: number;
   userLongitude?: number;
+}
+
+const GOOGLE_MAPS_KEY =
+  process.env.GOOGLE_MAPS_PLATFORM_KEY ||
+  (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY ||
+  (globalThis as any).GOOGLE_MAPS_PLATFORM_KEY ||
+  '';
+
+let globalLoader: Loader | null = null;
+
+function getMapsLoader(key: string) {
+  if (!globalLoader) {
+    globalLoader = new Loader({
+      apiKey: key || 'YOUR_API_KEY',
+      version: 'weekly',
+      libraries: ['places', 'geometry', 'marker']
+    });
+  }
+  return globalLoader;
 }
 
 export const MapComponent: React.FC<MapComponentProps> = ({ 
@@ -21,115 +40,132 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'PIN' | 'ROUTE'>('PIN');
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersAndLayersRef = useRef<L.Layer[]>([]);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const polylineRef = useRef<google.maps.Polyline | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   // Initialize map once
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstanceRef.current) return;
+    if (!mapContainerRef.current) return;
+    let isMounted = true;
 
-    let initialLat = latitude;
-    let initialLng = longitude;
-    let initialZoom = 15;
+    const loader = getMapsLoader(GOOGLE_MAPS_KEY);
 
-    if (viewMode === 'ROUTE' && userLatitude && userLongitude) {
-      initialLat = (userLatitude + latitude) / 2;
-      initialLng = (userLongitude + longitude) / 2;
-      initialZoom = 13;
-    }
+    (loader as any).load().then(() => {
+      if (!isMounted || !mapContainerRef.current) return;
 
-    const map = L.map(mapContainerRef.current, {
-      center: [initialLat, initialLng],
-      zoom: initialZoom,
-      zoomControl: true,
+      if (!mapInstanceRef.current) {
+        let initialLat = latitude;
+        let initialLng = longitude;
+        let initialZoom = 15;
+
+        if (viewMode === 'ROUTE' && userLatitude && userLongitude) {
+          initialLat = (userLatitude + latitude) / 2;
+          initialLng = (userLongitude + longitude) / 2;
+          initialZoom = 13;
+        }
+
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center: { lat: initialLat, lng: initialLng },
+          zoom: initialZoom,
+          mapId: 'DEMO_MAP_ID',
+          zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          gestureHandling: 'greedy',
+          clickableIcons: false,
+        });
+
+        mapInstanceRef.current = map;
+        setMapLoaded(true);
+      }
+    }).catch(err => {
+      console.error("Error loading Google Maps in MapComponent:", err);
     });
 
-    mapInstanceRef.current = map;
-
-    // OpenStreetMap Tile Layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    // Force map size update after render
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 200);
-
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
+      isMounted = false;
     };
-  }, []); // Run only once
+  }, []);
 
   // Update markers and route when props or viewMode change
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map) return;
+    if (!map || !mapLoaded) return;
 
-    // Clear old layers
-    markersAndLayersRef.current.forEach(layer => layer.remove());
-    markersAndLayersRef.current = [];
+    // Clear old markers & polyline
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+    if (polylineRef.current) {
+      polylineRef.current.setMap(null);
+      polylineRef.current = null;
+    }
 
-    // Custom Red Pin Icon for Destination
-    const destIcon = L.divIcon({
-      className: 'custom-leaflet-marker',
-      html: `
-        <div style="background-color: #ef4444; width: 32px; height: 32px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32]
+    // Destination Marker
+    const destMarker = new google.maps.Marker({
+      position: { lat: latitude, lng: longitude },
+      map,
+      title: title || 'Localização',
+      icon: {
+        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+        scale: 7,
+        fillColor: '#ef4444',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2,
+      }
     });
 
-    // Add Destination Marker
-    const destMarker = L.marker([latitude, longitude], { icon: destIcon }).addTo(map);
-    destMarker.bindPopup(`<strong>${title || 'Localização'}</strong>`).openPopup();
-    markersAndLayersRef.current.push(destMarker);
+    const infoWindow = new google.maps.InfoWindow({
+      content: `<div style="font-weight:bold;font-family:sans-serif;padding:2px;font-size:12px;">${title || 'Localização'}</div>`
+    });
+
+    destMarker.addListener('click', () => infoWindow.open(map, destMarker));
+    infoWindow.open(map, destMarker);
+    markersRef.current.push(destMarker);
 
     if (viewMode === 'ROUTE' && userLatitude && userLongitude) {
-      // Custom Blue Pin Icon for User
-      const userIcon = L.divIcon({
-        className: 'custom-leaflet-user-marker',
-        html: `
-          <div style="background-color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-          </div>
-        `,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+      // User Marker
+      const userMarker = new google.maps.Marker({
+        position: { lat: userLatitude, lng: userLongitude },
+        map,
+        title: 'Você está aqui',
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#3b82f6',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        }
       });
+      markersRef.current.push(userMarker);
 
-      // Add User Marker
-      const uMarker = L.marker([userLatitude, userLongitude], { icon: userIcon }).addTo(map);
-      uMarker.bindPopup('<strong>Você está aqui</strong>');
-      markersAndLayersRef.current.push(uMarker);
+      // Polyline route
+      const polyline = new google.maps.Polyline({
+        path: [
+          { lat: userLatitude, lng: userLongitude },
+          { lat: latitude, lng: longitude }
+        ],
+        geodesic: true,
+        strokeColor: '#4f46e5',
+        strokeOpacity: 0.8,
+        strokeWeight: 5
+      });
+      polyline.setMap(map);
+      polylineRef.current = polyline;
 
-      // Draw polyline connecting user to destination
-      const polyline = L.polyline([
-        [userLatitude, userLongitude],
-        [latitude, longitude]
-      ], {
-        color: '#4f46e5',
-        weight: 5,
-        opacity: 0.8,
-        dashArray: '10, 10'
-      }).addTo(map);
-      markersAndLayersRef.current.push(polyline);
-
-      // Fit map bounds to show both points
-      map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend({ lat: userLatitude, lng: userLongitude });
+      bounds.extend({ lat: latitude, lng: longitude });
+      map.fitBounds(bounds, 50);
     } else {
-      // Just center on destination
-      map.setView([latitude, longitude], 15);
+      map.setCenter({ lat: latitude, lng: longitude });
+      map.setZoom(15);
     }
-  }, [latitude, longitude, viewMode, userLatitude, userLongitude, title]);
+  }, [latitude, longitude, viewMode, userLatitude, userLongitude, title, mapLoaded]);
 
   return (
     <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-2xl">
@@ -183,7 +219,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         </div>
 
         <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline flex items-center gap-1">
-          🌍 OpenStreetMap Integrado
+          🌍 Google Maps Integrado
         </span>
       </div>
     </div>

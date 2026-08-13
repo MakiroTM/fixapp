@@ -89,7 +89,7 @@ export const ServiceRatingModal: React.FC<ServiceRatingModalProps> = ({
   const activeRating = hoverStars || selectedStars;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden animate-pop-in relative">
         
         {/* Modal Header */}

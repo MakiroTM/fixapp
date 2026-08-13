@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Navigation, Car, Bike, Footprints, MapPin, Compass, ShieldCheck, ExternalLink } from 'lucide-react';
-import L from 'leaflet';
+import { Loader } from '@googlemaps/js-api-loader';
 
 interface RouteModalProps {
   isOpen: boolean;
@@ -11,6 +11,25 @@ interface RouteModalProps {
   destinationAddress?: string;
   userLat?: number;
   userLng?: number;
+}
+
+const GOOGLE_MAPS_KEY =
+  process.env.GOOGLE_MAPS_PLATFORM_KEY ||
+  (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY ||
+  (globalThis as any).GOOGLE_MAPS_PLATFORM_KEY ||
+  '';
+
+let globalLoader: Loader | null = null;
+
+function getMapsLoader(key: string) {
+  if (!globalLoader) {
+    globalLoader = new Loader({
+      apiKey: key || 'YOUR_API_KEY',
+      version: 'weekly',
+      libraries: ['places', 'geometry', 'marker', 'routes']
+    });
+  }
+  return globalLoader;
 }
 
 export const RouteModal: React.FC<RouteModalProps> = ({
@@ -25,126 +44,141 @@ export const RouteModal: React.FC<RouteModalProps> = ({
 }) => {
   const [travelMode, setTravelMode] = useState<'car' | 'foot' | 'bike'>('car');
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const layersRef = useRef<L.Layer[]>([]);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const polylineRef = useRef<google.maps.Polyline | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
-  // Fallback destination lat/lng if not provided directly
   const destLat = destinationLat || -23.5505;
   const destLng = destinationLng || -46.6333;
-
-  // Fallback user lat/lng if not provided
   const origLat = userLat || destLat - 0.02;
   const origLng = userLng || destLng - 0.02;
 
-  // Initialize Map Once
+  // Initialize Map
   useEffect(() => {
-    if (!isOpen || !mapContainerRef.current || mapInstanceRef.current) return;
+    if (!isOpen || !mapContainerRef.current) return;
+    let isMounted = true;
 
-    const midpointLat = (origLat + destLat) / 2;
-    const midpointLng = (origLng + destLng) / 2;
+    const loader = getMapsLoader(GOOGLE_MAPS_KEY);
 
-    const map = L.map(mapContainerRef.current, {
-      center: [midpointLat, midpointLng],
-      zoom: 13,
-      zoomControl: true,
+    (loader as any).load().then(() => {
+      if (!isMounted || !mapContainerRef.current) return;
+
+      if (!mapInstanceRef.current) {
+        const midpointLat = (origLat + destLat) / 2;
+        const midpointLng = (origLng + destLng) / 2;
+
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center: { lat: midpointLat, lng: midpointLng },
+          zoom: 13,
+          mapId: 'DEMO_MAP_ID',
+          zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          gestureHandling: 'greedy',
+          clickableIcons: false,
+        });
+
+        mapInstanceRef.current = map;
+        setMapLoaded(true);
+      }
+    }).catch(err => {
+      console.error("Error loading Google Maps in RouteModal:", err);
     });
 
-    mapInstanceRef.current = map;
-
-    // OpenStreetMap Tile Layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 200);
-
-  }, [isOpen]);
-
-  // Clean up on unmount or close
-  useEffect(() => {
-    if (!isOpen && mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
     return () => {
-      if (!isOpen && mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
+      isMounted = false;
     };
   }, [isOpen]);
 
-  // Update Markers and Polyline
+  // Clean up on close
+  useEffect(() => {
+    if (!isOpen && mapInstanceRef.current) {
+      mapInstanceRef.current = null;
+      setMapLoaded(false);
+    }
+  }, [isOpen]);
+
+  // Update Markers & Polyline Route
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !isOpen) return;
+    if (!map || !isOpen || !mapLoaded) return;
 
-    // Clear old layers
-    layersRef.current.forEach(layer => layer.remove());
-    layersRef.current = [];
+    // Clear old markers & polyline
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+    if (polylineRef.current) {
+      polylineRef.current.setMap(null);
+      polylineRef.current = null;
+    }
 
-    // Custom Icon for Destination
-    const destIcon = L.divIcon({
-      className: 'custom-leaflet-dest-marker',
-      html: `
-        <div style="background-color: #ef4444; width: 34px; height: 34px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5); display: flex; align-items: center; justify-content: center; color: white;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-      `,
-      iconSize: [34, 34],
-      iconAnchor: [17, 34],
-      popupAnchor: [0, -34]
+    // Destination Marker
+    const dMarker = new google.maps.Marker({
+      position: { lat: destLat, lng: destLng },
+      map,
+      title: `Destino: ${destinationTitle}`,
+      icon: {
+        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+        scale: 7,
+        fillColor: '#ef4444',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2,
+      }
     });
 
-    // Custom Icon for User Origin
-    const userIcon = L.divIcon({
-      className: 'custom-leaflet-user-route-marker',
-      html: `
-        <div style="background-color: #3b82f6; width: 34px; height: 34px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5); display: flex; align-items: center; justify-content: center; color: white;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-        </div>
-      `,
-      iconSize: [34, 34],
-      iconAnchor: [17, 34],
-      popupAnchor: [0, -34]
+    const dInfoWindow = new google.maps.InfoWindow({
+      content: `<div style="font-weight:bold;font-family:sans-serif;padding:2px;font-size:12px;">Destino: ${destinationTitle}</div>`
     });
+    dMarker.addListener('click', () => dInfoWindow.open(map, dMarker));
+    dInfoWindow.open(map, dMarker);
+    markersRef.current.push(dMarker);
 
-    // Add Markers
-    const dMarker = L.marker([destLat, destLng], { icon: destIcon }).addTo(map);
-    dMarker.bindPopup(`<strong>Destino: ${destinationTitle}</strong>`).openPopup();
-    layersRef.current.push(dMarker);
+    // User Origin Marker
+    const uMarker = new google.maps.Marker({
+      position: { lat: origLat, lng: origLng },
+      map,
+      title: 'Origem: Ponto de Partida',
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8,
+        fillColor: '#3b82f6',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2,
+      }
+    });
+    markersRef.current.push(uMarker);
 
-    const uMarker = L.marker([origLat, origLng], { icon: userIcon }).addTo(map);
-    uMarker.bindPopup('<strong>Origem: Ponto de Partida</strong>');
-    layersRef.current.push(uMarker);
-
-    // Draw Polyline Route
+    // Polyline
     const polylineColor = travelMode === 'car' ? '#4f46e5' : travelMode === 'foot' ? '#10b981' : '#f59e0b';
-    const polyline = L.polyline([
-      [origLat, origLng],
-      [destLat, destLng]
-    ], {
-      color: polylineColor,
-      weight: 6,
-      opacity: 0.85,
-      dashArray: travelMode === 'foot' ? '6, 8' : '10, 8'
-    }).addTo(map);
-    layersRef.current.push(polyline);
+    const polyline = new google.maps.Polyline({
+      path: [
+        { lat: origLat, lng: origLng },
+        { lat: destLat, lng: destLng }
+      ],
+      geodesic: true,
+      strokeColor: polylineColor,
+      strokeOpacity: 0.85,
+      strokeWeight: 6
+    });
+    polyline.setMap(map);
+    polylineRef.current = polyline;
 
-    // Fit Bounds
-    map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend({ lat: origLat, lng: origLng });
+    bounds.extend({ lat: destLat, lng: destLng });
+    map.fitBounds(bounds, 50);
 
-  }, [isOpen, origLat, origLng, destLat, destLng, destinationTitle, travelMode]);
+  }, [isOpen, origLat, origLng, destLat, destLng, destinationTitle, travelMode, mapLoaded]);
 
   if (!isOpen) return null;
 
-  const osmExternalUrl = `https://www.openstreetmap.org/directions?engine=osrm_${travelMode === 'foot' ? 'foot' : travelMode === 'bike' ? 'bicycle' : 'car'}&route=${origLat}%2C${origLng}%3B${destLat}%2C${destLng}`;
+  const gmapsExternalUrl = `https://www.google.com/maps/dir/?api=1&origin=${origLat},${origLng}&destination=${destLat},${destLng}&travelmode=${travelMode === 'foot' ? 'walking' : travelMode === 'bike' ? 'bicycling' : 'driving'}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
       <div className="bg-white dark:bg-zinc-900 w-full max-w-3xl h-[85vh] sm:h-[80vh] rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden animate-pop-in relative">
         
         {/* Header */}
@@ -156,7 +190,7 @@ export const RouteModal: React.FC<RouteModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                  Rota OpenStreetMap Integrada
+                  Rota Google Maps Integrada
                 </span>
                 <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded-full border border-emerald-500/30 flex items-center gap-1">
                   <ShieldCheck size={10} /> No aplicativo FIX
@@ -216,17 +250,17 @@ export const RouteModal: React.FC<RouteModalProps> = ({
           </div>
 
           <a
-            href={osmExternalUrl}
+            href={gmapsExternalUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800/50"
           >
             <ExternalLink size={13} />
-            <span>Abrir no OpenStreetMap</span>
+            <span>Abrir no Google Maps</span>
           </a>
         </div>
 
-        {/* Leaflet OpenStreetMap Container */}
+        {/* Google Maps Container */}
         <div className="flex-1 relative w-full h-full bg-zinc-100 dark:bg-zinc-950 z-0">
           <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
         </div>
