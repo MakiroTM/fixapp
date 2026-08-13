@@ -21,7 +21,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate })
       className="fixed bottom-0 left-0 right-0 z-50 z-bottom-nav pointer-events-none px-4 lg:hidden"
       style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
     >
-      <div className="bg-zinc-900/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-800/60 shadow-[0_8px_32px_rgba(59,130,246,0.15)] rounded-3xl mx-auto max-w-md pointer-events-auto flex items-center justify-between px-3 py-2">
+      <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-lg shadow-zinc-300/50 dark:shadow-[0_8px_32px_rgba(59,130,246,0.15)] rounded-3xl mx-auto max-w-md pointer-events-auto flex items-center justify-between px-3 py-2 transition-colors">
         {navItems.map((item) => {
           const isActive = currentView === item.id || 
                            (item.id === 'nearby' && currentView === 'workshop-detail');

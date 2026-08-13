@@ -275,7 +275,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
 
       {/* FLOATING TOP BAR OVERLAY: Floating GPS Button & Status */}
       <div className="relative z-20 p-3 sm:p-4 flex items-center justify-between pointer-events-none">
-        <div className="bg-zinc-900/90 dark:bg-zinc-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-800 shadow-lg text-[11px] font-bold text-zinc-300 pointer-events-auto flex items-center gap-2">
+        <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 shadow-lg text-[11px] font-bold text-zinc-800 dark:text-zinc-300 pointer-events-auto flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>{filteredChunks.length || groundingChunks.length} oficinas no mapa</span>
         </div>
@@ -308,7 +308,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
 
       {/* INTERACTIVE DRAGGABLE BOTTOM SHEET OVER MAP */}
       <div 
-        className={`relative z-[60] z-bottom-sheet bg-zinc-900/95 dark:bg-zinc-950/95 backdrop-blur-2xl border-t border-zinc-800/80 rounded-t-3xl shadow-[0_-12px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out flex flex-col ${
+        className={`relative z-[60] z-bottom-sheet bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl border-t border-zinc-200 dark:border-zinc-800/80 rounded-t-3xl shadow-[0_-12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_-12px_40px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out flex flex-col ${
           sheetState === 'expanded' 
             ? 'h-[60%] sm:h-[55%] max-h-[520px]' 
             : 'h-36 sm:h-40'
@@ -324,14 +324,14 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
           onClick={toggleSheetState}
         >
           {/* Handle bar */}
-          <div className="w-12 h-1.5 bg-zinc-600/80 dark:bg-zinc-700 rounded-full hover:bg-indigo-500 transition-colors mb-1" />
+          <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full hover:bg-indigo-500 transition-colors mb-1" />
           
-          <div className="w-full flex items-center justify-between text-[11px] text-zinc-400 font-bold px-1">
-            <span className="flex items-center gap-1 text-indigo-400">
+          <div className="w-full flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 font-bold px-1">
+            <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
               <ShieldCheck size={13} />
               {selectedWorkshop ? 'Oficina Credenciada FIX' : 'Selecione uma Oficina'}
             </span>
-            <span className="flex items-center gap-1 text-zinc-500 hover:text-white transition-colors">
+            <span className="flex items-center gap-1 text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
               {sheetState === 'expanded' ? (
                 <>Minimizar <ChevronDown size={14} /></>
               ) : (
@@ -351,20 +351,20 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                 <div className="flex items-center justify-between gap-3 animate-fade-in pt-1">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                         Aberto Agora
                       </span>
-                      <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
-                        <Star size={12} className="fill-amber-400" />
+                      <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+                        <Star size={12} className="fill-amber-500" />
                         4.8
                       </div>
-                      <span className="text-zinc-600">•</span>
-                      <span className="text-xs text-zinc-400 flex items-center gap-0.5">
+                      <span className="text-zinc-300 dark:text-zinc-600">•</span>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-0.5">
                         <MapPin size={11} /> 1.2 km
                       </span>
                     </div>
 
-                    <h3 className="font-extrabold text-white text-base sm:text-lg truncate leading-tight">
+                    <h3 className="font-extrabold text-zinc-900 dark:text-white text-base sm:text-lg truncate leading-tight">
                       {title}
                     </h3>
                   </div>
@@ -391,13 +391,13 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                 <div className="space-y-4 animate-fade-in pt-1">
                   
                   {/* Photo Header Card */}
-                  <div className="relative h-32 sm:h-36 rounded-2xl overflow-hidden border border-zinc-800 shadow-md">
+                  <div className="relative h-32 sm:h-36 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-md">
                     <img 
                       src={bgPhoto} 
                       alt={title}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/40 to-transparent" />
                     
                     <button
                       onClick={() => onSelectWorkshop(null)}
@@ -420,28 +420,28 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                   </div>
 
                   {/* Rating, Hours & Distance */}
-                  <div className="flex items-center justify-between text-xs text-zinc-300 bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800">
-                    <div className="flex items-center gap-1 text-amber-400 font-bold">
-                      <Star size={14} className="fill-amber-400" />
+                  <div className="flex items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                    <div className="flex items-center gap-1 text-amber-500 font-bold">
+                      <Star size={14} className="fill-amber-500" />
                       4.8 <span className="text-zinc-500 font-normal">(128 avaliações)</span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-emerald-400 font-bold">
+                    <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
                       <Clock size={13} />
                       Aberto hoje até 18:00
                     </div>
 
-                    <div className="flex items-center gap-1 text-zinc-400">
-                      <MapPin size={13} className="text-indigo-400" />
+                    <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
+                      <MapPin size={13} className="text-indigo-600 dark:text-indigo-400" />
                       1.2 km
                     </div>
                   </div>
 
                   {/* Address Box */}
-                  <div className="bg-zinc-900/60 p-3 rounded-xl border border-zinc-800/80 flex items-center justify-between gap-2">
-                    <div className="text-xs text-zinc-300 min-w-0">
+                  <div className="bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between gap-2">
+                    <div className="text-xs text-zinc-700 dark:text-zinc-300 min-w-0">
                       <p className="font-semibold truncate">{fakeAddress}</p>
-                      <p className="text-[11px] text-zinc-500 mt-0.5">Clique para copiar o endereço</p>
+                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">Clique para copiar o endereço</p>
                     </div>
 
                     <button

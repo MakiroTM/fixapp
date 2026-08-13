@@ -10,6 +10,8 @@ import { SosEmergencyScreen } from './components/SosEmergencyScreen';
 import { SplashScreen } from './components/SplashScreen';
 import { NearbyWorkshopsScreen } from './components/NearbyWorkshopsScreen';
 import { WorkshopDetailScreen } from './components/WorkshopDetailScreen';
+import { FavoritesScreen } from './components/FavoritesScreen';
+import { ChatScreen } from './components/ChatScreen';
 import { BottomNav } from './components/BottomNav';
 import { DesktopSidebar } from './components/DesktopSidebar';
 import { Heart, MessageCircle } from 'lucide-react';
@@ -287,21 +289,21 @@ const App: React.FC = () => {
                     }}
                   />
                 ) : currentView === 'favorites' ? (
-                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
-                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
-                      <Heart size={32} />
-                    </div>
-                    <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Oficinas Salvas</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Suas oficinas e prestadores favoritos aparecerão aqui para acesso rápido.</p>
-                  </div>
+                  <FavoritesScreen
+                    userLocation={location}
+                    onBack={() => setCurrentView('dashboard')}
+                    onSelectWorkshop={(chunk) => {
+                      setSelectedWorkshop(chunk);
+                      setCurrentView('workshop-detail');
+                    }}
+                    onContact={() => setCurrentView('chat')}
+                  />
                 ) : currentView === 'chat' ? (
-                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full min-h-[60vh]">
-                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mb-4">
-                      <MessageCircle size={32} />
-                    </div>
-                    <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Mensagens</h2>
-                    <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Seu histórico de conversas com mecânicos e suporte será listado aqui.</p>
-                  </div>
+                  <ChatScreen
+                    user={user}
+                    userLocation={location}
+                    onBack={() => setCurrentView('dashboard')}
+                  />
                 ) : (
                   <>
                     {user.role === 'CLIENT' ? (

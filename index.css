@@ -83,6 +83,23 @@
 .leaflet-popup-content-wrapper {
   border-radius: 12px !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+  background-color: #ffffff !important;
+  color: #18181b !important;
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background-color: #18181b !important;
+  color: #f4f4f5 !important;
+  border: 1px solid rgba(63, 63, 70, 0.8) !important;
+}
+
+.dark .leaflet-popup-tip {
+  background-color: #18181b !important;
+}
+
+/* Dark Mode Leaflet Map Tile Filters */
+.dark .leaflet-tile {
+  filter: brightness(0.65) invert(1) contrast(1.25) hue-rotate(200deg) saturate(0.3) !important;
 }
 
 /* Custom Scrollbar Utilities */
