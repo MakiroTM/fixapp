@@ -18,7 +18,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate })
 
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4"
+      className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 lg:hidden"
       style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
     >
       <div className="bg-zinc-900/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-800/60 shadow-[0_8px_32px_rgba(59,130,246,0.15)] rounded-3xl mx-auto max-w-md pointer-events-auto flex items-center justify-between px-3 py-2">

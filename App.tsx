@@ -198,11 +198,13 @@ const App: React.FC = () => {
         onHomeClick={() => setCurrentView('dashboard')}
         onSosClick={() => setCurrentView('sos')}
         onMapClick={() => setCurrentView('nearby')}
+        onFavoritesClick={() => setCurrentView('favorites')}
+        onChatClick={() => setCurrentView('chat')}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
       />
       
-      <main className="flex-grow flex flex-col relative overflow-hidden pb-24">
+      <main className="flex-grow flex flex-col relative overflow-hidden pb-24 lg:pb-0">
         <AnimatePresence mode="wait">
           {!user ? (
             <motion.div

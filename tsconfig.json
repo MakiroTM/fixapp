@@ -12,7 +12,7 @@
     "skipLibCheck": true,
     "types": [
       "node",
-      "google.maps"
+      "leaflet"
     ],
     "moduleResolution": "bundler",
     "isolatedModules": true,

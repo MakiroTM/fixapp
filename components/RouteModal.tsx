@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Navigation, Car, Bike, Footprints, MapPin, Compass, ShieldCheck, ExternalLink } from 'lucide-react';
-import { Loader } from '@googlemaps/js-api-loader';
+import { X, Navigation, Car, Bike, Footprints, MapPin, ShieldCheck, ExternalLink } from 'lucide-react';
+import L from 'leaflet';
 
 interface RouteModalProps {
   isOpen: boolean;
@@ -11,25 +11,6 @@ interface RouteModalProps {
   destinationAddress?: string;
   userLat?: number;
   userLng?: number;
-}
-
-const GOOGLE_MAPS_KEY =
-  process.env.GOOGLE_MAPS_PLATFORM_KEY ||
-  (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY ||
-  (globalThis as any).GOOGLE_MAPS_PLATFORM_KEY ||
-  '';
-
-let globalLoader: Loader | null = null;
-
-function getMapsLoader(key: string) {
-  if (!globalLoader) {
-    globalLoader = new Loader({
-      apiKey: key || 'YOUR_API_KEY',
-      version: 'weekly',
-      libraries: ['places', 'geometry', 'marker', 'routes']
-    });
-  }
-  return globalLoader;
 }
 
 export const RouteModal: React.FC<RouteModalProps> = ({
@@ -44,10 +25,8 @@ export const RouteModal: React.FC<RouteModalProps> = ({
 }) => {
   const [travelMode, setTravelMode] = useState<'car' | 'foot' | 'bike'>('car');
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const polylineRef = useRef<google.maps.Polyline | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersGroupRef = useRef<L.LayerGroup | null>(null);
 
   const destLat = destinationLat || -23.5505;
   const destLng = destinationLng || -46.6333;
@@ -57,125 +36,100 @@ export const RouteModal: React.FC<RouteModalProps> = ({
   // Initialize Map
   useEffect(() => {
     if (!isOpen || !mapContainerRef.current) return;
-    let isMounted = true;
 
-    const loader = getMapsLoader(GOOGLE_MAPS_KEY);
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        center: [(origLat + destLat) / 2, (origLng + destLng) / 2],
+        zoom: 13,
+        zoomControl: true,
+        attributionControl: false,
+      });
 
-    (loader as any).load().then(() => {
-      if (!isMounted || !mapContainerRef.current) return;
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      }).addTo(map);
 
-      if (!mapInstanceRef.current) {
-        const midpointLat = (origLat + destLat) / 2;
-        const midpointLng = (origLng + destLng) / 2;
+      markersGroupRef.current = L.layerGroup().addTo(map);
+      mapInstanceRef.current = map;
 
-        const map = new google.maps.Map(mapContainerRef.current, {
-          center: { lat: midpointLat, lng: midpointLng },
-          zoom: 13,
-          mapId: 'DEMO_MAP_ID',
-          zoomControl: true,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-          gestureHandling: 'greedy',
-          clickableIcons: false,
-        });
-
-        mapInstanceRef.current = map;
-        setMapLoaded(true);
-      }
-    }).catch(err => {
-      console.error("Error loading Google Maps in RouteModal:", err);
-    });
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 200);
+    }
 
     return () => {
-      isMounted = false;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
     };
-  }, [isOpen]);
-
-  // Clean up on close
-  useEffect(() => {
-    if (!isOpen && mapInstanceRef.current) {
-      mapInstanceRef.current = null;
-      setMapLoaded(false);
-    }
   }, [isOpen]);
 
   // Update Markers & Polyline Route
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !isOpen || !mapLoaded) return;
+    const group = markersGroupRef.current;
+    if (!map || !isOpen || !group) return;
 
-    // Clear old markers & polyline
-    markersRef.current.forEach(m => m.setMap(null));
-    markersRef.current = [];
-    if (polylineRef.current) {
-      polylineRef.current.setMap(null);
-      polylineRef.current = null;
-    }
+    group.clearLayers();
 
     // Destination Marker
-    const dMarker = new google.maps.Marker({
-      position: { lat: destLat, lng: destLng },
-      map,
-      title: `Destino: ${destinationTitle}`,
-      icon: {
-        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-        scale: 7,
-        fillColor: '#ef4444',
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 2,
-      }
+    const destIcon = L.divIcon({
+      className: 'custom-dest-pin',
+      html: `<div class="relative flex items-center justify-center w-8 h-8 cursor-pointer">
+        <div class="bg-rose-600 text-white p-1.5 rounded-full shadow-lg border-2 border-white flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+      </div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
     });
 
-    const dInfoWindow = new google.maps.InfoWindow({
-      content: `<div style="font-weight:bold;font-family:sans-serif;padding:2px;font-size:12px;">Destino: ${destinationTitle}</div>`
-    });
-    dMarker.addListener('click', () => dInfoWindow.open(map, dMarker));
-    dInfoWindow.open(map, dMarker);
-    markersRef.current.push(dMarker);
+    const dMarker = L.marker([destLat, destLng], { icon: destIcon });
+    dMarker.bindPopup(`<strong style="font-family:sans-serif;font-size:12px;">Destino: ${destinationTitle}</strong>`).openPopup();
+    group.addLayer(dMarker);
 
     // User Origin Marker
-    const uMarker = new google.maps.Marker({
-      position: { lat: origLat, lng: origLng },
-      map,
-      title: 'Origem: Ponto de Partida',
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 8,
-        fillColor: '#3b82f6',
-        fillOpacity: 1,
-        strokeColor: '#ffffff',
-        strokeWeight: 2,
-      }
+    const userIcon = L.divIcon({
+      className: 'custom-user-pin',
+      html: `<div class="relative flex items-center justify-center w-8 h-8">
+        <div class="absolute inset-0 bg-blue-500/40 rounded-full animate-ping"></div>
+        <div class="w-6 h-6 bg-blue-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white">
+          <div class="w-2 h-2 bg-white rounded-full"></div>
+        </div>
+      </div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
     });
-    markersRef.current.push(uMarker);
+
+    const uMarker = L.marker([origLat, origLng], { icon: userIcon });
+    uMarker.bindPopup('<strong style="font-family:sans-serif;font-size:12px;">Origem: Você está aqui</strong>');
+    group.addLayer(uMarker);
 
     // Polyline
     const polylineColor = travelMode === 'car' ? '#4f46e5' : travelMode === 'foot' ? '#10b981' : '#f59e0b';
-    const polyline = new google.maps.Polyline({
-      path: [
-        { lat: origLat, lng: origLng },
-        { lat: destLat, lng: destLng }
-      ],
-      geodesic: true,
-      strokeColor: polylineColor,
-      strokeOpacity: 0.85,
-      strokeWeight: 6
+    const polyline = L.polyline([
+      [origLat, origLng],
+      [destLat, destLng]
+    ], {
+      color: polylineColor,
+      weight: 5,
+      opacity: 0.85,
+      dashArray: travelMode === 'foot' ? '5, 10' : undefined
     });
-    polyline.setMap(map);
-    polylineRef.current = polyline;
+    group.addLayer(polyline);
 
-    const bounds = new google.maps.LatLngBounds();
-    bounds.extend({ lat: origLat, lng: origLng });
-    bounds.extend({ lat: destLat, lng: destLng });
-    map.fitBounds(bounds, 50);
+    const bounds = L.latLngBounds([
+      [origLat, origLng],
+      [destLat, destLng]
+    ]);
+    map.fitBounds(bounds, { padding: [50, 50] });
 
-  }, [isOpen, origLat, origLng, destLat, destLng, destinationTitle, travelMode, mapLoaded]);
+  }, [isOpen, origLat, origLng, destLat, destLng, destinationTitle, travelMode]);
 
   if (!isOpen) return null;
 
-  const gmapsExternalUrl = `https://www.google.com/maps/dir/?api=1&origin=${origLat},${origLng}&destination=${destLat},${destLng}&travelmode=${travelMode === 'foot' ? 'walking' : travelMode === 'bike' ? 'bicycling' : 'driving'}`;
+  const externalMapUrl = `https://www.google.com/maps/dir/?api=1&origin=${origLat},${origLng}&destination=${destLat},${destLng}&travelmode=${travelMode === 'foot' ? 'walking' : travelMode === 'bike' ? 'bicycling' : 'driving'}`;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
@@ -190,7 +144,7 @@ export const RouteModal: React.FC<RouteModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                  Rota Google Maps Integrada
+                  Rota Interativa de Atendimento
                 </span>
                 <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded-full border border-emerald-500/30 flex items-center gap-1">
                   <ShieldCheck size={10} /> No aplicativo FIX
@@ -250,17 +204,17 @@ export const RouteModal: React.FC<RouteModalProps> = ({
           </div>
 
           <a
-            href={gmapsExternalUrl}
+            href={externalMapUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800/50"
           >
             <ExternalLink size={13} />
-            <span>Abrir no Google Maps</span>
+            <span>Navegação Externa</span>
           </a>
         </div>
 
-        {/* Google Maps Container */}
+        {/* Map Container */}
         <div className="flex-1 relative w-full h-full bg-zinc-100 dark:bg-zinc-950 z-0">
           <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
         </div>

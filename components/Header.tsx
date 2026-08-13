@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, LogOut, User as UserIcon, Store, Moon, Sun, Crown, Map as MapIcon } from 'lucide-react';
+import { Wrench, LogOut, User as UserIcon, Store, Moon, Sun, Crown, Map as MapIcon, Home, Heart, MessageCircle, AlertTriangle } from 'lucide-react';
 import { User } from '../types';
 
 interface HeaderProps {
@@ -10,6 +10,8 @@ interface HeaderProps {
   onHomeClick?: () => void;
   onSosClick?: () => void;
   onMapClick?: () => void;
+  onFavoritesClick?: () => void;
+  onChatClick?: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 }
@@ -22,6 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   onHomeClick,
   onSosClick,
   onMapClick,
+  onFavoritesClick,
+  onChatClick,
   isDarkMode, 
   toggleTheme 
 }) => {
@@ -29,9 +33,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-50 transition-colors duration-300 pt-[env(safe-area-inset-top)]">
-      <div className="max-w-5xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+        
+        {/* Brand Logo & Name */}
         <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onClick={onHomeClick ? onHomeClick : () => window.location.href = "/"}>
-          <div className="bg-indigo-600 p-1.5 sm:p-2 rounded-lg text-white shadow-md shadow-indigo-200 dark:shadow-none">
+          <div className="bg-indigo-600 p-1.5 sm:p-2 rounded-xl text-white shadow-md shadow-indigo-200 dark:shadow-none">
             <Wrench size={18} className="sm:w-6 sm:h-6" />
           </div>
           <div>
@@ -42,11 +48,54 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
+        {/* Desktop Navigation Menu Bar (lg:flex) */}
+        {user && (
+          <nav className="hidden lg:flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800/60 p-1 rounded-2xl border border-zinc-200/80 dark:border-zinc-700/50">
+            {onHomeClick && (
+              <button
+                onClick={onHomeClick}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 hover:text-indigo-600 dark:hover:text-white transition-all cursor-pointer"
+              >
+                <Home size={15} />
+                <span>Início</span>
+              </button>
+            )}
+            {onMapClick && (
+              <button
+                onClick={onMapClick}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 hover:text-indigo-600 dark:hover:text-white transition-all cursor-pointer"
+              >
+                <MapIcon size={15} />
+                <span>Buscar Oficinas</span>
+              </button>
+            )}
+            {onFavoritesClick && (
+              <button
+                onClick={onFavoritesClick}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 hover:text-rose-500 transition-all cursor-pointer"
+              >
+                <Heart size={15} />
+                <span>Favoritos</span>
+              </button>
+            )}
+            {onChatClick && (
+              <button
+                onClick={onChatClick}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 hover:text-indigo-600 transition-all cursor-pointer"
+              >
+                <MessageCircle size={15} />
+                <span>Mensagens</span>
+              </button>
+            )}
+          </nav>
+        )}
+
+        {/* Action Controls & User Profile */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           {user && user.role === 'CLIENT' && onMapClick && (
             <button
               onClick={onMapClick}
-              className="p-1.5 sm:p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-full transition-colors flex items-center gap-1.5"
+              className="lg:hidden p-1.5 sm:p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-full transition-colors flex items-center gap-1.5"
               title="Oficinas Próximas"
             >
               <MapIcon size={16} className="sm:w-5 sm:h-5" />
@@ -57,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
           {user && user.role === 'CLIENT' && onSosClick && (
             <button
               onClick={onSosClick}
-              className="relative group flex items-center gap-1.5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white px-3 py-1.5 rounded-full text-xs font-black transition-all duration-300 shadow-md shadow-rose-600/40 hover:scale-105 active:scale-95 border border-rose-400/30 overflow-hidden"
+              className="relative group flex items-center gap-1.5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white px-3.5 py-1.5 rounded-full text-xs font-black transition-all duration-300 shadow-md shadow-rose-600/40 hover:scale-105 active:scale-95 border border-rose-400/30 overflow-hidden cursor-pointer"
               title="Abrir Central SOS Emergência"
             >
               <span className="absolute -inset-1 bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 opacity-60 blur-xs animate-pulse rounded-full pointer-events-none"></span>
@@ -73,7 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={toggleTheme}
-            className="p-1.5 sm:p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+            className="p-1.5 sm:p-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
             title={isDarkMode ? "Modo Claro" : "Modo Escuro"}
           >
             {isDarkMode ? <Sun size={16} className="sm:w-5 sm:h-5" /> : <Moon size={16} className="sm:w-5 sm:h-5" />}
@@ -85,20 +134,20 @@ export const Header: React.FC<HeaderProps> = ({
               <button 
                 id="plan-badge"
                 onClick={onPlanClick}
-                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-bold transition-all shadow-sm ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-bold transition-all shadow-xs cursor-pointer ${
                   isPremium 
                     ? 'bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:shadow-amber-500/30' 
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                 }`}
               >
-                {isPremium ? <Crown size={9} className="sm:w-3 sm:h-3" fill="currentColor" /> : <Crown size={9} className="sm:w-3 sm:h-3" />}
+                {isPremium ? <Crown size={11} fill="currentColor" /> : <Crown size={11} />}
                 <span className="hidden xs:inline">{isPremium ? (user.role === 'MECHANIC' ? 'PRO' : 'PRIME') : 'Assinar'}</span>
                 <span className="xs:hidden">{isPremium ? (user.role === 'MECHANIC' ? 'PRO' : 'PRIME') : '+'}</span>
               </button>
 
               <button 
                 onClick={onProfileClick}
-                className="hidden sm:flex flex-col items-end mr-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg transition-colors text-right"
+                className="hidden sm:flex flex-col items-end mr-1 hover:bg-zinc-50 dark:hover:bg-zinc-800 px-2 py-1 rounded-lg transition-colors text-right cursor-pointer"
               >
                 <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
                   {user.role === 'MECHANIC' ? user.shopName : user.name}
@@ -120,7 +169,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               <button 
                 onClick={onLogout}
-                className="p-1 sm:p-2 text-zinc-400 dark:text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors"
+                className="p-1 sm:p-2 text-zinc-400 dark:text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-full transition-colors cursor-pointer"
                 title="Sair"
               >
                 <LogOut size={14} className="sm:w-4.5 sm:h-4.5" />
