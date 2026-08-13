@@ -16,6 +16,7 @@ import { BottomNav } from './components/BottomNav';
 import { DesktopSidebar } from './components/DesktopSidebar';
 import { Heart, MessageCircle } from 'lucide-react';
 import { User, Coordinates, GroundingChunk } from './types';
+import { locationService } from './services/locationService';
 
 type ViewState = 'dashboard' | 'profile' | 'subscription' | 'sos' | 'nearby' | 'workshop-detail' | 'favorites' | 'chat';
 
@@ -66,84 +67,26 @@ const App: React.FC = () => {
     }
   }, [isDarkMode]);
 
-  // Geolocation Logic
+  // Geolocation Logic via centralized locationService
   useEffect(() => {
-    const requestLocation = async () => {
-      if (typeof window !== 'undefined') {
-        try {
-          setIsDetectingLocation(true);
-          
-          // First, check permission natively if using Capacitor
-          const { Geolocation } = await import('@capacitor/geolocation');
-          
-          try {
-            const permStatus = await Geolocation.checkPermissions();
-            if (permStatus.location !== 'granted' && permStatus.location !== 'prompt') {
-               const reqStatus = await Geolocation.requestPermissions();
-               if (reqStatus.location !== 'granted') {
-                 setLocationError("Permissão de localização negada pelo usuário.");
-                 setIsDetectingLocation(false);
-                 return;
-               }
-            } else if (permStatus.location === 'prompt') {
-               const reqStatus = await Geolocation.requestPermissions();
-               if (reqStatus.location !== 'granted') {
-                 setLocationError("Permissão de localização negada pelo usuário.");
-                 setIsDetectingLocation(false);
-                 return;
-               }
-            }
-          } catch (capacitorError) {
-             console.log('[DEBUG Geolocation] Not running in capacitor natively, fallback to web geolocation.', capacitorError);
-          }
-
-          if (navigator.geolocation) {
-            console.log('[DEBUG Geolocation] Requesting current position via navigator.geolocation...');
-            
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                const coords = {
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                };
-                console.log('[DEBUG Geolocation] Position acquired successfully:', coords);
-                setLocation(coords);
-                setLocationError(null);
-                setIsDetectingLocation(false);
-              },
-              (err: any) => {
-                console.error("[DEBUG Geolocation Error]", {
-                  code: err.code,
-                  message: err.message
-                });
-                let msg = "Erro de localização.";
-                if (err.code === 1) msg = "Permissão negada.";
-                else if (err.code === 2) msg = "Sinal indisponível.";
-                else if (err.code === 3) msg = "Tempo esgotado.";
-                setLocationError(msg);
-                setIsDetectingLocation(false);
-                
-                // Alert se negou ou falhou na web e o usuario precisa saber
-                if (err.code === 1) {
-                  alert("Por favor, ative a localização do seu aparelho para encontrar socorristas próximos.");
-                }
-              },
-              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-          } else {
-            console.warn('[DEBUG Geolocation] Geolocation API is not supported in this environment.');
-            setLocationError("Não suportado.");
-            setIsDetectingLocation(false);
-          }
-        } catch (error) {
-          console.error("Geolocation global error:", error);
-          setLocationError("Erro interno.");
-          setIsDetectingLocation(false);
-        }
+    locationService.startTracking();
+    const unsub = locationService.subscribe((locState) => {
+      if (locState.coords) {
+        setLocation({
+          latitude: locState.coords.latitude,
+          longitude: locState.coords.longitude,
+        });
+        setLocationError(null);
+        setIsDetectingLocation(false);
+      } else if (locState.errorMessage) {
+        setLocationError(locState.errorMessage);
+        setIsDetectingLocation(false);
       }
-    };
+    });
 
-    requestLocation();
+    return () => {
+      unsub();
+    };
   }, []);
 
   const toggleTheme = () => {

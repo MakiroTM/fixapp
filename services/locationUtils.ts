@@ -53,9 +53,17 @@ export function calculateDynamicETA(
   userCoords?: Coordinates | null,
   mechanicCoords?: Coordinates | null
 ): ETACalculationResult {
-  // Default fallback coords if user location is not active
-  const defaultUserCoords: Coordinates = { latitude: -23.55052, longitude: -46.633308 }; // São Paulo default
-  const actualUserCoords = userCoords || defaultUserCoords;
+  if (!userCoords) {
+    return {
+      distanceKm: 0,
+      etaMinutes: 0,
+      formattedEta: 'Localização indisponível',
+      trafficCondition: 'LIVRE',
+      mechanicCoords: mechanicCoords || { latitude: 0, longitude: 0 }
+    };
+  }
+
+  const actualUserCoords = userCoords;
 
   const actualMechanicCoords = mechanicCoords || generateNearbyMechanicCoords(actualUserCoords);
   const distanceKm = calculateDistanceKm(actualUserCoords, actualMechanicCoords);

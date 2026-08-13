@@ -508,8 +508,8 @@ export const WorkshopDetailScreen: React.FC<WorkshopDetailScreenProps> = ({
                   
                   <div className="h-72 w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
                     <MapComponent
-                      latitude={userLocation?.latitude || -23.5505}
-                      longitude={userLocation?.longitude || -46.6333}
+                      latitude={userLocation?.latitude || -15.7801}
+                      longitude={userLocation?.longitude || -47.9292}
                       userLatitude={userLocation?.latitude}
                       userLongitude={userLocation?.longitude}
                       title={title}

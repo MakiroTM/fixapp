@@ -6,6 +6,8 @@ import {
   Clock, ShieldCheck, ChevronUp, ChevronDown, Wrench, X, Share2, Copy, Check
 } from 'lucide-react';
 import { RouteModal } from './RouteModal';
+import { useNavigation } from '../hooks/useNavigation';
+import { NavigationPanel } from './NavigationPanel';
 
 interface HomeInteractiveMapProps {
   userLocation: Coordinates | null;
@@ -40,11 +42,17 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
 
+  // Navigation Hook
+  const navState = useNavigation();
+  const { startNavigation, stopNavigation, forceRecalculate } = navState;
+
   // Dragging interaction state
   const dragStartYRef = useRef<number | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersGroupRef = useRef<L.LayerGroup | null>(null);
+  const routePolylineGroupRef = useRef<L.LayerGroup | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -71,9 +79,6 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
     localStorage.setItem('favoriteWorkshops', JSON.stringify(updated));
   };
 
-  const centerLat = userLocation?.latitude || -23.5505;
-  const centerLng = userLocation?.longitude || -46.6333;
-
   // Filter chunks based on category and vehicle
   const filteredChunks = groundingChunks.filter((chunk) => {
     const chunkTitle = (chunk.maps?.title || '').toLowerCase();
@@ -88,14 +93,30 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
     return true;
   });
 
+  // Calculate workshop coordinates relative to userLocation or map center
+  const getWorkshopCoords = (chunk: GroundingChunk, index: number): Coordinates | null => {
+    if (!userLocation) return null;
+    const radius = 0.012;
+    const chunksCount = filteredChunks.length > 0 ? filteredChunks.length : groundingChunks.length;
+    const angle = (index / Math.max(chunksCount, 1)) * Math.PI * 2;
+    return {
+      latitude: userLocation.latitude + Math.cos(angle) * radius * 0.85,
+      longitude: userLocation.longitude + Math.sin(angle) * radius * 0.85,
+    };
+  };
+
   // Initialize Leaflet Map
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
+      const initialLat = userLocation?.latitude || -15.7801; // Neutral Brazil center if no GPS
+      const initialLng = userLocation?.longitude || -47.9292;
+      const initialZoom = userLocation ? 14 : 4;
+
       const map = L.map(mapContainerRef.current, {
-        center: [centerLat, centerLng],
-        zoom: 14,
+        center: [initialLat, initialLng],
+        zoom: initialZoom,
         zoomControl: false,
         attributionControl: false,
       });
@@ -104,6 +125,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
         maxZoom: 19,
       }).addTo(map);
 
+      routePolylineGroupRef.current = L.layerGroup().addTo(map);
       markersGroupRef.current = L.layerGroup().addTo(map);
       mapInstanceRef.current = map;
 
@@ -132,7 +154,6 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
   }, []);
 
   useEffect(() => {
-    // Invalidate map size when bottom sheet expands or minimizes
     const timer = setTimeout(() => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.invalidateSize();
@@ -150,7 +171,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
     }
   }, [userLocation]);
 
-  // Update Markers on Map
+  // Update User & Workshop Markers on Map
   useEffect(() => {
     const map = mapInstanceRef.current;
     const group = markersGroupRef.current;
@@ -158,36 +179,32 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
 
     group.clearLayers();
 
-    const baseLat = userLocation?.latitude || -23.5505;
-    const baseLng = userLocation?.longitude || -46.6333;
-
     // User Marker
     if (userLocation) {
       const userIcon = L.divIcon({
         className: 'custom-user-pin',
-        html: `<div class="relative flex items-center justify-center w-9 h-9">
+        html: `<div class="relative flex items-center justify-center w-10 h-10">
           <div class="absolute inset-0 bg-indigo-500/40 rounded-full animate-ping"></div>
-          <div class="w-7 h-7 bg-indigo-600 border-2 border-white rounded-full shadow-xl flex items-center justify-center text-white">
-            <div class="w-2.5 h-2.5 bg-white rounded-full"></div>
+          <div class="w-8 h-8 bg-indigo-600 border-2 border-white rounded-full shadow-2xl flex items-center justify-center text-white">
+            <div class="w-3 h-3 bg-white rounded-full"></div>
           </div>
         </div>`,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
       });
 
       const userMarker = L.marker([userLocation.latitude, userLocation.longitude], { icon: userIcon });
-      userMarker.bindPopup('<strong style="font-family:sans-serif;font-size:12px;">Sua Localização GPS</strong>');
+      userMarker.bindPopup('<strong style="font-family:sans-serif;font-size:12px;">Sua Localização GPS Real</strong>');
       group.addLayer(userMarker);
+      userMarkerRef.current = userMarker;
     }
 
     // Workshop Pins
     const chunksToRender = filteredChunks.length > 0 ? filteredChunks : groundingChunks;
 
     chunksToRender.forEach((chunk, index) => {
-      const radius = 0.012;
-      const angle = (index / Math.max(chunksToRender.length, 1)) * Math.PI * 2;
-      const lat = baseLat + Math.cos(angle) * radius * 0.85;
-      const lng = baseLng + Math.sin(angle) * radius * 0.85;
+      const shopCoords = getWorkshopCoords(chunk, index);
+      if (!shopCoords) return;
 
       const isSelected = selectedWorkshop?.maps?.title === chunk.maps?.title;
 
@@ -209,12 +226,12 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
         iconAnchor: [18, 18],
       });
 
-      const shopMarker = L.marker([lat, lng], { icon: shopIcon });
+      const shopMarker = L.marker([shopCoords.latitude, shopCoords.longitude], { icon: shopIcon });
       
       shopMarker.on('click', () => {
         onSelectWorkshop(chunk);
-        setSheetState('minimized'); // Open bottom sheet minimized when marker clicked
-        map.panTo([lat, lng], { animate: true, duration: 0.5 });
+        setSheetState('minimized');
+        map.panTo([shopCoords.latitude, shopCoords.longitude], { animate: true, duration: 0.5 });
       });
 
       group.addLayer(shopMarker);
@@ -222,13 +239,73 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
 
   }, [filteredChunks, userLocation?.latitude, userLocation?.longitude, selectedWorkshop]);
 
+  // Update Route Polyline when Navigation is Active
+  useEffect(() => {
+    const routeGroup = routePolylineGroupRef.current;
+    const map = mapInstanceRef.current;
+    if (!routeGroup || !map) return;
+
+    routeGroup.clearLayers();
+
+    if (navState.route && navState.route.geometry.length > 0 && navState.status !== 'idle') {
+      // Outline shadow
+      const polylineOutline = L.polyline(navState.route.geometry, {
+        color: '#1e1b4b',
+        weight: 10,
+        opacity: 0.5,
+      });
+      routeGroup.addLayer(polylineOutline);
+
+      // Main Route Polyline
+      const polyline = L.polyline(navState.route.geometry, {
+        color: '#4f46e5',
+        weight: 6,
+        opacity: 0.9,
+      });
+      routeGroup.addLayer(polyline);
+
+      // Fit map bounds to show full route initially
+      if (navState.status === 'calculating' || navState.status === 'navigating') {
+        const bounds = polyline.getBounds();
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [60, 60] });
+        }
+      }
+    }
+  }, [navState.route, navState.status]);
+
+  // Handler for starting live route navigation
+  const handleStartRoute = (chunk?: GroundingChunk | null) => {
+    const targetChunk = chunk || selectedWorkshop;
+    if (!targetChunk) return;
+
+    if (!userLocation) {
+      alert("Não foi possível obter sua localização real do GPS.");
+      return;
+    }
+
+    const index = groundingChunks.findIndex(c => c.maps?.title === targetChunk.maps?.title);
+    const destCoords = getWorkshopCoords(targetChunk, Math.max(0, index));
+
+    if (!destCoords) {
+      alert("Este destino não possui localização válida.");
+      return;
+    }
+
+    const shopTitle = targetChunk.maps?.title || 'Oficina Selecionada';
+    startNavigation(destCoords, shopTitle);
+    setSheetState('minimized');
+  };
+
   // Recenter GPS button handler
   const handleRecenterGps = () => {
     if (mapInstanceRef.current && userLocation) {
-      mapInstanceRef.current.setView([userLocation.latitude, userLocation.longitude], 15, {
+      mapInstanceRef.current.setView([userLocation.latitude, userLocation.longitude], 16, {
         animate: true,
         duration: 0.6
       });
+    } else {
+      alert("Localização GPS indisponível no momento.");
     }
   };
 
@@ -243,12 +320,9 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
     const clientY = 'changedTouches' in e ? e.changedTouches[0].clientY : e.clientY;
     const deltaY = clientY - dragStartYRef.current;
 
-    // Drag up -> expand
     if (deltaY < -40) {
       setSheetState('expanded');
-    } 
-    // Drag down -> minimize
-    else if (deltaY > 40) {
+    } else if (deltaY > 40) {
       setSheetState('minimized');
     }
     dragStartYRef.current = null;
@@ -263,7 +337,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
   const bgPhoto = DEFAULT_WORKSHOP_IMAGES[Math.max(0, selectedIndex) % DEFAULT_WORKSHOP_IMAGES.length];
   const snippet = selectedWorkshop?.maps?.placeAnswerSources?.reviewSnippets?.[0]?.snippet || 
     'Oficina mecânica especializada e credenciada pelo ecossistema FIX. Atendimento ágil, peças originais e garantia.';
-  const fakeAddress = `Av. Paulista, ${1000 + (selectedIndex > -1 ? selectedIndex * 120 : 250)} - São Paulo, SP`;
+  const fakeAddress = `Av. Principal - Atendimento via GPS FIX`;
 
   return (
     <div className="relative w-full h-[calc(100vh-210px)] sm:h-[calc(100vh-230px)] min-h-[480px] max-h-[850px] rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-950 flex flex-col justify-between fix-map-container isolate z-0">
@@ -273,25 +347,34 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
         <div ref={mapContainerRef} className="w-full h-full z-0" />
       </div>
 
-      {/* FLOATING TOP BAR OVERLAY: Floating GPS Button & Status */}
-      <div className="relative z-20 p-3 sm:p-4 flex items-center justify-between pointer-events-none">
-        <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 shadow-lg text-[11px] font-bold text-zinc-800 dark:text-zinc-300 pointer-events-auto flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>{filteredChunks.length || groundingChunks.length} oficinas no mapa</span>
-        </div>
+      {/* FLOATING REAL-TIME NAVIGATION PANEL */}
+      <NavigationPanel
+        navState={navState}
+        onCenterMap={handleRecenterGps}
+        onStopNavigation={stopNavigation}
+        onRecalculate={forceRecalculate}
+      />
 
-        {/* Floating "Minha Localização" GPS Button */}
-        <button
-          type="button"
-          onClick={handleRecenterGps}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-full shadow-xl border border-indigo-400/40 font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer pointer-events-auto backdrop-blur-md"
-          title="Centralizar no Meu GPS"
-        >
-          <Navigation size={14} className="fill-white" />
-          <span className="hidden sm:inline">Minha Localização</span>
-          <span className="sm:hidden">GPS</span>
-        </button>
-      </div>
+      {/* FLOATING TOP BAR OVERLAY: Status & Recenter */}
+      {navState.status === 'idle' && (
+        <div className="relative z-20 p-3 sm:p-4 flex items-center justify-between pointer-events-none">
+          <div className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 shadow-lg text-[11px] font-bold text-zinc-800 dark:text-zinc-300 pointer-events-auto flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>{filteredChunks.length || groundingChunks.length} oficinas no mapa</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleRecenterGps}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-full shadow-xl border border-indigo-400/40 font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer pointer-events-auto backdrop-blur-md"
+            title="Centralizar no Meu GPS"
+          >
+            <Navigation size={14} className="fill-white" />
+            <span className="hidden sm:inline">Minha Localização</span>
+            <span className="sm:hidden">GPS</span>
+          </button>
+        </div>
+      )}
 
       {/* ROUTE MODAL */}
       {selectedWorkshop && (
@@ -299,10 +382,14 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
           isOpen={isRouteModalOpen}
           onClose={() => setIsRouteModalOpen(false)}
           destinationTitle={title}
-          destinationLat={userLocation?.latitude ? userLocation.latitude + 0.01 : -23.5505}
-          destinationLng={userLocation?.longitude ? userLocation.longitude + 0.01 : -46.6333}
+          destinationLat={userLocation?.latitude ? userLocation.latitude + 0.01 : undefined}
+          destinationLng={userLocation?.longitude ? userLocation.longitude + 0.01 : undefined}
           userLat={userLocation?.latitude}
           userLng={userLocation?.longitude}
+          onStartLiveNavigation={() => {
+            setIsRouteModalOpen(false);
+            handleStartRoute(selectedWorkshop);
+          }}
         />
       )}
 
@@ -323,7 +410,6 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
           onMouseUp={handleTouchEnd}
           onClick={toggleSheetState}
         >
-          {/* Handle bar */}
           <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full hover:bg-indigo-500 transition-colors mb-1" />
           
           <div className="w-full flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 font-bold px-1">
@@ -358,10 +444,6 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                         <Star size={12} className="fill-amber-500" />
                         4.8
                       </div>
-                      <span className="text-zinc-300 dark:text-zinc-600">•</span>
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-0.5">
-                        <MapPin size={11} /> 1.2 km
-                      </span>
                     </div>
 
                     <h3 className="font-extrabold text-zinc-900 dark:text-white text-base sm:text-lg truncate leading-tight">
@@ -369,18 +451,18 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                     </h3>
                   </div>
 
-                  {/* Minimized Quick Action Button: ROTA */}
+                  {/* Minimized Action Button: TRAÇAR ROTA */}
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setIsRouteModalOpen(true);
+                        handleStartRoute(selectedWorkshop);
                       }}
                       className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all cursor-pointer active:scale-95"
                     >
                       <Navigation size={14} />
-                      <span>Rota</span>
+                      <span>Traçar Rota</span>
                     </button>
                   </div>
                 </div>
@@ -419,7 +501,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                     </div>
                   </div>
 
-                  {/* Rating, Hours & Distance */}
+                  {/* Rating & Hours */}
                   <div className="flex items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
                     <div className="flex items-center gap-1 text-amber-500 font-bold">
                       <Star size={14} className="fill-amber-500" />
@@ -428,12 +510,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
 
                     <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
                       <Clock size={13} />
-                      Aberto hoje até 18:00
-                    </div>
-
-                    <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
-                      <MapPin size={13} className="text-indigo-600 dark:text-indigo-400" />
-                      1.2 km
+                      Aberto hoje
                     </div>
                   </div>
 
@@ -441,7 +518,6 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                   <div className="bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between gap-2">
                     <div className="text-xs text-zinc-700 dark:text-zinc-300 min-w-0">
                       <p className="font-semibold truncate">{fakeAddress}</p>
-                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">Clique para copiar o endereço</p>
                     </div>
 
                     <button
@@ -476,16 +552,16 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                     </div>
                   </div>
 
-                  {/* ACTION BUTTONS GRID: Rota, WhatsApp, Ligar, Favoritar */}
+                  {/* ACTION BUTTONS GRID: Traçar Rota, WhatsApp, Ligar, Favoritar */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-zinc-800">
                     
                     <button
                       type="button"
-                      onClick={() => setIsRouteModalOpen(true)}
+                      onClick={() => handleStartRoute(selectedWorkshop)}
                       className="bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all cursor-pointer"
                     >
                       <Navigation size={15} />
-                      <span>Rota</span>
+                      <span>Traçar Rota</span>
                     </button>
 
                     <button
@@ -555,7 +631,7 @@ export const HomeInteractiveMap: React.FC<HomeInteractiveMapProps> = ({
                           {chunk.maps?.title || 'Oficina Mecânica'}
                         </h5>
                         <p className="text-[10px] text-zinc-400 flex items-center gap-1 mt-0.5">
-                          <Star size={10} className="fill-amber-400 text-amber-400" /> 4.8 • 1.2 km
+                          <Star size={10} className="fill-amber-400 text-amber-400" /> 4.8
                         </p>
                       </div>
                     </div>

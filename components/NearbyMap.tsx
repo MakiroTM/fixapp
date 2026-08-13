@@ -21,8 +21,8 @@ export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = 
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersGroupRef = useRef<L.LayerGroup | null>(null);
 
-  const centerLat = userLocation?.latitude || -23.5505;
-  const centerLng = userLocation?.longitude || -46.6333;
+  const centerLat = userLocation?.latitude || -15.7801;
+  const centerLng = userLocation?.longitude || -47.9292;
 
   const displayMechanics: MechanicMarker[] = mechanics.length > 0 ? mechanics : [
     { id: '1', name: 'Auto Center Express', lat: centerLat + 0.008, lng: centerLng + 0.012, type: 'Mecânica Geral' },

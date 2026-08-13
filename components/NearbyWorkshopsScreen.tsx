@@ -110,8 +110,8 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      const centerLat = location?.latitude || -23.5505;
-      const centerLng = location?.longitude || -46.6333;
+      const centerLat = location?.latitude || -15.7801;
+      const centerLng = location?.longitude || -47.9292;
 
       const map = L.map(mapContainerRef.current, {
         center: [centerLat, centerLng],

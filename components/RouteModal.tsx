@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Navigation, Car, Bike, Footprints, MapPin, ShieldCheck, ExternalLink } from 'lucide-react';
+import { X, Navigation, Car, Bike, Footprints, MapPin, ShieldCheck, ExternalLink, Play } from 'lucide-react';
 import L from 'leaflet';
+import { calculateRoute, CalculatedRouteResult } from '../services/routingService';
 
 interface RouteModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface RouteModalProps {
   destinationAddress?: string;
   userLat?: number;
   userLng?: number;
+  onStartLiveNavigation?: () => void;
 }
 
 export const RouteModal: React.FC<RouteModalProps> = ({
@@ -21,25 +23,31 @@ export const RouteModal: React.FC<RouteModalProps> = ({
   destinationLng,
   destinationAddress,
   userLat,
-  userLng
+  userLng,
+  onStartLiveNavigation
 }) => {
   const [travelMode, setTravelMode] = useState<'car' | 'foot' | 'bike'>('car');
+  const [routeData, setRouteData] = useState<CalculatedRouteResult | null>(null);
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  const [routeError, setRouteError] = useState<string | null>(null);
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersGroupRef = useRef<L.LayerGroup | null>(null);
 
-  const destLat = destinationLat || -23.5505;
-  const destLng = destinationLng || -46.6333;
-  const origLat = userLat || destLat - 0.02;
-  const origLng = userLng || destLng - 0.02;
+  const hasValidDest = typeof destinationLat === 'number' && typeof destinationLng === 'number';
+  const hasValidOrig = typeof userLat === 'number' && typeof userLng === 'number';
 
   // Initialize Map
   useEffect(() => {
     if (!isOpen || !mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
+      const centerLat = hasValidDest ? destinationLat : hasValidOrig ? userLat : -15.7801;
+      const centerLng = hasValidDest ? destinationLng : hasValidOrig ? userLng : -47.9292;
+
       const map = L.map(mapContainerRef.current, {
-        center: [(origLat + destLat) / 2, (origLng + destLng) / 2],
+        center: [centerLat!, centerLng!],
         zoom: 13,
         zoomControl: true,
         attributionControl: false,
@@ -65,13 +73,49 @@ export const RouteModal: React.FC<RouteModalProps> = ({
     };
   }, [isOpen]);
 
-  // Update Markers & Polyline Route
+  // Calculate OSRM route when modal opens and coordinates are available
+  useEffect(() => {
+    if (!isOpen || !hasValidOrig || !hasValidDest) {
+      setRouteData(null);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingRoute(true);
+    setRouteError(null);
+
+    calculateRoute(
+      { latitude: userLat!, longitude: userLng! },
+      { latitude: destinationLat!, longitude: destinationLng! }
+    )
+      .then((res) => {
+        if (isMounted) {
+          setRouteData(res);
+          setIsLoadingRoute(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.warn('[RouteModal OSRM route error]', err);
+          setRouteError(err?.message || 'Não foi possível calcular a rota.');
+          setIsLoadingRoute(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, userLat, userLng, destinationLat, destinationLng]);
+
+  // Update Markers & Polyline Route on Map
   useEffect(() => {
     const map = mapInstanceRef.current;
     const group = markersGroupRef.current;
     if (!map || !isOpen || !group) return;
 
     group.clearLayers();
+
+    if (!hasValidDest) return;
 
     // Destination Marker
     const destIcon = L.divIcon({
@@ -85,51 +129,70 @@ export const RouteModal: React.FC<RouteModalProps> = ({
       iconAnchor: [16, 16],
     });
 
-    const dMarker = L.marker([destLat, destLng], { icon: destIcon });
+    const dMarker = L.marker([destinationLat!, destinationLng!], { icon: destIcon });
     dMarker.bindPopup(`<strong style="font-family:sans-serif;font-size:12px;">Destino: ${destinationTitle}</strong>`).openPopup();
     group.addLayer(dMarker);
 
     // User Origin Marker
-    const userIcon = L.divIcon({
-      className: 'custom-user-pin',
-      html: `<div class="relative flex items-center justify-center w-8 h-8">
-        <div class="absolute inset-0 bg-blue-500/40 rounded-full animate-ping"></div>
-        <div class="w-6 h-6 bg-blue-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white">
-          <div class="w-2 h-2 bg-white rounded-full"></div>
-        </div>
-      </div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-    });
+    if (hasValidOrig) {
+      const userIcon = L.divIcon({
+        className: 'custom-user-pin',
+        html: `<div class="relative flex items-center justify-center w-8 h-8">
+          <div class="absolute inset-0 bg-blue-500/40 rounded-full animate-ping"></div>
+          <div class="w-6 h-6 bg-blue-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white">
+            <div class="w-2 h-2 bg-white rounded-full"></div>
+          </div>
+        </div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
 
-    const uMarker = L.marker([origLat, origLng], { icon: userIcon });
-    uMarker.bindPopup('<strong style="font-family:sans-serif;font-size:12px;">Origem: Você está aqui</strong>');
-    group.addLayer(uMarker);
+      const uMarker = L.marker([userLat!, userLng!], { icon: userIcon });
+      uMarker.bindPopup('<strong style="font-family:sans-serif;font-size:12px;">Sua Localização GPS</strong>');
+      group.addLayer(uMarker);
+    }
 
     // Polyline
-    const polylineColor = travelMode === 'car' ? '#4f46e5' : travelMode === 'foot' ? '#10b981' : '#f59e0b';
-    const polyline = L.polyline([
-      [origLat, origLng],
-      [destLat, destLng]
-    ], {
-      color: polylineColor,
-      weight: 5,
-      opacity: 0.85,
-      dashArray: travelMode === 'foot' ? '5, 10' : undefined
-    });
-    group.addLayer(polyline);
+    if (routeData && routeData.geometry.length > 0) {
+      const polylineColor = travelMode === 'car' ? '#4f46e5' : travelMode === 'foot' ? '#10b981' : '#f59e0b';
+      const polyline = L.polyline(routeData.geometry, {
+        color: polylineColor,
+        weight: 6,
+        opacity: 0.85,
+        dashArray: travelMode === 'foot' ? '5, 10' : undefined
+      });
+      group.addLayer(polyline);
 
-    const bounds = L.latLngBounds([
-      [origLat, origLng],
-      [destLat, destLng]
-    ]);
-    map.fitBounds(bounds, { padding: [50, 50] });
+      const bounds = polyline.getBounds();
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    } else if (hasValidOrig && hasValidDest) {
+      const polyline = L.polyline([
+        [userLat!, userLng!],
+        [destinationLat!, destinationLng!]
+      ], {
+        color: '#4f46e5',
+        weight: 4,
+        opacity: 0.6,
+        dashArray: '8, 8'
+      });
+      group.addLayer(polyline);
 
-  }, [isOpen, origLat, origLng, destLat, destLng, destinationTitle, travelMode]);
+      const bounds = L.latLngBounds([
+        [userLat!, userLng!],
+        [destinationLat!, destinationLng!]
+      ]);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+
+  }, [isOpen, hasValidOrig, hasValidDest, userLat, userLng, destinationLat, destinationLng, destinationTitle, travelMode, routeData]);
 
   if (!isOpen) return null;
 
-  const externalMapUrl = `https://www.google.com/maps/dir/?api=1&origin=${origLat},${origLng}&destination=${destLat},${destLng}&travelmode=${travelMode === 'foot' ? 'walking' : travelMode === 'bike' ? 'bicycling' : 'driving'}`;
+  const externalMapUrl = hasValidOrig && hasValidDest
+    ? `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${destinationLat},${destinationLng}&travelmode=${travelMode === 'foot' ? 'walking' : travelMode === 'bike' ? 'bicycling' : 'driving'}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinationTitle)}`;
 
   return (
     <div className="fixed inset-0 z-[100] z-app-modal flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
@@ -144,10 +207,10 @@ export const RouteModal: React.FC<RouteModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                  Rota Interativa de Atendimento
+                  Rota do Atendimento FIX
                 </span>
                 <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded-full border border-emerald-500/30 flex items-center gap-1">
-                  <ShieldCheck size={10} /> No aplicativo FIX
+                  <ShieldCheck size={10} /> OSRM + OpenStreetMap
                 </span>
               </div>
               <h3 className="font-extrabold text-base sm:text-lg text-white truncate max-w-xs sm:max-w-md">
@@ -177,7 +240,7 @@ export const RouteModal: React.FC<RouteModalProps> = ({
                   : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
-              <Car size={14} /> Carro / Moto
+              <Car size={14} /> Veículo
             </button>
             <button
               type="button"
@@ -199,7 +262,7 @@ export const RouteModal: React.FC<RouteModalProps> = ({
                   : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
-              <Bike size={14} /> Bicicleta
+              <Bike size={14} /> Bike
             </button>
           </div>
 
@@ -210,30 +273,65 @@ export const RouteModal: React.FC<RouteModalProps> = ({
             className="hidden sm:flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-indigo-200 dark:border-indigo-800/50"
           >
             <ExternalLink size={13} />
-            <span>Navegação Externa</span>
+            <span>Maps Externo</span>
           </a>
         </div>
+
+        {/* Route Summary Bar */}
+        {routeData && (
+          <div className="bg-indigo-950/80 text-indigo-100 px-4 py-2 border-b border-indigo-900 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-4 font-bold">
+              <span>Distância: <strong className="text-white">{routeData.formattedDistance}</strong></span>
+              <span>Tempo: <strong className="text-emerald-400">{routeData.formattedDuration}</strong></span>
+            </div>
+            {routeData.steps.length > 0 && (
+              <span className="text-indigo-300 hidden sm:inline">
+                {routeData.steps.length} instruções de rota
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Map Container */}
         <div className="flex-1 relative w-full h-full bg-zinc-100 dark:bg-zinc-950 fix-map-container isolate z-0 overflow-hidden">
           <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0 overflow-hidden" />
+
+          {!hasValidOrig && (
+            <div className="absolute top-4 inset-x-4 z-20 bg-amber-500 text-zinc-950 px-4 py-2 rounded-xl text-xs font-extrabold shadow-xl text-center">
+              ⚠️ Localização GPS do usuário indisponível. Exibindo apenas destino.
+            </div>
+          )}
         </div>
 
-        {/* Footer info bar */}
-        <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400">
-          <div className="flex items-center gap-2">
-            <MapPin size={14} className="text-rose-500" />
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate max-w-xs sm:max-w-md">
-              Destino: {destinationTitle}
+        {/* Footer info & action bar */}
+        <div className="p-3 sm:p-4 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPin size={16} className="text-rose-500 shrink-0" />
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-xs sm:text-sm truncate">
+              {destinationTitle}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold rounded-xl text-xs transition-colors cursor-pointer"
-          >
-            Voltar ao App
-          </button>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {onStartLiveNavigation && (
+              <button
+                type="button"
+                onClick={onStartLiveNavigation}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer active:scale-95"
+              >
+                <Play size={15} className="fill-white" />
+                <span>Iniciar Navegação</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3.5 py-2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold rounded-xl text-xs transition-colors cursor-pointer"
+            >
+              Voltar
+            </button>
+          </div>
         </div>
 
       </div>

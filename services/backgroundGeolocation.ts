@@ -94,29 +94,8 @@ export class BackgroundLocationManager {
         this.watcherId = `geo-${watchId}`;
         return this.watcherId;
       } catch (geoErr) {
-        // Fallback 2: Web interval simulation for preview
-        console.warn('[BackgroundGeolocation] Geolocation watchPosition error, using simulated updater for web preview:', geoErr);
-        
-        // Initial location
-        onLocationUpdate({
-          latitude: -23.5505,
-          longitude: -46.6333,
-          time: Date.now()
-        });
-
-        this.webIntervalId = setInterval(() => {
-          // slight random jitter
-          const latJitter = (Math.random() - 0.5) * 0.0004;
-          const lngJitter = (Math.random() - 0.5) * 0.0004;
-          onLocationUpdate({
-            latitude: -23.5505 + latJitter,
-            longitude: -46.6333 + lngJitter,
-            time: Date.now()
-          });
-        }, 8000);
-
-        this.watcherId = 'web-simulated-id';
-        return this.watcherId;
+        console.warn('[BackgroundGeolocation] Geolocation watchPosition unavailable:', geoErr);
+        throw new Error('Localização indisponível.');
       }
     }
   }
