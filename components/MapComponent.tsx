@@ -119,8 +119,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   }, [latitude, longitude, viewMode, userLatitude, userLongitude, title]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-2xl">
-      <div className="p-3.5 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50">
+    <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-2xl fix-map-container isolate z-0 relative">
+      <div className="p-3.5 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50 z-20">
         <h3 className="font-bold text-zinc-800 dark:text-zinc-100 text-sm sm:text-base flex items-center gap-2">
           <div className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse"></div>
           {title || 'Localização no Mapa'}
@@ -137,8 +137,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         )}
       </div>
 
-      <div className="flex-1 relative min-h-[320px] z-0">
-        <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
+      <div className="flex-1 relative min-h-[320px] z-0 overflow-hidden">
+        <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0 overflow-hidden" />
       </div>
 
       <div className="p-3 bg-zinc-50 dark:bg-zinc-900/90 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-2">

@@ -132,7 +132,7 @@ export const RouteModal: React.FC<RouteModalProps> = ({
   const externalMapUrl = `https://www.google.com/maps/dir/?api=1&origin=${origLat},${origLng}&destination=${destLat},${destLng}&travelmode=${travelMode === 'foot' ? 'walking' : travelMode === 'bike' ? 'bicycling' : 'driving'}`;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[100] z-app-modal flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
       <div className="bg-white dark:bg-zinc-900 w-full max-w-3xl h-[85vh] sm:h-[80vh] rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden animate-pop-in relative">
         
         {/* Header */}
@@ -215,8 +215,8 @@ export const RouteModal: React.FC<RouteModalProps> = ({
         </div>
 
         {/* Map Container */}
-        <div className="flex-1 relative w-full h-full bg-zinc-100 dark:bg-zinc-950 z-0">
-          <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
+        <div className="flex-1 relative w-full h-full bg-zinc-100 dark:bg-zinc-950 fix-map-container isolate z-0 overflow-hidden">
+          <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0 overflow-hidden" />
         </div>
 
         {/* Footer info bar */}

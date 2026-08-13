@@ -12,6 +12,7 @@ import { ServiceSkeleton } from './ServiceSkeleton';
 import { RouteModal } from './RouteModal';
 import { QuickChatCard } from './QuickChatCard';
 import { NearbyMap } from './NearbyMap';
+import { HomeInteractiveMap } from './HomeInteractiveMap';
 import { findMechanics } from '../services/geminiService';
 import { calculateDynamicETA } from '../services/locationUtils';
 import { VehicleType, ServiceType, Coordinates, SearchResult, User, ChatMessage, ActiveServiceRequest, ServiceStatus, GroundingChunk } from '../types';
@@ -65,6 +66,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   // Category filter state for service list with layout transitions
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [isFilterAnimating, setIsFilterAnimating] = useState<boolean>(false);
+  const [selectedMapWorkshop, setSelectedMapWorkshop] = useState<GroundingChunk | null>(null);
 
   // Trigger smooth layout transition when category or location filters change
   const handleCategoryFilterChange = (filterKey: string) => {
@@ -417,13 +419,65 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           </div>
         )}
 
-        {/* Nearby Map Viewer */}
-        <div className="mb-6 relative z-10">
-          <div className="flex items-center gap-2 mb-3">
-            <MapPin size={18} className="text-indigo-500" />
-            <h3 className="font-bold text-zinc-800 dark:text-zinc-100">Profissionais Próximos</h3>
+        {/* Horizontal Filters Bar (scrollable horizontally without visible scrollbars) */}
+        <div className="mb-4 relative z-20">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
+              <SlidersHorizontal size={14} className="text-indigo-500" />
+              Filtros Rápidos
+            </span>
+            <span className="text-[11px] font-semibold text-zinc-400 bg-zinc-900 px-2.5 py-0.5 rounded-full border border-zinc-800">
+              Deslize na horizontal →
+            </span>
           </div>
-          <NearbyMap userLocation={location} />
+
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-0.5">
+            {[
+              { id: 'ALL', label: 'Todos os Serviços', icon: '📍' },
+              { id: 'MECANICA', label: 'Mecânica', icon: '🔧' },
+              { id: 'GUINCHO', label: 'Guincho', icon: '🚨' },
+              { id: 'PNEU', label: 'Borracharia', icon: '🛞' },
+              { id: 'ELETRICA', label: 'Elétrica', icon: '⚡' },
+              { id: 'CARROS', label: 'Carros', icon: '🚗' },
+              { id: 'MOTOS', label: 'Motos', icon: '🏍️' },
+              { id: 'CAMINHOES', label: 'Caminhões', icon: '🚛' },
+              { id: 'ELETRICOS', label: 'Elétricos', icon: '🔋' },
+            ].map((opt) => {
+              const isActive = categoryFilter === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => handleCategoryFilterChange(opt.id)}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-2 cursor-pointer select-none shrink-0 ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105 ring-2 ring-indigo-400/50'
+                      : 'bg-zinc-900/90 text-zinc-300 hover:bg-zinc-800 border border-zinc-800/80 hover:scale-[1.02]'
+                  }`}
+                >
+                  <span className="text-sm">{opt.icon}</span>
+                  <span>{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* HERO INTERACTIVE OPENSTREETMAP MAP WITH DRAGGABLE BOTTOM SHEET */}
+        <div className="mb-6 relative z-20">
+          <HomeInteractiveMap
+            userLocation={location}
+            groundingChunks={(searchResult || nearbyMechanics)?.groundingChunks || []}
+            activeCategory={categoryFilter}
+            activeVehicle={categoryFilter}
+            selectedWorkshop={selectedMapWorkshop}
+            onSelectWorkshop={(chunk) => {
+              setSelectedMapWorkshop(chunk);
+              if (chunk && onSelectWorkshop) {
+                onSelectWorkshop(chunk);
+              }
+            }}
+            onContact={handleContact}
+          />
         </div>
 
         <SearchForm 

@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   const isPremium = user?.plan === 'PRO' || user?.plan === 'PRIME';
 
   return (
-    <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-50 transition-colors duration-300 pt-[env(safe-area-inset-top)]">
+    <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-[80] z-app-header transition-colors duration-300 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
         
         {/* Brand Logo & Name */}

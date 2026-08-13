@@ -436,8 +436,8 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({
         </div>
 
         {/* MAP CANVAS AREA (Occupies remaining screen on Tablet/Desktop, Full Screen on Mobile) */}
-        <div className="flex-1 relative z-0 overflow-hidden min-h-[350px]">
-          <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
+        <div className="flex-1 relative z-0 overflow-hidden min-h-[350px] fix-map-container isolate">
+          <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0 overflow-hidden" />
 
           {/* Floating Re-Center GPS Button */}
           {location && (
@@ -459,7 +459,7 @@ export const NearbyWorkshopsScreen: React.FC<NearbyWorkshopsScreenProps> = ({
 
         {/* MOBILE BOTTOM SHEET (ONLY ON MOBILE < 768px) */}
         <div 
-          className={`md:hidden relative z-30 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out border-t border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 ${
+          className={`md:hidden relative z-[60] z-bottom-sheet bg-white dark:bg-zinc-900 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out border-t border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 ${
             isSheetOpen ? (selectedWorkshop ? 'h-[50vh]' : 'h-[35vh]') : 'h-12'
           }`}
         >

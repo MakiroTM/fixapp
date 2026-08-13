@@ -1,0 +1,96 @@
+/* Custom App & Leaflet Z-Index Stacking Hierarchy */
+
+:root {
+  --z-index-map: 0;
+  --z-index-controls: 20;
+  --z-index-bottom-nav: 50;
+  --z-index-bottom-sheet: 60;
+  --z-index-header: 80;
+  --z-index-modal: 100;
+}
+
+/* 1. Leaflet Map Containers - Isolated Stacking Context */
+.fix-map-container,
+.leaflet-container {
+  isolation: isolate !important;
+  position: relative !important;
+  z-index: var(--z-index-map) !important;
+  overflow: hidden !important;
+  border-radius: inherit;
+}
+
+/* Custom Stacking Utility Classes */
+.z-map {
+  z-index: var(--z-index-map) !important;
+}
+
+.z-bottom-nav {
+  z-index: var(--z-index-bottom-nav) !important;
+}
+
+.z-bottom-sheet {
+  z-index: var(--z-index-bottom-sheet) !important;
+}
+
+.z-app-header {
+  z-index: var(--z-index-header) !important;
+}
+
+.z-app-modal {
+  z-index: var(--z-index-modal) !important;
+}
+
+/* 2. Internal Leaflet Panes Scoped inside Isolated Map Stacking Context */
+.fix-map-container .leaflet-map-pane,
+.fix-map-container .leaflet-tile-pane,
+.leaflet-container .leaflet-map-pane,
+.leaflet-container .leaflet-tile-pane {
+  z-index: 10 !important;
+}
+
+.fix-map-container .leaflet-overlay-pane,
+.leaflet-container .leaflet-overlay-pane {
+  z-index: 20 !important;
+}
+
+.fix-map-container .leaflet-marker-pane,
+.leaflet-container .leaflet-marker-pane {
+  z-index: 30 !important;
+}
+
+.fix-map-container .leaflet-tooltip-pane,
+.leaflet-container .leaflet-tooltip-pane {
+  z-index: 35 !important;
+}
+
+.fix-map-container .leaflet-popup-pane,
+.leaflet-container .leaflet-popup-pane {
+  z-index: 40 !important;
+}
+
+.fix-map-container .leaflet-control-container,
+.fix-map-container .leaflet-control,
+.fix-map-container .leaflet-top,
+.fix-map-container .leaflet-bottom,
+.leaflet-container .leaflet-control-container,
+.leaflet-container .leaflet-control,
+.leaflet-container .leaflet-top,
+.leaflet-container .leaflet-bottom {
+  z-index: 45 !important;
+}
+
+/* Ensure Leaflet popups don't bleed or create scrollbar glitches */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Custom Scrollbar Utilities */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

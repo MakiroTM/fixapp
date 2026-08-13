@@ -128,8 +128,8 @@ export const NearbyMap: React.FC<NearbyMapProps> = ({ userLocation, mechanics = 
   }, [userLocation?.latitude, userLocation?.longitude, displayMechanics]);
 
   return (
-    <div className="w-full h-[300px] sm:h-[400px] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-lg relative z-0">
-      <div ref={mapContainerRef} className="w-full h-full z-0" />
+    <div className="w-full h-[300px] sm:h-[400px] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-lg relative fix-map-container isolate z-0">
+      <div ref={mapContainerRef} className="w-full h-full z-0 overflow-hidden" />
       
       {!userLocation && (
         <div className="absolute top-3 left-3 right-3 bg-amber-500/90 backdrop-blur-md text-zinc-950 font-bold p-2 rounded-xl text-xs z-20 flex items-center justify-between shadow-md">
